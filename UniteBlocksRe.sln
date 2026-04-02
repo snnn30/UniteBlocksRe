@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.37111.16 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UniteBlocksRe", "UniteBlocksRe.csproj", "{9DD239FA-5049-4D7D-B25C-287B4A7F69C0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ソリューションフォルダ", "ソリューションフォルダ", "{DDB4EF12-CC4E-5E88-E6FC-71A802F4DE97}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		.gitignore = .gitignore
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		ExportDebug|Any CPU = ExportDebug|Any CPU
+		ExportRelease|Any CPU = ExportRelease|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9DD239FA-5049-4D7D-B25C-287B4A7F69C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9DD239FA-5049-4D7D-B25C-287B4A7F69C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9DD239FA-5049-4D7D-B25C-287B4A7F69C0}.ExportDebug|Any CPU.ActiveCfg = ExportDebug|Any CPU
+		{9DD239FA-5049-4D7D-B25C-287B4A7F69C0}.ExportDebug|Any CPU.Build.0 = ExportDebug|Any CPU
+		{9DD239FA-5049-4D7D-B25C-287B4A7F69C0}.ExportRelease|Any CPU.ActiveCfg = ExportRelease|Any CPU
+		{9DD239FA-5049-4D7D-B25C-287B4A7F69C0}.ExportRelease|Any CPU.Build.0 = ExportRelease|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {539438D9-4786-4478-AB28-7AFE2C73ED08}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3 uid="uid://bqh53jhw7601j"]
+
+[ext_resource type="Script" uid="uid://b5nwvn23vqppl" path="res://src/Nodes/Tests/NBlockTest.cs" id="1_50jnk"]
+[ext_resource type="PackedScene" uid="uid://bwb1m24upet0p" path="res://scenes/game.tscn" id="2_5tlow"]
+
+[node name="Test" type="Node"]
+script = ExtResource("1_50jnk")
+
+[node name="Game" parent="." instance=ExtResource("2_5tlow")]

@@ -1,0 +1,54 @@
+[gd_scene load_steps=4 format=3 uid="uid://c101pr35mnthh"]
+
+[ext_resource type="Texture2D" uid="uid://cj2t01n2kvisx" path="res://images/backgrounds/sky_bg.png" id="1_r7ct6"]
+[ext_resource type="Texture2D" uid="uid://d0nu8jied4sc3" path="res://images/backgrounds/clover.png" id="2_gdsrw"]
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_f0xkm"]
+particle_flag_disable_z = true
+emission_shape_offset = Vector3(0, -600, 0)
+emission_shape = 3
+emission_box_extents = Vector3(800, 1, 1)
+direction = Vector3(0, 1, 0)
+spread = 0.0
+initial_velocity_min = 76.92
+initial_velocity_max = 170.04
+angular_velocity_min = 15.999984
+angular_velocity_max = 31.999983
+gravity = Vector3(0, 0, 0)
+scale_min = 0.19999999
+scale_max = 0.59999996
+color = Color(0.73406124, 0.9977446, 0.84340906, 1)
+
+[node name="PlayBg" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TextureRect" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -3333.5
+offset_top = -2500.0
+offset_right = 3333.5
+offset_bottom = 2500.0
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(0.22, 0.22)
+pivot_offset = Vector2(3333, 2500)
+texture = ExtResource("1_r7ct6")
+
+[node name="GPUParticles2D" type="GPUParticles2D" parent="."]
+position = Vector2(640, 360)
+amount = 24
+texture = ExtResource("2_gdsrw")
+lifetime = 20.0
+preprocess = 20.0
+visibility_rect = Rect2(-800, -500, 1600, 1000)
+process_material = SubResource("ParticleProcessMaterial_f0xkm")

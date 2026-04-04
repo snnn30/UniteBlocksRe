@@ -1,4 +1,5 @@
 using Godot;
+using UniteBlocksRe.Logging;
 using UniteBlocksRe.Models.Entities;
 using UniteBlocksRe.Models.ValueObjects;
 
@@ -15,8 +16,13 @@ public partial class NBlockTest : Node
         AddChild(_block);
         _block.Position = new Vector2(100, 100);
 
-        GD.Print($"初期モデル    {_block.Model}");
-        GD.Print("キー1～4でモデルを切り替え\nキー5でアウトラインの切り替え");
+        Log.Info(
+            $"""
+            NBlockのテスト開始
+            初期モデルは {_block.Model}
+            キー1～4でモデルを切り替え、キー5でアウトラインの切り替え
+            """
+        );
     }
 
     public override void _Input(InputEvent @event)
@@ -33,14 +39,14 @@ public partial class NBlockTest : Node
             };
             if (model is not null)
             {
-                GD.Print($"新しいモデルをセット\n    {model}");
                 _block.Model = model;
+                Log.Info($"新しいモデルをセット {model}");
             }
 
             if (key.Keycode == Key.Key5)
             {
-                GD.Print("アウトラインの切り替え");
                 _block.Outlined = !_block.Outlined;
+                Log.Info($"アウトラインの切り替え {(_block.Outlined ? "オン" : "オフ")} ");
             }
         }
     }

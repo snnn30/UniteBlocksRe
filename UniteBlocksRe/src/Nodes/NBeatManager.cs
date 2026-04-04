@@ -1,5 +1,6 @@
 ﻿using System;
 using Godot;
+using UniteBlocksRe.Logging;
 
 namespace UniteBlocksRe.Nodes;
 
@@ -17,7 +18,7 @@ public partial class NBeatManager : Node
     {
         if (Instance != null)
         {
-            GD.PrintErr("NBeatManagerインスタンスが複数ある");
+            Log.Warn("NBeatManagerインスタンスが複数ある");
             QueueFree();
             return;
         }

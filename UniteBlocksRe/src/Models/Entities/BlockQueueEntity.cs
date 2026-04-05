@@ -1,12 +1,16 @@
 ﻿using System;
 using UniteBlocksRe.Models.ValueObjects;
+using BlockPair = (
+    UniteBlocksRe.Models.Entities.BlockEntity Parent,
+    UniteBlocksRe.Models.Entities.BlockEntity Child
+);
 
 namespace UniteBlocksRe.Models.Entities;
 
 public class BlockQueueEntity
 {
-    public BlockPairEntity Next { get; private set; }
-    public BlockPairEntity NextNext { get; private set; }
+    public BlockPair Next { get; private set; }
+    public BlockPair NextNext { get; private set; }
 
     public BlockQueueEntity()
     {
@@ -14,7 +18,7 @@ public class BlockQueueEntity
         NextNext = GeneratePair();
     }
 
-    public BlockPairEntity Dequeue()
+    public BlockPair Dequeue()
     {
         var current = Next;
         Next = NextNext;
@@ -22,7 +26,7 @@ public class BlockQueueEntity
         return current;
     }
 
-    private static BlockPairEntity GeneratePair()
+    private static BlockPair GeneratePair()
     {
         BlockEntity parent = new(GetRandomColor(), new(1, 1));
         BlockEntity child = new(GetRandomColor(), new(1, 1));

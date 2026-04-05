@@ -1,4 +1,4 @@
-﻿using Godot;
+using Godot;
 using Shouldly;
 using UniteBlocksRe.Models.Entities;
 using UniteBlocksRe.Models.Services;
@@ -104,8 +104,8 @@ public class BoardUniterTests
 
         board.TrySetBlock(new(0, 0), block);
         board.TrySetBlock(new(0, 1), block2);
-        board.TrySetBlock(new(5, 13), block3);
-        board.TrySetBlock(new(5, 11), block4);
+        board.TrySetBlock(new(5, BoardEntity.Size.Y - 1), block3);
+        board.TrySetBlock(new(5, BoardEntity.Size.Y - 3), block4);
         var result = BoardUniter.Unite(board);
 
         result.HasUnited.ShouldBeTrue();
@@ -113,6 +113,6 @@ public class BoardUniterTests
         result.Steps[0].CreatedBlock.Size.ShouldBe(new Vector2I(2, 2));
         result.Steps[0].Position.ShouldBe(new Vector2I(0, 0));
         result.Steps[1].CreatedBlock.Size.ShouldBe(new Vector2I(2, 3));
-        result.Steps[1].Position.ShouldBe(new Vector2I(5, 11));
+        result.Steps[1].Position.ShouldBe(new Vector2I(5, BoardEntity.Size.Y - 3));
     }
 }

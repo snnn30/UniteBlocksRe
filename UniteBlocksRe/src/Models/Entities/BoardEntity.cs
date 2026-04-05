@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Godot;
 
 namespace UniteBlocksRe.Models.Entities;
@@ -6,8 +6,8 @@ namespace UniteBlocksRe.Models.Entities;
 public class BoardEntity
 {
     // 左上を原点とする座標系で、右方向がX軸、下方向がY軸
-    public static readonly Vector2I Size = new(7, 14);
-    public static readonly Vector2I SpawnPosition = new(3, 1);
+    public static readonly Vector2I Size = new(8, 12);
+    public static readonly Vector2I LosePosition = new(3, 0);
 
     private readonly BlockEntity[,] _grid = new BlockEntity[Size.X, Size.Y];
     private readonly Dictionary<BlockEntity, Vector2I> _blockOrigins = [];

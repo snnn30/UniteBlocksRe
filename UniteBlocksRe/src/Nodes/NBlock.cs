@@ -6,6 +6,8 @@ namespace UniteBlocksRe.Nodes;
 
 public partial class NBlock : Node2D
 {
+    public const int BaseSize = 40;
+
     private Control _visuals;
     private ColorRect _outline;
     private NinePatchRect _icon;
@@ -73,6 +75,6 @@ public partial class NBlock : Node2D
 
     private void Resize()
     {
-        _visuals.Size = Model.Size * 40 + new Vector2I(20, 20);
+        _visuals.Size = Model.Size * BaseSize + new Vector2I(20, 20);
     }
 }

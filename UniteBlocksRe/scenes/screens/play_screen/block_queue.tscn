@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://bkrjkiqwy4ve"]
 
-[ext_resource type="PackedScene" uid="uid://bepogq5wvg41" path="res://scenes/block.tscn" id="1_hawg5"]
+[ext_resource type="PackedScene" uid="uid://bepogq5wvg41" path="res://scenes/blocks/block.tscn" id="1_hawg5"]
 [ext_resource type="Script" uid="uid://c8ghb2vbxj0w" path="res://src/Nodes/NBlockQueue.cs" id="1_q0oou"]
 
 [node name="BlockQueue" type="Node2D"]
@@ -9,7 +9,7 @@ script = ExtResource("1_q0oou")
 [node name="ClipMask" type="Polygon2D" parent="."]
 clip_children = 2
 position = Vector2(0, 12)
-color = Color(0.24477637, 0.24477643, 0.24477634, 1)
+color = Color(0.3180199, 0.31801975, 0.3180198, 1)
 polygon = PackedVector2Array(8, -104, -56, -104, -56, 0, -24, 0, -24, 80, 24, 80, 24, -8, 8, -8)
 
 [node name="Next" type="Node2D" parent="ClipMask"]

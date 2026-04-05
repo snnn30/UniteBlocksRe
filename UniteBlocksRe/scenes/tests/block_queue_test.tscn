@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://qolbjrgmppuc"]
 
-[ext_resource type="PackedScene" uid="uid://bkrjkiqwy4ve" path="res://scenes/block_queue.tscn" id="1_ar20i"]
+[ext_resource type="PackedScene" uid="uid://bkrjkiqwy4ve" path="res://scenes/screens/play_screen/block_queue.tscn" id="1_ar20i"]
 [ext_resource type="Script" uid="uid://u50kov3ojcej" path="res://src/Nodes/Tests/NBlockQueueTest.cs" id="1_rasel"]
 
 [node name="Node" type="Node"]

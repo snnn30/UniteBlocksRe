@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.IO;
 using Godot;
 
@@ -11,7 +11,15 @@ public static class Log
     {
         skipFrames++;
         var colorCord = "#CE45CE";
-        GD.PrintRich(FormatRich("DEBUG", message, colorCord, skipFrames));
+        var plain = Format("DEBUG", message, skipFrames);
+        if (IsGodotEnvironment)
+        {
+            GD.PrintRich(FormatRich("DEBUG", message, colorCord, skipFrames));
+        }
+        else
+        {
+            System.Console.WriteLine(plain);
+        }
     }
 
     [Conditional("DEBUG")]
@@ -19,23 +27,47 @@ public static class Log
     {
         skipFrames++;
         var colorCord = "#39D239";
-        GD.PrintRich(FormatRich("INFO", message, colorCord, skipFrames));
+        var plain = Format("INFO", message, skipFrames);
+        if (IsGodotEnvironment)
+        {
+            GD.PrintRich(FormatRich("INFO", message, colorCord, skipFrames));
+        }
+        else
+        {
+            System.Console.WriteLine(plain);
+        }
     }
 
     public static void Warn(string message, int skipFrames = 0)
     {
         skipFrames++;
         var colorCord = "#E5E545";
-        GD.PushWarning(Format("WARN", message, skipFrames));
-        GD.PrintRich(FormatRich("WARN", message, colorCord, skipFrames));
+        var plain = Format("WARN", message, skipFrames);
+        if (IsGodotEnvironment)
+        {
+            GD.PushWarning(plain);
+            GD.PrintRich(FormatRich("WARN", message, colorCord, skipFrames));
+        }
+        else
+        {
+            System.Console.WriteLine(plain);
+        }
     }
 
     public static void Error(string message, int skipFrames = 0)
     {
         skipFrames++;
         var colorCord = "#E54545";
-        GD.PushError(Format("ERROR", message, skipFrames));
-        GD.PrintRich(FormatRich("ERROR", message, colorCord, skipFrames));
+        var plain = Format("ERROR", message, skipFrames);
+        if (IsGodotEnvironment)
+        {
+            GD.PushError(Format("ERROR", message, skipFrames));
+            GD.PrintRich(FormatRich("ERROR", message, colorCord, skipFrames));
+        }
+        else
+        {
+            throw new System.Exception(plain);
+        }
     }
 
     private static string FormatRich(string level, string message, string colorCord, int skipFrames)
@@ -64,4 +96,6 @@ public static class Log
         var methodName = frame.GetMethod()?.Name ?? "Unknown";
         return $"line {line}:{methodName}() in {fileName}";
     }
+
+    private static bool IsGodotEnvironment => Engine.GetMainLoop() != null;
 }

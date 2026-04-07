@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://bse5vr6vscgqi"]
 
 [ext_resource type="Script" uid="uid://c8rtue324dv7t" path="res://src/Nodes/NBoard.cs" id="1_bw3vb"]
-[ext_resource type="Texture2D" uid="uid://dhq4gs2x5ye4o" path="res://images/board/LoseIcon.png" id="2_tx6nw"]
+[ext_resource type="Texture2D" uid="uid://dhq4gs2x5ye4o" path="res://images/board/SpawnIcon.png" id="2_tx6nw"]
 
 [node name="Board" type="Node2D"]
 script = ExtResource("1_bw3vb")
@@ -40,7 +40,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="LoseIcon" type="Sprite2D" parent="Visuals/ClipMask"]
+[node name="SpawnIcon" type="Sprite2D" parent="Visuals/ClipMask"]
 unique_name_in_owner = true
 position = Vector2(71.5, 80)
 texture = ExtResource("2_tx6nw")

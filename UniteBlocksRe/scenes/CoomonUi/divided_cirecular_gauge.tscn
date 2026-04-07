@@ -1,0 +1,14 @@
+[gd_scene load_steps=2 format=3 uid="uid://vtbmgjpgf448"]
+
+[ext_resource type="Script" uid="uid://cvpqhyam7y0qb" path="res://src/Nodes/CommonUi/NDividedCircularGauge.cs" id="1_lbhpv"]
+
+[node name="DividedCirecularGauge" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -1.0
+offset_bottom = -1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_lbhpv")

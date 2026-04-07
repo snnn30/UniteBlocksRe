@@ -18,7 +18,7 @@ public partial class NBoard : Node2D
         _visuals.Size = BoardEntity.Size * NBlock.BaseSize;
         _visuals.Position = -_visuals.Size / 2;
 
-        var loseIcon = GetNode<Sprite2D>("%LoseIcon");
+        var spawnIcon = GetNode<Sprite2D>("%SpawnIcon");
 
         for (var x = 0; x < BoardEntity.Size.X; x++)
         {
@@ -28,7 +28,10 @@ public partial class NBoard : Node2D
             }
         }
 
-        loseIcon.Position = BlockPositions[BoardEntity.LosePosition.X, BoardEntity.LosePosition.Y];
-        SpawnPosition = loseIcon.Position + new Vector2(0, -NBlock.BaseSize);
+        spawnIcon.Position = BlockPositions[
+            BoardEntity.SpawnPosition.X,
+            BoardEntity.SpawnPosition.Y
+        ];
+        SpawnPosition = spawnIcon.Position + new Vector2(0, -NBlock.BaseSize);
     }
 }

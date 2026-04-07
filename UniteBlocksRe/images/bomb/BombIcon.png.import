@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dhq4gs2x5ye4o"
-path="res://.godot/imported/LoseIcon.png-d8a0a37418dcf3060fc0321c39aa820a.ctex"
+uid="uid://d0ihghury7i1g"
+path="res://.godot/imported/BombIcon.png-fdbdb182a4094832db67fdca62c1dc23.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://images/board/LoseIcon.png"
-dest_files=["res://.godot/imported/LoseIcon.png-d8a0a37418dcf3060fc0321c39aa820a.ctex"]
+source_file="res://images/bomb/BombIcon.png"
+dest_files=["res://.godot/imported/BombIcon.png-fdbdb182a4094832db67fdca62c1dc23.ctex"]
 
 [params]
 

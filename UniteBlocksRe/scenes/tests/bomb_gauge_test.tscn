@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3 uid="uid://waumfy2bige7"]
+
+[ext_resource type="Script" uid="uid://bommk6ejrwig1" path="res://src/Nodes/Tests/NBombGaugeTest.cs" id="1_q5dhx"]
+[ext_resource type="PackedScene" uid="uid://dqn6mw5pl1sqp" path="res://scenes/screens/play_screen/bomb_gauge.tscn" id="2_actmj"]
+
+[node name="BombGaugeTest" type="Node"]
+script = ExtResource("1_q5dhx")
+
+[node name="BombGauge" parent="." instance=ExtResource("2_actmj")]
+unique_name_in_owner = true
+position = Vector2(598, 351)

@@ -1,0 +1,21 @@
+[gd_scene load_steps=4 format=3 uid="uid://dqn6mw5pl1sqp"]
+
+[ext_resource type="PackedScene" uid="uid://vtbmgjpgf448" path="res://scenes/CoomonUi/divided_cirecular_gauge.tscn" id="1_5do2i"]
+[ext_resource type="Script" uid="uid://c061xkkjkjp27" path="res://src/Nodes/NBombGauge.cs" id="1_tswpe"]
+[ext_resource type="Texture2D" uid="uid://d0ihghury7i1g" path="res://images/bomb/BombIcon.png" id="2_tswpe"]
+
+[node name="BombGauge" type="Node2D"]
+script = ExtResource("1_tswpe")
+
+[node name="Gauge" parent="." instance=ExtResource("1_5do2i")]
+unique_name_in_owner = true
+Segments = 3
+BaseColor = Color(0.14044744, 0.14044744, 0.14044744, 0.5019608)
+FilledColor = Color(0, 1, 0, 1)
+ChargingColor = Color(0, 0.5084171, 2.8878452e-07, 1)
+
+[node name="Icon" type="Sprite2D" parent="."]
+unique_name_in_owner = true
+position = Vector2(1, 0)
+scale = Vector2(0.72, 0.72)
+texture = ExtResource("2_tswpe")

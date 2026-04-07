@@ -22,17 +22,29 @@ public partial class NBombGauge : Node2D
         private set
         {
             _isBombActive = value;
-            UpdateIconModulate();
+            _icon.Modulate = value ? new Color(1f, 1f, 1f) : new Color(0.2f, 0.2f, 0.2f, 0.8f);
+            var tween = CreateTween()
+                .SetTrans(Tween.TransitionType.Elastic)
+                .SetEase(Tween.EaseType.Out);
+            tween.TweenProperty(
+                _icon,
+                "scale",
+                value ? _defaultIconScale * 1.2f : _defaultIconScale,
+                0.4f
+            );
         }
     }
 
     private NDividedCircularGauge _gauge;
     private Sprite2D _icon;
+    private Vector2 _defaultIconScale;
 
     public override void _Ready()
     {
         _gauge = GetNode<NDividedCircularGauge>("%Gauge");
         _icon = GetNode<Sprite2D>("%Icon");
+        _defaultIconScale = _icon.Scale;
+
         Value = 0;
         IsBombActive = false;
     }
@@ -76,10 +88,5 @@ public partial class NBombGauge : Node2D
             Value -= NDividedCircularGauge.UnitsPerSegment;
             return true;
         }
-    }
-
-    private void UpdateIconModulate()
-    {
-        _icon.Modulate = IsBombActive ? new Color(1f, 1f, 1f) : new Color(0.2f, 0.2f, 0.2f, 0.8f);
     }
 }

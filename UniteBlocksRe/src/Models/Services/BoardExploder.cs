@@ -1,5 +1,6 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Godot;
+using UniteBlocksRe.Logging;
 using UniteBlocksRe.Models.Entities;
 using UniteBlocksRe.Models.ValueObjects;
 
@@ -7,10 +8,29 @@ namespace UniteBlocksRe.Models.Services;
 
 public static class BoardExploder
 {
-    public static ExplodeResult Explode(BoardEntity board, BlockEntity block)
+    public static ExplodeResult Explode(BoardEntity board, BlockEntity bomb)
     {
-        var steps = new List<ExplodeStep>();
-        var currentTarget = new HashSet<BlockEntity> { block };
+        if (bomb.Type != BlockType.Bomb)
+        {
+            Log.Warn("爆発起点がBombじゃない");
+            return new ExplodeResult([]);
+        }
+
+        var steps = new List<ExplodeStep> { new([bomb]) };
+
+        if (board.TryGetOrigin(bomb) is not (true, var bombPos))
+        {
+            Log.Warn("Bombがボード上に存在しない");
+            return new ExplodeResult([]);
+        }
+
+        board.TryRemoveBlock(bomb);
+
+        if (board.TryGetBlock(bombPos + Vector2I.Down) is not (true, var blockBelow))
+        {
+            return new ExplodeResult(steps);
+        }
+        var currentTarget = new HashSet<BlockEntity> { blockBelow };
 
         while (currentTarget.Count > 0)
         {
@@ -72,7 +92,12 @@ public static class BoardExploder
                 var checkPos = new Vector2I(pos.X + dx, pos.Y + dy);
                 (var success, var foundBlock) = board.TryGetBlock(checkPos);
 
-                if (success && foundBlock != centerBlock && foundBlock.Color == centerBlock.Color)
+                if (
+                    success
+                    && foundBlock != centerBlock
+                    && foundBlock.Type == BlockType.Normal
+                    && foundBlock.Color == centerBlock.Color
+                )
                 {
                     results.Add(foundBlock);
                 }

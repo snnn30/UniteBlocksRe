@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UniteBlocksRe.Models.ValueObjects;
 using BlockPair = (
     UniteBlocksRe.Models.Entities.BlockEntity Parent,
@@ -28,8 +28,8 @@ public class BlockQueueEntity
 
     private static BlockPair GeneratePair()
     {
-        BlockEntity parent = new(GetRandomColor(), new(1, 1));
-        BlockEntity child = new(GetRandomColor(), new(1, 1));
+        BlockEntity parent = new(BlockType.Normal, GetRandomColor(), new(1, 1));
+        BlockEntity child = new(BlockType.Normal, GetRandomColor(), new(1, 1));
         return new(parent, child);
     }
 
@@ -37,6 +37,6 @@ public class BlockQueueEntity
     {
         var values = Enum.GetValues<BlockColor>();
         var random = new Random();
-        return values[random.Next(values.Length)];
+        return values[random.Next(1, values.Length)];
     }
 }

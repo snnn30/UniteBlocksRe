@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Godot;
 using UniteBlocksRe.Models.Entities;
 using UniteBlocksRe.Models.ValueObjects;
@@ -18,6 +18,11 @@ public static class BoardUniter
                 var pos = new Vector2I(x, y);
                 var (exists, block) = board.TryGetBlock(pos);
                 if (!exists)
+                {
+                    continue;
+                }
+
+                if (block.Type != BlockType.Normal)
                 {
                     continue;
                 }
@@ -67,7 +72,7 @@ public static class BoardUniter
             board.TryRemoveBlock(target);
         }
 
-        var createdBlock = new BlockEntity(color, shape);
+        var createdBlock = new BlockEntity(BlockType.Normal, color, shape);
         board.TrySetBlock(origin, createdBlock);
 
         return new UniteStep(targets, createdBlock, origin);

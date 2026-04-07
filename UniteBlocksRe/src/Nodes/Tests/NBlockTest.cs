@@ -11,7 +11,7 @@ public partial class NBlockTest : Node
 
     public override void _Ready()
     {
-        var block = new BlockEntity(BlockColor.Red, new Vector2I(1, 1));
+        var block = new BlockEntity(BlockType.Normal, BlockColor.Red, new Vector2I(1, 1));
         _block = NBlock.Create(block);
         AddChild(_block);
         _block.Position = new Vector2(100, 100);
@@ -20,7 +20,7 @@ public partial class NBlockTest : Node
             $"""
             NBlockのテスト開始
             初期モデルは {_block.Model}
-            キー1～4でモデルを切り替え、キー5でアウトラインの切り替え
+            キー1～4でNormalType切り替え、キー5でBomb、キー6でObstacle、キー7でアウトラインの切り替え
             """
         );
     }
@@ -31,10 +31,16 @@ public partial class NBlockTest : Node
         {
             var model = key.Keycode switch
             {
-                Key.Key1 => new BlockEntity(BlockColor.Red, new Vector2I(1, 1)),
-                Key.Key2 => new BlockEntity(BlockColor.Green, new Vector2I(2, 2)),
-                Key.Key3 => new BlockEntity(BlockColor.Blue, new Vector2I(6, 3)),
-                Key.Key4 => new BlockEntity(BlockColor.Orange, new Vector2I(2, 8)),
+                Key.Key1 => new BlockEntity(BlockType.Normal, BlockColor.Red, new Vector2I(1, 1)),
+                Key.Key2 => new BlockEntity(BlockType.Normal, BlockColor.Green, new Vector2I(2, 2)),
+                Key.Key3 => new BlockEntity(BlockType.Normal, BlockColor.Blue, new Vector2I(6, 3)),
+                Key.Key4 => new BlockEntity(
+                    BlockType.Normal,
+                    BlockColor.Orange,
+                    new Vector2I(2, 8)
+                ),
+                Key.Key5 => new BlockEntity(BlockType.Bomb, BlockColor.None, Vector2I.One),
+                Key.Key6 => new BlockEntity(BlockType.Obstacle, BlockColor.None, Vector2I.One),
                 _ => null,
             };
             if (model is not null)
@@ -43,7 +49,7 @@ public partial class NBlockTest : Node
                 Log.Info($"新しいモデルをセット {model}");
             }
 
-            if (key.Keycode == Key.Key5)
+            if (key.Keycode == Key.Key7)
             {
                 _block.Outlined = !_block.Outlined;
                 Log.Info($"アウトラインの切り替え {(_block.Outlined ? "オン" : "オフ")} ");

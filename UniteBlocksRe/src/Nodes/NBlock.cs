@@ -65,16 +65,24 @@ public partial class NBlock : Node2D
 
     private void LoadTex()
     {
-        var path = Model.Color switch
+        var root = "res://images/blocks";
+        var file = (Model.Type, Model.Color) switch
         {
-            BlockColor.Red => "res://images/blocks/RedBlock.png",
-            BlockColor.Green => "res://images/blocks/GreenBlock.png",
-            BlockColor.Blue => "res://images/blocks/BlueBlock.png",
-            BlockColor.Orange => "res://images/blocks/OrangeBlock.png",
+            (BlockType.Bomb, _) => "BombBlock.png",
+            (BlockType.Obstacle, _) => "ObstacleBlock.png",
+            (_, BlockColor.Red) => "RedBlock.png",
+            (_, BlockColor.Green) => "GreenBlock.png",
+            (_, BlockColor.Blue) => "BlueBlock.png",
+            (_, BlockColor.Orange) => "OrangeBlock.png",
             _ => throw new System.NotImplementedException(),
         };
+        var fullPath = $"{root}/{file}";
 
-        _icon.Texture = ResourceLoader.Load<Texture2D>(path, null, ResourceLoader.CacheMode.Reuse);
+        _icon.Texture = ResourceLoader.Load<Texture2D>(
+            fullPath,
+            null,
+            ResourceLoader.CacheMode.Reuse
+        );
     }
 
     private void Resize()

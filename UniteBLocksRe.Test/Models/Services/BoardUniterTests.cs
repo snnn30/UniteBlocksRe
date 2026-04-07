@@ -12,8 +12,8 @@ public class BoardUniterTests
     public void Test1()
     {
         var board = new BoardEntity();
-        var block = new BlockEntity(BlockColor.Red, new(2, 1));
-        var block2 = new BlockEntity(BlockColor.Red, new(2, 1));
+        var block = new BlockEntity(BlockType.Normal, BlockColor.Red, new(2, 1));
+        var block2 = new BlockEntity(BlockType.Normal, BlockColor.Red, new(2, 1));
 
         board.TrySetBlock(new(0, 0), block);
         board.TrySetBlock(new(0, 1), block2);
@@ -28,10 +28,10 @@ public class BoardUniterTests
     public void Test2()
     {
         var board = new BoardEntity();
-        var block = new BlockEntity(BlockColor.Red, new(1, 1));
-        var block2 = new BlockEntity(BlockColor.Red, new(1, 1));
-        var block3 = new BlockEntity(BlockColor.Red, new(1, 1));
-        var block4 = new BlockEntity(BlockColor.Red, new(1, 1));
+        var block = new BlockEntity(BlockType.Normal, BlockColor.Red, new(1, 1));
+        var block2 = new BlockEntity(BlockType.Normal, BlockColor.Red, new(1, 1));
+        var block3 = new BlockEntity(BlockType.Normal, BlockColor.Red, new(1, 1));
+        var block4 = new BlockEntity(BlockType.Normal, BlockColor.Red, new(1, 1));
 
         board.TrySetBlock(new(0, 0), block);
         board.TrySetBlock(new(0, 1), block2);
@@ -48,8 +48,8 @@ public class BoardUniterTests
     public void Test3()
     {
         var board = new BoardEntity();
-        var block = new BlockEntity(BlockColor.Red, new(2, 1));
-        var block2 = new BlockEntity(BlockColor.Green, new(2, 1));
+        var block = new BlockEntity(BlockType.Normal, BlockColor.Red, new(2, 1));
+        var block2 = new BlockEntity(BlockType.Normal, BlockColor.Green, new(2, 1));
 
         board.TrySetBlock(new(0, 0), block);
         board.TrySetBlock(new(0, 1), block2);
@@ -63,8 +63,8 @@ public class BoardUniterTests
     public void Test4()
     {
         var board = new BoardEntity();
-        var block = new BlockEntity(BlockColor.Red, new(1, 2));
-        var block2 = new BlockEntity(BlockColor.Red, new(1, 3));
+        var block = new BlockEntity(BlockType.Normal, BlockColor.Red, new(1, 2));
+        var block2 = new BlockEntity(BlockType.Normal, BlockColor.Red, new(1, 3));
 
         board.TrySetBlock(new(0, 0), block);
         board.TrySetBlock(new(1, 0), block2);
@@ -78,9 +78,9 @@ public class BoardUniterTests
     public void Test5()
     {
         var board = new BoardEntity();
-        var block = new BlockEntity(BlockColor.Red, new(2, 1));
-        var block2 = new BlockEntity(BlockColor.Red, new(1, 2));
-        var block3 = new BlockEntity(BlockColor.Red, new(2, 1));
+        var block = new BlockEntity(BlockType.Normal, BlockColor.Red, new(2, 1));
+        var block2 = new BlockEntity(BlockType.Normal, BlockColor.Red, new(1, 2));
+        var block3 = new BlockEntity(BlockType.Normal, BlockColor.Red, new(2, 1));
 
         board.TrySetBlock(new(0, 0), block);
         board.TrySetBlock(new(2, 0), block2);
@@ -97,10 +97,10 @@ public class BoardUniterTests
     public void Test6()
     {
         var board = new BoardEntity();
-        var block = new BlockEntity(BlockColor.Red, new(2, 1));
-        var block2 = new BlockEntity(BlockColor.Red, new(2, 1));
-        var block3 = new BlockEntity(BlockColor.Blue, new(2, 1));
-        var block4 = new BlockEntity(BlockColor.Blue, new(2, 2));
+        var block = new BlockEntity(BlockType.Normal, BlockColor.Red, new(2, 1));
+        var block2 = new BlockEntity(BlockType.Normal, BlockColor.Red, new(2, 1));
+        var block3 = new BlockEntity(BlockType.Normal, BlockColor.Blue, new(2, 1));
+        var block4 = new BlockEntity(BlockType.Normal, BlockColor.Blue, new(2, 2));
 
         board.TrySetBlock(new(0, 0), block);
         board.TrySetBlock(new(0, 1), block2);

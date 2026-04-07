@@ -1,4 +1,4 @@
-﻿using Godot;
+using Godot;
 using Shouldly;
 using UniteBlocksRe.Models.Entities;
 using UniteBlocksRe.Models.ValueObjects;
@@ -11,7 +11,7 @@ public class BoardTests
     public void Test1()
     {
         var board = new BoardEntity();
-        var block = new BlockEntity(BlockColor.Red, new(1, 1));
+        var block = new BlockEntity(BlockType.Normal, BlockColor.Red, new(1, 1));
 
         board.TrySetBlock(new(0, 0), block).ShouldBeTrue();
         board.TryGetBlock(new(0, 0)).ShouldBe((true, block));
@@ -24,7 +24,7 @@ public class BoardTests
     public void Test2()
     {
         var board = new BoardEntity();
-        var block = new BlockEntity(BlockColor.Red, new(1, 1));
+        var block = new BlockEntity(BlockType.Normal, BlockColor.Red, new(1, 1));
 
         board.CanPlace(BoardEntity.Size - new Vector2I(1, 1), block).ShouldBeTrue();
         board.CanPlace(new(-1, 0), block).ShouldBeFalse();
@@ -33,7 +33,7 @@ public class BoardTests
         board.CanPlace(new(0, BoardEntity.Size.Y), block).ShouldBeFalse();
 
         board.CanPlace(BoardEntity.Size - new Vector2I(1, 1), block).ShouldBeTrue();
-        var block2 = new BlockEntity(BlockColor.Green, new(2, 1));
+        var block2 = new BlockEntity(BlockType.Normal, BlockColor.Green, new(2, 1));
         board.CanPlace(BoardEntity.Size - new Vector2I(1, 0), block2).ShouldBeFalse();
     }
 
@@ -41,8 +41,8 @@ public class BoardTests
     public void Test3()
     {
         var board = new BoardEntity();
-        var block1 = new BlockEntity(BlockColor.Red, new(2, 2));
-        var block2 = new BlockEntity(BlockColor.Green, new(2, 2));
+        var block1 = new BlockEntity(BlockType.Normal, BlockColor.Red, new(2, 2));
+        var block2 = new BlockEntity(BlockType.Normal, BlockColor.Green, new(2, 2));
 
         board.TrySetBlock(new(0, 0), block1).ShouldBeTrue();
         board.CanPlace(new(1, 1), block2).ShouldBeFalse();

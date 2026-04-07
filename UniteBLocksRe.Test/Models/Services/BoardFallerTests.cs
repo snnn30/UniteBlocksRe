@@ -1,4 +1,4 @@
-﻿using Godot;
+using Godot;
 using Shouldly;
 using UniteBlocksRe.Models.Entities;
 using UniteBlocksRe.Models.Services;
@@ -12,7 +12,7 @@ public class BoardFallerTests
     public void Test1()
     {
         var board = new BoardEntity();
-        var block = new BlockEntity(BlockColor.Red, new(1, 1));
+        var block = new BlockEntity(BlockType.Normal, BlockColor.Red, new(1, 1));
 
         board.TrySetBlock(new(0, 0), block);
         var result = BoardFaller.Fall(board);
@@ -26,8 +26,8 @@ public class BoardFallerTests
     public void Test2()
     {
         var board = new BoardEntity();
-        var block1 = new BlockEntity(BlockColor.Red, new(1, 1));
-        var block2 = new BlockEntity(BlockColor.Red, new(1, 1));
+        var block1 = new BlockEntity(BlockType.Normal, BlockColor.Red, new(1, 1));
+        var block2 = new BlockEntity(BlockType.Normal, BlockColor.Red, new(1, 1));
 
         board.TrySetBlock(new(0, 0), block1);
         board.TrySetBlock(new(0, 1), block2);
@@ -44,8 +44,8 @@ public class BoardFallerTests
     public void Test3()
     {
         var board = new BoardEntity();
-        var block1 = new BlockEntity(BlockColor.Red, new(2, 1));
-        var block2 = new BlockEntity(BlockColor.Red, new(1, 1));
+        var block1 = new BlockEntity(BlockType.Normal, BlockColor.Red, new(2, 1));
+        var block2 = new BlockEntity(BlockType.Normal, BlockColor.Red, new(1, 1));
 
         board.TrySetBlock(new(0, 0), block1);
         board.TrySetBlock(new(1, 1), block2);
@@ -62,8 +62,8 @@ public class BoardFallerTests
     public void Test4()
     {
         var board = new BoardEntity();
-        var block1 = new BlockEntity(BlockColor.Red, new(1, 1));
-        var block2 = new BlockEntity(BlockColor.Red, new(1, 1));
+        var block1 = new BlockEntity(BlockType.Normal, BlockColor.Red, new(1, 1));
+        var block2 = new BlockEntity(BlockType.Normal, BlockColor.Red, new(1, 1));
 
         board.TrySetBlock(new(0, BoardEntity.Size.Y - 1), block1);
         board.TrySetBlock(new(0, BoardEntity.Size.Y - 2), block2);

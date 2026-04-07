@@ -1,7 +1,8 @@
-﻿namespace UniteBlocksRe.Models.ValueObjects;
+namespace UniteBlocksRe.Models.ValueObjects;
 
 public enum BlockColor
 {
+    None,
     Red,
     Green,
     Blue,

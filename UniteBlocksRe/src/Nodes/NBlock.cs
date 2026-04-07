@@ -41,7 +41,11 @@ public partial class NBlock : Node2D
     public static NBlock Create(BlockEntity model)
     {
         var nBlock = ResourceLoader
-            .Load<PackedScene>("res://scenes/block.tscn", null, ResourceLoader.CacheMode.Reuse)
+            .Load<PackedScene>(
+                "res://scenes/blocks/block.tscn",
+                null,
+                ResourceLoader.CacheMode.Reuse
+            )
             .Instantiate<NBlock>(PackedScene.GenEditState.Disabled);
 
         nBlock.Model = model;

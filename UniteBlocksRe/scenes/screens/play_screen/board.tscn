@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://bse5vr6vscgqi"]
+[gd_scene load_steps=4 format=3 uid="uid://bse5vr6vscgqi"]
 
 [ext_resource type="Script" uid="uid://c8rtue324dv7t" path="res://src/Nodes/NBoard.cs" id="1_bw3vb"]
 [ext_resource type="Texture2D" uid="uid://dhq4gs2x5ye4o" path="res://images/board/SpawnIcon.png" id="2_tx6nw"]
+[ext_resource type="PackedScene" uid="uid://brw2pexc1gwrw" path="res://scenes/screens/play_screen/operation_item.tscn" id="3_452qj"]
 
 [node name="Board" type="Node2D"]
 script = ExtResource("1_bw3vb")
@@ -32,6 +33,7 @@ grow_vertical = 2
 color = Color(0.07, 0.07, 0.07, 0.6745098)
 
 [node name="ClipMask" type="ColorRect" parent="Visuals"]
+unique_name_in_owner = true
 clip_children = 1
 layout_mode = 1
 anchors_preset = 15
@@ -44,3 +46,6 @@ grow_vertical = 2
 unique_name_in_owner = true
 position = Vector2(71.5, 80)
 texture = ExtResource("2_tx6nw")
+
+[node name="OperationItem" parent="Visuals/ClipMask" instance=ExtResource("3_452qj")]
+unique_name_in_owner = true

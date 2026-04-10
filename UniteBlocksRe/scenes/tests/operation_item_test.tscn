@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3 uid="uid://b8i58jn61syd"]
+
+[ext_resource type="Script" uid="uid://bdnuvatyne3jl" path="res://src/Nodes/Tests/OperationItemTest.cs" id="1_43kbv"]
+[ext_resource type="PackedScene" uid="uid://bse5vr6vscgqi" path="res://scenes/screens/play_screen/board.tscn" id="2_qor7p"]
+
+[node name="OperationItemTest" type="Node"]
+script = ExtResource("1_43kbv")
+
+[node name="Board" parent="." instance=ExtResource("2_qor7p")]
+unique_name_in_owner = true
+position = Vector2(606, 391)

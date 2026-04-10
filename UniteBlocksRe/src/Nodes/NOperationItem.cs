@@ -32,7 +32,7 @@ public partial class NOperationItem : Node2D
         _board = board;
     }
 
-    public void SpawnAndResetPos(BlockEntity parent, BlockEntity child = null)
+    public async Task SpawnAndResetPos(BlockEntity parent, BlockEntity child = null)
     {
         if (_state != State.WaitingSpawn)
         {
@@ -52,14 +52,21 @@ public partial class NOperationItem : Node2D
         AddChild(Parent);
         ParentPos = BoardEntity.SpawnPosition;
         Parent.Position = ParentPos * NBlock.BaseSize;
+        var parentTask = Parent.PlaySpawnAnimeAsync();
+        _activeTasks.Add(parentTask);
 
+        var childTask = Task.CompletedTask;
         if (child != null)
         {
             Child = NBlock.Create(child);
             AddChild(Child);
             ChildPos = ParentPos + Vector2I.Up;
             Child.Position = ChildPos * NBlock.BaseSize;
+            childTask = Child.PlaySpawnAnimeAsync();
+            _activeTasks.Add(childTask);
         }
+
+        await Task.WhenAll(parentTask, childTask);
 
         _state = State.Operating;
     }
@@ -77,10 +84,15 @@ public partial class NOperationItem : Node2D
         await Task.WhenAll(_activeTasks);
 
         _board.TryReparentBlock(ParentPos, Parent);
+        var parentTask = Parent.PlayPlacedAnimeAsync();
+        var childTask = Task.CompletedTask;
         if (Child != null)
         {
             _board.TryReparentBlock(ChildPos, Child);
+            childTask = Child.PlayPlacedAnimeAsync();
         }
+
+        await Task.WhenAll(parentTask, childTask);
 
         Parent = null;
         Child = null;

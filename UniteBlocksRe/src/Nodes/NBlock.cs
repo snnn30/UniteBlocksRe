@@ -1,4 +1,6 @@
+using System.Threading.Tasks;
 using Godot;
+using UniteBlocksRe.Extensions;
 using UniteBlocksRe.Models.Entities;
 using UniteBlocksRe.Models.ValueObjects;
 
@@ -23,6 +25,8 @@ public partial class NBlock : Node2D
         }
     }
 
+    private Vector2 _visualsOriginalScale;
+
     public bool Outlined { get; set; } = false;
 
     public override void _Ready()
@@ -30,6 +34,7 @@ public partial class NBlock : Node2D
         _visuals = GetNode<Control>("%Visuals");
         _outline = GetNode<ColorRect>("%Outline");
         _icon = GetNode<NinePatchRect>("%Icon");
+        _visualsOriginalScale = _visuals.Scale;
         Reload();
     }
 
@@ -50,6 +55,66 @@ public partial class NBlock : Node2D
 
         nBlock.Model = model;
         return nBlock;
+    }
+
+    public Task PlayFalledAnimeAsync() => PlayPlacedAnimeAsync();
+
+    public Task PlayUniteAnimeAsync() => PlayPlacedAnimeAsync();
+
+    public Task PlaySpawnAnimeAsync()
+    {
+        var tween = CreateTween();
+        tween
+            .TweenMethod(
+                Callable.From<Vector2>(x => _visuals.Scale = x),
+                _visualsOriginalScale * 0.8f,
+                _visualsOriginalScale,
+                0.2f
+            )
+            .SetEase(Tween.EaseType.Out)
+            .SetTrans(Tween.TransitionType.Quart);
+        return tween.WaitForFinished();
+    }
+
+    public Task PlayPlacedAnimeAsync()
+    {
+        var tween = CreateTween();
+        tween
+            .TweenMethod(
+                Callable.From<Vector2>(x => _visuals.Scale = x),
+                _visualsOriginalScale * 0.6f,
+                _visualsOriginalScale,
+                0.6f
+            )
+            .SetEase(Tween.EaseType.Out)
+            .SetTrans(Tween.TransitionType.Elastic);
+        return tween.WaitForFinished();
+    }
+
+    public Task PlayExplodeAnimeAsync(float explodeDuration = 0.6f)
+    {
+        var targetScale = _visualsOriginalScale * 1.5f;
+
+        var tween = CreateTween();
+        tween
+            .TweenMethod(
+                Callable.From<Vector2>(x => _visuals.Scale = x),
+                _visualsOriginalScale,
+                targetScale,
+                explodeDuration / 2f
+            )
+            .SetEase(Tween.EaseType.Out)
+            .SetTrans(Tween.TransitionType.Cubic);
+        tween
+            .TweenMethod(
+                Callable.From<Vector2>(x => _visuals.Scale = x),
+                targetScale,
+                Vector2.Zero,
+                explodeDuration / 2f
+            )
+            .SetEase(Tween.EaseType.Out)
+            .SetTrans(Tween.TransitionType.Cubic);
+        return tween.WaitForFinished();
     }
 
     private void Reload()
@@ -88,5 +153,6 @@ public partial class NBlock : Node2D
     private void Resize()
     {
         _visuals.Size = Model.Size * BaseSize + new Vector2I(20, 20);
+        _visuals.PivotOffset = _visuals.Size / 2;
     }
 }

@@ -20,12 +20,13 @@ public partial class NBlockTest : Node
             $"""
             NBlockのテスト開始
             初期モデルは {_block.Model}
-            キー1～4でNormalType切り替え、キー5でBomb、キー6でObstacle、キー7でアウトラインの切り替え
+            キー1～4でNormalType切り替え、AでBomb、SでObstacle、Dでアウトラインの切り替え
+            キー5～9で各種アニメーション
             """
         );
     }
 
-    public override void _Input(InputEvent @event)
+    public override async void _Input(InputEvent @event)
     {
         if (@event is InputEventKey key && key.Pressed)
         {
@@ -39,8 +40,8 @@ public partial class NBlockTest : Node
                     BlockColor.Orange,
                     new Vector2I(2, 8)
                 ),
-                Key.Key5 => new BlockEntity(BlockType.Bomb, BlockColor.None, Vector2I.One),
-                Key.Key6 => new BlockEntity(BlockType.Obstacle, BlockColor.None, Vector2I.One),
+                Key.A => new BlockEntity(BlockType.Bomb, BlockColor.None, Vector2I.One),
+                Key.S => new BlockEntity(BlockType.Obstacle, BlockColor.None, Vector2I.One),
                 _ => null,
             };
             if (model is not null)
@@ -49,10 +50,41 @@ public partial class NBlockTest : Node
                 Log.Info($"新しいモデルをセット {model}");
             }
 
-            if (key.Keycode == Key.Key7)
+            if (key.Keycode == Key.D)
             {
                 _block.Outlined = !_block.Outlined;
                 Log.Info($"アウトラインの切り替え {(_block.Outlined ? "オン" : "オフ")} ");
+            }
+
+            if (key.Keycode == Key.Key5)
+            {
+                Log.Info("ボード上に設置した時のアニメーション");
+                await _block.PlayPlacedAnimeAsync();
+                Log.Info("アニメーション完了");
+            }
+            if (key.Keycode == Key.Key6)
+            {
+                Log.Info("爆発アニメーション");
+                await _block.PlayExplodeAnimeAsync();
+                Log.Info("アニメーション完了");
+            }
+            if (key.Keycode == Key.Key7)
+            {
+                Log.Info("合体アニメーション");
+                await _block.PlayPlacedAnimeAsync();
+                Log.Info("アニメーション完了");
+            }
+            if (key.Keycode == Key.Key8)
+            {
+                Log.Info("落下時アニメーション");
+                await _block.PlayFalledAnimeAsync();
+                Log.Info("アニメーション完了");
+            }
+            if (key.Keycode == Key.Key9)
+            {
+                Log.Info("スポーンアニメーション");
+                await _block.PlaySpawnAnimeAsync();
+                Log.Info("アニメーション完了");
             }
         }
     }

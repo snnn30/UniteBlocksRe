@@ -13,7 +13,9 @@ public partial class OperationItemTest : Node
     public override void _Ready()
     {
         _board = GetNode<NBoard>("%Board");
-        _item = _board.OperationItem;
+        _item = GetNode<NOperationItem>("%Item");
+
+        _item.Init(_board);
 
         Log.Info(
             $"""
@@ -29,12 +31,12 @@ public partial class OperationItemTest : Node
         {
             if (key.Keycode == Key.Key1)
             {
-                _item.SpawnAndResetPos(new BlockEntity(BlockColor.Red));
+                _ = _item.SpawnBlock(new BlockEntity(BlockColor.Red));
                 Log.Info($"ブロック1つをスポーン {_item.ParentPos}");
             }
             if (key.Keycode == Key.Key2)
             {
-                _item.SpawnAndResetPos(
+                _ = _item.SpawnBlock(
                     new BlockEntity(BlockColor.Blue),
                     new BlockEntity(BlockColor.Green)
                 );

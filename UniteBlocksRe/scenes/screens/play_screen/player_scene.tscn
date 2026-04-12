@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://b2pbjmw8bpy40"]
+[gd_scene load_steps=5 format=3 uid="uid://b2pbjmw8bpy40"]
 
 [ext_resource type="PackedScene" uid="uid://bse5vr6vscgqi" path="res://scenes/screens/play_screen/board.tscn" id="1_6ka6b"]
 [ext_resource type="PackedScene" uid="uid://bkrjkiqwy4ve" path="res://scenes/screens/play_screen/block_queue.tscn" id="2_0ktpp"]
 [ext_resource type="PackedScene" uid="uid://dqn6mw5pl1sqp" path="res://scenes/screens/play_screen/bomb_gauge.tscn" id="3_0ktpp"]
+[ext_resource type="PackedScene" uid="uid://brw2pexc1gwrw" path="res://scenes/screens/play_screen/operation_item.tscn" id="4_47b2i"]
 
 [node name="PlayerScene" type="Node2D"]
 
@@ -14,3 +15,5 @@ position = Vector2(254.27002, -179)
 [node name="BombGauge" parent="." instance=ExtResource("3_0ktpp")]
 position = Vector2(253, 35)
 scale = Vector2(0.56, 0.56)
+
+[node name="OperationItem" parent="." instance=ExtResource("4_47b2i")]

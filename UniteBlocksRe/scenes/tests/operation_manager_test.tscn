@@ -1,0 +1,23 @@
+[gd_scene load_steps=6 format=3 uid="uid://b0g5y45rjkuq7"]
+
+[ext_resource type="Script" uid="uid://caiyq2hu584yy" path="res://src/Nodes/Tests/NOperationManagerTest.cs" id="1_dsslf"]
+[ext_resource type="PackedScene" uid="uid://bwb1m24upet0p" path="res://scenes/game.tscn" id="1_sn0ki"]
+[ext_resource type="PackedScene" uid="uid://bse5vr6vscgqi" path="res://scenes/screens/play_screen/board.tscn" id="2_dsslf"]
+[ext_resource type="PackedScene" uid="uid://brw2pexc1gwrw" path="res://scenes/screens/play_screen/operation_item.tscn" id="3_w3k5q"]
+[ext_resource type="PackedScene" uid="uid://mvu67ni3qh6c" path="res://scenes/screens/play_screen/operation_manager.tscn" id="4_tf1er"]
+
+[node name="OperationManagerTest" type="Node"]
+script = ExtResource("1_dsslf")
+
+[node name="Game" parent="." instance=ExtResource("1_sn0ki")]
+
+[node name="Board" parent="Game" instance=ExtResource("2_dsslf")]
+unique_name_in_owner = true
+position = Vector2(629, 341)
+
+[node name="Item" parent="Game" instance=ExtResource("3_w3k5q")]
+unique_name_in_owner = true
+position = Vector2(629, 341)
+
+[node name="Manager" parent="Game" instance=ExtResource("4_tf1er")]
+unique_name_in_owner = true

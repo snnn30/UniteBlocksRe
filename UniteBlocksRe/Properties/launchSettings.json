@@ -1,0 +1,14 @@
+{
+  "profiles": {
+    "UniteBlocksRe": {
+      "commandName": "Project"
+    },
+    "debug": {
+      "commandName": "Executable",
+      "executablePath": "C:\\Godot_v4.5.1-stable_mono_win64\\Godot_v4.5.1-stable_mono_win64.exe",
+      "commandLineArgs": "\r\n",
+      "workingDirectory": ".",
+      "nativeDebugging": true
+    }
+  }
+}

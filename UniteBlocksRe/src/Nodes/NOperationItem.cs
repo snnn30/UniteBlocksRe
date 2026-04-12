@@ -92,16 +92,16 @@ public partial class NOperationItem : Node2D
     }
 
     public (bool Sucess, Task Task) DropLinear() =>
-        Move(Vector2I.Down, 0.3f, Tween.TransitionType.Linear, Tween.EaseType.In);
+        Move(Vector2I.Down, 0.03f, Tween.TransitionType.Linear, Tween.EaseType.In);
 
-    public (bool Sucess, Task Task) Drop() =>
-        Move(Vector2I.Down, 0.3f, Tween.TransitionType.Quart, Tween.EaseType.Out);
+    public (bool Sucess, Task Task) DropSudden() =>
+        Move(Vector2I.Down, 0.03f, Tween.TransitionType.Quart, Tween.EaseType.Out);
 
     public (bool Sucess, Task Task) MoveLeft() =>
-        Move(Vector2I.Left, 0.3f, Tween.TransitionType.Quart, Tween.EaseType.Out);
+        Move(Vector2I.Left, 0.03f, Tween.TransitionType.Sine, Tween.EaseType.InOut);
 
     public (bool Sucess, Task Task) MoveRight() =>
-        Move(Vector2I.Right, 0.3f, Tween.TransitionType.Quart, Tween.EaseType.Out);
+        Move(Vector2I.Right, 0.03f, Tween.TransitionType.Sine, Tween.EaseType.InOut);
 
     private (bool Sucess, Task Task) Move(
         Vector2I direction,
@@ -217,7 +217,7 @@ public partial class NOperationItem : Node2D
                 }),
                 0f,
                 clockWise ? 90f : -90f,
-                0.3f
+                0.2f
             );
 
             return tween.WaitForFinished();

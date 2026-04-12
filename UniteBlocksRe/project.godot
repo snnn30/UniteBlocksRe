@@ -11,7 +11,13 @@ config_version=5
 [application]
 
 config/name="UniteBlocksRe"
+run/main_scene="uid://bwb1m24upet0p"
 config/features=PackedStringArray("4.5", "C#", "Forward Plus")
+
+[autoload]
+
+FrameProviderDispatcher="*res://addons/R3.Godot/FrameProviderDispatcher.cs"
+ObservableTrackerRuntimeHook="*res://addons/R3.Godot/ObservableTrackerRuntimeHook.cs"
 
 [display]
 
@@ -21,6 +27,10 @@ window/size/viewport_height=720
 [dotnet]
 
 project/assembly_name="UniteBlocksRe"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/R3.Godot/plugin.cfg")
 
 [input]
 

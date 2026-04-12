@@ -54,7 +54,7 @@ public partial class OperationItemTest : Node
             }
             if (key.Keycode == Key.S)
             {
-                (var sucess, var task) = _item.Drop();
+                (var sucess, var task) = _item.DropSudden();
                 Log.Info($"落下 {(sucess ? "成功" : "失敗")}");
             }
             if (key.Keycode == Key.U)

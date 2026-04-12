@@ -6,7 +6,7 @@ namespace UniteBlocksRe.Models.Entities;
 public class BoardEntity
 {
     // 左上を原点とする座標系で、右方向がX軸、下方向がY軸
-    public static readonly Vector2I Size = new(8, 12);
+    public static readonly Vector2I Size = new(8, 14);
     public static readonly Vector2I SpawnPosition = new(3, 1);
 
     private readonly BlockEntity[,] _grid = new BlockEntity[Size.X, Size.Y];

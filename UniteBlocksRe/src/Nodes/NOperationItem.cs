@@ -16,6 +16,8 @@ public partial class NOperationItem : Node2D
     public Vector2I ParentPos { get; private set; }
     public Vector2I ChildPos { get; private set; }
 
+    private bool _isHalf = false;
+
     private enum State
     {
         WaitingSpawn,
@@ -62,6 +64,7 @@ public partial class NOperationItem : Node2D
         await Task.WhenAll(parentTask, childTask);
 
         _state = State.Operating;
+        _isHalf = false;
     }
 
     public async Task SetOnBoard()
@@ -69,6 +72,12 @@ public partial class NOperationItem : Node2D
         if (_state != State.Operating)
         {
             Log.Warn("操作状態じゃない");
+            return;
+        }
+
+        if (_isHalf)
+        {
+            Log.Warn("マスの半分の高さにある");
             return;
         }
 
@@ -89,19 +98,88 @@ public partial class NOperationItem : Node2D
         Child = null;
 
         _state = State.WaitingSpawn;
+        _isHalf = false;
     }
 
     public (bool Sucess, Task Task) DropLinear() =>
-        Move(Vector2I.Down, 0.03f, Tween.TransitionType.Linear, Tween.EaseType.In);
+        Drop(0.01f, Tween.TransitionType.Linear, Tween.EaseType.In);
 
     public (bool Sucess, Task Task) DropSudden() =>
-        Move(Vector2I.Down, 0.03f, Tween.TransitionType.Quart, Tween.EaseType.Out);
+        Drop(0.01f, Tween.TransitionType.Quart, Tween.EaseType.Out);
 
     public (bool Sucess, Task Task) MoveLeft() =>
         Move(Vector2I.Left, 0.03f, Tween.TransitionType.Sine, Tween.EaseType.InOut);
 
     public (bool Sucess, Task Task) MoveRight() =>
         Move(Vector2I.Right, 0.03f, Tween.TransitionType.Sine, Tween.EaseType.InOut);
+
+    private (bool Sucess, Task task) Drop(
+        float duration,
+        Tween.TransitionType trans,
+        Tween.EaseType ease
+    )
+    {
+        if (_state != State.Operating)
+        {
+            return (false, Task.CompletedTask);
+        }
+        if (!CanDrop())
+        {
+            return (false, Task.CompletedTask);
+        }
+
+        if (!_isHalf)
+        {
+            ParentPos += Vector2I.Down;
+            ChildPos += Vector2I.Down;
+        }
+
+        var task = DoAnimation();
+        RegistTask(task);
+        _isHalf = !_isHalf;
+        return (true, task);
+
+        bool CanDrop()
+        {
+            if (_isHalf)
+            {
+                return true;
+            }
+
+            var targetParentPos = ParentPos + Vector2I.Down;
+            var canPlaceParent = _board.Model.CanPlace(targetParentPos, Parent.Model);
+            var canPlaceChild = true;
+            if (Child is not null)
+            {
+                var targetChildPos = ChildPos + Vector2I.Down;
+                canPlaceChild = _board.Model.CanPlace(targetChildPos, Child.Model);
+            }
+
+            return canPlaceParent && canPlaceChild;
+        }
+        Task DoAnimation()
+        {
+            var tween = CreateTween().SetTrans(trans).SetEase(ease);
+            var sum = Vector2.Zero;
+            tween.TweenMethod(
+                Callable.From<Vector2>(val =>
+                {
+                    var diff = val - sum;
+                    Parent.Position += diff;
+                    if (Child != null)
+                    {
+                        Child.Position += diff;
+                    }
+                    sum = val;
+                }),
+                Vector2.Zero,
+                Vector2.Down * NBlock.BaseSize * 0.5f,
+                duration
+            );
+
+            return tween.WaitForFinished();
+        }
+    }
 
     private (bool Sucess, Task Task) Move(
         Vector2I direction,

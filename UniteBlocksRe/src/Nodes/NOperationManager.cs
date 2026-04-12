@@ -42,7 +42,7 @@ public partial class NOperationManager : Node
                         while (!ct.IsCancellationRequested)
                         {
                             await ExecuteDropSudden();
-                            await Task.Delay(TimeSpan.FromSeconds(0.02f), ct);
+                            await Task.Delay(TimeSpan.FromSeconds(0.005f), ct);
                         }
                     });
                 }
@@ -198,7 +198,7 @@ public partial class NOperationManager : Node
                     {
                         await ExecuteMove(dir);
                         //0fにすると移動に失敗したときに何万回とループしてしまう
-                        await Task.Delay(TimeSpan.FromSeconds(0.005f), ct);
+                        await Task.Delay(TimeSpan.FromSeconds(0.01f), ct);
                     }
                 });
             })

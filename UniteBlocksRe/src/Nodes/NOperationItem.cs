@@ -147,15 +147,14 @@ public partial class NOperationItem : Node2D
             }
 
             var targetParentPos = ParentPos + Vector2I.Down;
-            var canPlaceParent = _board.Model.CanPlace(targetParentPos, Parent.Model);
-            var canPlaceChild = true;
+            var canPlace = _board.Model.CanPlace(targetParentPos, Parent.Model);
             if (Child is not null)
             {
                 var targetChildPos = ChildPos + Vector2I.Down;
-                canPlaceChild = _board.Model.CanPlace(targetChildPos, Child.Model);
+                canPlace &= _board.Model.CanPlace(targetChildPos, Child.Model);
             }
 
-            return canPlaceParent && canPlaceChild;
+            return canPlace;
         }
         Task DoAnimation()
         {
@@ -206,15 +205,19 @@ public partial class NOperationItem : Node2D
         bool CanMove()
         {
             var targetParentPos = ParentPos + direction;
-            var canPlaceParent = _board.Model.CanPlace(targetParentPos, Parent.Model);
-            var canPlaceChild = true;
+            var canPlace = _board.Model.CanPlace(targetParentPos, Parent.Model);
+            canPlace &=
+                _board.Model.CanPlace(targetParentPos + Vector2I.Up, Parent.Model) || !_isHalf;
+
             if (Child is not null)
             {
                 var targetChildPos = ChildPos + direction;
-                canPlaceChild = _board.Model.CanPlace(targetChildPos, Child.Model);
+                canPlace &= _board.Model.CanPlace(targetChildPos, Child.Model);
+                canPlace &=
+                    _board.Model.CanPlace(targetChildPos + Vector2I.Up, Child.Model) || !_isHalf;
             }
 
-            return canPlaceParent && canPlaceChild;
+            return canPlace;
         }
         Task DoAnimation()
         {
@@ -269,14 +272,14 @@ public partial class NOperationItem : Node2D
                 : new Vector2I(relativePos.Y, -relativePos.X);
             var targetChildPos = ParentPos + rotatedRelative;
 
-            if (_board.Model.CanPlace(targetChildPos, Child.Model) is not true)
+            var canPlace = _board.Model.CanPlace(targetChildPos, Child.Model);
+            canPlace &=
+                _board.Model.CanPlace(targetChildPos + Vector2I.Up, Child.Model) || !_isHalf;
+            if (canPlace is false)
             {
                 return (false, default);
             }
-            else
-            {
-                return (true, targetChildPos);
-            }
+            return (true, targetChildPos);
         }
         Task DoAnimation()
         {

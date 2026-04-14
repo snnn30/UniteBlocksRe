@@ -26,15 +26,25 @@ public static class RotateHandler
         // trueの所は何でもいい ダミーの値を入れる
         return true switch
         {
-            _ when CanNormalRotate(current, context, isCW) is (true, var target) => new(
+            _ when CanNormalRotate(current, context, isCW, false) is (true, var target) => new(
                 true,
                 target,
-                CreateNormalRotateAnimation(context, current, target, isCW, Duration)
+                CreateNormalRotateAnimation(context, current, target, isCW, Duration, false)
             ),
-            _ when CanShiftRotate(current, context, isCW) is (true, var target) => new(
+            _ when CanShiftRotate(current, context, isCW, false) is (true, var target) => new(
                 true,
                 target,
-                CreateShiftRotateAnimation(context, current, target, isCW, Duration)
+                CreateShiftRotateAnimation(context, current, target, isCW, Duration, false)
+            ),
+            _ when CanNormalRotate(current, context, isCW, true) is (true, var target) => new(
+                true,
+                target,
+                CreateNormalRotateAnimation(context, current, target, isCW, Duration, true)
+            ),
+            _ when CanShiftRotate(current, context, isCW, true) is (true, var target) => new(
+                true,
+                target,
+                CreateShiftRotateAnimation(context, current, target, isCW, Duration, true)
             ),
             _ => OperationResult.Failed(current),
         };
@@ -43,54 +53,79 @@ public static class RotateHandler
     private static (bool CanRotate, OperationState target) CanNormalRotate(
         OperationState current,
         OperationContext context,
-        bool isCW
+        bool isCW,
+        bool pivotIsChild
     )
     {
-        var relativePos = current.ChildPos - current.ParentPos;
+        var pivotPos = pivotIsChild ? current.ChildPos : current.ParentPos;
+        var moverPos = pivotIsChild ? current.ParentPos : current.ChildPos;
+        var moverModel = pivotIsChild ? context.Parent.Model : context.Child.Model;
+
+        var relativePos = moverPos - pivotPos;
         var rotatedRelative = isCW
             ? new Vector2I(-relativePos.Y, relativePos.X)
             : new Vector2I(relativePos.Y, -relativePos.X);
-        var targetChildPos = current.ParentPos + rotatedRelative;
 
-        var canPlace = context.Board.Model.CanPlace(targetChildPos, context.Child.Model);
+        var targetMoverPos = pivotPos + rotatedRelative;
+
+        var canPlace = context.Board.Model.CanPlace(targetMoverPos, moverModel);
         canPlace &=
-            context.Board.Model.CanPlace(targetChildPos + Vector2I.Up, context.Child.Model)
+            context.Board.Model.CanPlace(targetMoverPos + Vector2I.Up, moverModel)
             || !current.IsBetweenCells;
-        if (canPlace is false)
+        if (!canPlace)
         {
             return (false, default);
         }
 
-        var target = current with { ChildPos = targetChildPos };
+        var target = pivotIsChild
+            ? current with
+            {
+                ParentPos = targetMoverPos,
+            }
+            : current with
+            {
+                ChildPos = targetMoverPos,
+            };
         return (true, target);
     }
 
     private static (bool CanRotate, OperationState target) CanShiftRotate(
         OperationState current,
         OperationContext context,
-        bool isCW
+        bool isCW,
+        bool pivotIsChild
     )
     {
-        var relativePos = current.ChildPos - current.ParentPos;
+        var pivotPos = pivotIsChild ? current.ChildPos : current.ParentPos;
+        var moverPos = pivotIsChild ? current.ParentPos : current.ChildPos;
+        var moverModel = pivotIsChild ? context.Parent.Model : context.Child.Model;
+
+        var relativePos = moverPos - pivotPos;
         var relativeWallPos = isCW
             ? new Vector2I(-relativePos.Y, relativePos.X)
             : new Vector2I(relativePos.Y, -relativePos.X);
-        var targetChildPos = current.ParentPos + relativePos + relativeWallPos;
+        var targetMoverPos = pivotPos + relativePos + relativeWallPos;
 
-        var canPlace = context.Board.Model.CanPlace(targetChildPos, context.Child.Model);
-        canPlace &= !context.Board.Model.CanPlace(
-            current.ParentPos + relativeWallPos,
-            context.Child.Model
-        );
+        var canPlace = context.Board.Model.CanPlace(targetMoverPos, moverModel);
+        canPlace &= !context.Board.Model.CanPlace(pivotPos + relativeWallPos, moverModel);
         canPlace &=
-            context.Board.Model.CanPlace(targetChildPos + Vector2I.Up, context.Child.Model)
+            context.Board.Model.CanPlace(targetMoverPos + Vector2I.Up, moverModel)
             || !current.IsBetweenCells;
         if (canPlace is false)
         {
             return (false, default);
         }
-        var target = current with { ParentPos = current.ChildPos, ChildPos = targetChildPos };
-
+        var target = pivotIsChild
+            ? current with
+            {
+                ChildPos = current.ParentPos,
+                ParentPos = targetMoverPos,
+            }
+            : current with
+            {
+                ParentPos = current.ChildPos,
+                ChildPos = targetMoverPos,
+            };
         return (true, target);
     }
 
@@ -99,7 +134,8 @@ public static class RotateHandler
         OperationState current,
         OperationState target,
         bool isCW,
-        float duration
+        float duration,
+        bool pivotIsChild
     )
     {
         async Task PlayAnim()
@@ -110,7 +146,7 @@ public static class RotateHandler
             }
 
             context.OperationState = target;
-            await ShiftRotateAnimation(context, current, isCW, duration);
+            await ShiftRotateAnimation(context, current, isCW, duration, pivotIsChild);
         }
 
         return context.TrackAnim(PlayAnim);
@@ -121,7 +157,8 @@ public static class RotateHandler
         OperationState current,
         OperationState target,
         bool isCW,
-        float duration
+        float duration,
+        bool pivotIsChild
     )
     {
         async Task PlayAnim()
@@ -132,7 +169,7 @@ public static class RotateHandler
             }
 
             context.OperationState = target;
-            await NormalRotateAnimation(context, isCW, duration);
+            await NormalRotateAnimation(context, isCW, duration, pivotIsChild);
         }
 
         return context.TrackAnim(PlayAnim);
@@ -142,17 +179,20 @@ public static class RotateHandler
         OperationContext context,
         OperationState current,
         bool isCW,
-        float duration
+        float duration,
+        bool pivotIsChild
     )
     {
-        var task = NormalRotateAnimation(context, isCW, duration);
+        var task = NormalRotateAnimation(context, isCW, duration, pivotIsChild);
         var tween = context
             .OperationItem.CreateTween()
             .SetTrans(Tween.TransitionType.Quart)
             .SetEase(Tween.EaseType.Out);
 
         var sum = Vector2.Zero;
-        var relativePos = current.ChildPos - current.ParentPos;
+        var relativePos = pivotIsChild
+            ? current.ParentPos - current.ChildPos
+            : current.ChildPos - current.ParentPos;
         tween.TweenMethod(
             Callable.From<Vector2>(val =>
             {
@@ -171,7 +211,12 @@ public static class RotateHandler
         return Task.WhenAll(task, task2);
     }
 
-    private static Task NormalRotateAnimation(OperationContext context, bool isCW, float duration)
+    private static Task NormalRotateAnimation(
+        OperationContext context,
+        bool isCW,
+        float duration,
+        bool pivotIsChild
+    )
     {
         var tween = context
             .OperationItem.CreateTween()
@@ -183,8 +228,17 @@ public static class RotateHandler
             {
                 var diff = deg - sum;
                 var radDiff = Mathf.DegToRad(diff);
-                var relativePos = context.Child.Position - context.Parent.Position;
-                context.Child.Position = context.Parent.Position + relativePos.Rotated(radDiff);
+                if (pivotIsChild)
+                {
+                    var relativePos = context.Parent.Position - context.Child.Position;
+                    context.Parent.Position = context.Child.Position + relativePos.Rotated(radDiff);
+                }
+                else
+                {
+                    var relativePos = context.Child.Position - context.Parent.Position;
+                    context.Child.Position = context.Parent.Position + relativePos.Rotated(radDiff);
+                }
+
                 sum = deg;
             }),
             0f,

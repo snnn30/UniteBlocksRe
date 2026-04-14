@@ -51,6 +51,7 @@ public static class SettleHandler
             context.OperationState = target;
 
             await context.WaitForAnimations();
+            context.Parent.Outlined = false;
             await SettleAnimation(context, current);
 
             context.Parent = null;

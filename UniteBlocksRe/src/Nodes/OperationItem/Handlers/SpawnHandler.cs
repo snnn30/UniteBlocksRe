@@ -41,6 +41,7 @@ public static class SpawnHandler
             context.IsLocked = true;
 
             (var parentNode, var parentAnim) = context.Board.SpawnBlock(parent, parentPos);
+            parentNode.Outlined = true;
             (var childNode, var childAnim) = child is not null
                 ? context.Board.SpawnBlock(child, childPos)
                 : default;

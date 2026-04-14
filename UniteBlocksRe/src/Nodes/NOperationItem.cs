@@ -26,7 +26,7 @@ public partial class NOperationItem : Node2D
     }
 
     private State _state = State.WaitingSpawn;
-    private readonly List<Task> _activeTasks = new();
+    private readonly List<Task> _activeTasks = [];
 
     public void Init(NBoard board)
     {
@@ -245,26 +245,38 @@ public partial class NOperationItem : Node2D
 
     public (bool Sucess, Task Task) Rotate(bool clockWise)
     {
+        const float duration = 0.2f;
+
         if (_state != State.Operating)
         {
             return (false, Task.CompletedTask);
         }
         if (Child is null)
         {
-            return (false, Task.CompletedTask);
+            return (true, Task.CompletedTask);
         }
-        if (CanRotate() is not (true, var targetChildPos))
+
+        var canNormalResult = CanNormalRotate();
+        var canShiftResult = CanShiftRotate();
+
+        if (canNormalResult.CanRotate)
         {
-            return (false, Task.CompletedTask);
+            var task = DoNormalRotate();
+            RegistTask(task);
+            ChildPos = canNormalResult.TargetChildPos;
+            return (true, task);
         }
+        if (canShiftResult.CanRotate)
+        {
+            var task = DoShiftRotate();
+            RegistTask(task);
+            ParentPos = canShiftResult.TargetParentPos;
+            ChildPos = canShiftResult.TargetChildPos;
+            return (true, task);
+        }
+        return (false, Task.CompletedTask);
 
-        ChildPos = targetChildPos;
-
-        var task = DoAnimation();
-        RegistTask(task);
-        return (true, task);
-
-        (bool CanRotate, Vector2I TargetChildPos) CanRotate()
+        (bool CanRotate, Vector2I TargetChildPos) CanNormalRotate()
         {
             var relativePos = ChildPos - ParentPos;
             var rotatedRelative = clockWise
@@ -281,7 +293,54 @@ public partial class NOperationItem : Node2D
             }
             return (true, targetChildPos);
         }
-        Task DoAnimation()
+
+        (bool CanRotate, Vector2I TargetParentPos, Vector2I TargetChildPos) CanShiftRotate()
+        {
+            var relativePos = ChildPos - ParentPos;
+            var relativeWallPos = clockWise
+                ? new Vector2I(-relativePos.Y, relativePos.X)
+                : new Vector2I(relativePos.Y, -relativePos.X);
+            var targetChildPos = ParentPos + relativePos + relativeWallPos;
+
+            var canPlace = _board.Model.CanPlace(targetChildPos, Child.Model);
+            canPlace &= !_board.Model.CanPlace(ParentPos + relativeWallPos, Child.Model);
+            canPlace &=
+                _board.Model.CanPlace(targetChildPos + Vector2I.Up, Child.Model) || !_isHalf;
+            if (canPlace is false)
+            {
+                return (false, default, default);
+            }
+            return (true, ChildPos, targetChildPos);
+        }
+
+        Task DoShiftRotate()
+        {
+            var task = DoNormalRotate();
+            var tween = CreateTween()
+                .SetTrans(Tween.TransitionType.Quart)
+                .SetEase(Tween.EaseType.Out);
+
+            var sum = Vector2.Zero;
+            var relativePos = ChildPos - ParentPos;
+            tween.TweenMethod(
+                Callable.From<Vector2>(val =>
+                {
+                    var diff = val - sum;
+                    Parent.Position += diff;
+                    Child.Position += diff;
+                    sum = val;
+                }),
+                Vector2.Zero,
+                (Vector2)relativePos * NBlock.BaseSize,
+                duration
+            );
+
+            var task2 = tween.WaitForFinished();
+
+            return Task.WhenAll(task, task2);
+        }
+
+        Task DoNormalRotate()
         {
             var tween = CreateTween()
                 .SetTrans(Tween.TransitionType.Quart)
@@ -298,7 +357,7 @@ public partial class NOperationItem : Node2D
                 }),
                 0f,
                 clockWise ? 90f : -90f,
-                0.2f
+                duration
             );
 
             return tween.WaitForFinished();

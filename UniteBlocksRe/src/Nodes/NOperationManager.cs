@@ -41,7 +41,7 @@ public partial class NOperationManager : Node
                     {
                         while (!ct.IsCancellationRequested)
                         {
-                            await ExecuteDrop(true);
+                            await ExecuteDrop(false);
                             await Task.Delay(TimeSpan.FromSeconds(0.005f), ct);
                         }
                     });
@@ -59,7 +59,7 @@ public partial class NOperationManager : Node
                             {
                                 if (ActivateAutoDrop)
                                 {
-                                    await ExecuteDrop(false);
+                                    await ExecuteDrop(true);
                                 }
                             })
                         );

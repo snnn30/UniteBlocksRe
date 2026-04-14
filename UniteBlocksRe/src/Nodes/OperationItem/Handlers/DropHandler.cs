@@ -11,8 +11,8 @@ public static class DropHandler
     {
         return isSingle switch
         {
-            true => Drop(context, 0.01f, Tween.TransitionType.Quart, Tween.EaseType.Out),
-            false => Drop(context, 0.01f, Tween.TransitionType.Linear, Tween.EaseType.In),
+            true => Drop(context, 0.1f, Tween.TransitionType.Quart, Tween.EaseType.Out),
+            false => Drop(context, 0.02f, Tween.TransitionType.Linear, Tween.EaseType.In),
         };
     }
 

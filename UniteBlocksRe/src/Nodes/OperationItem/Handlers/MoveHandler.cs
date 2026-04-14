@@ -99,7 +99,7 @@ public static class MoveHandler
             }),
             Vector2.Zero,
             (Vector2)direction * NBlock.BaseSize,
-            0.03f
+            0.06f
         );
 
         return tween.WaitForFinished();

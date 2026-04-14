@@ -45,6 +45,8 @@ public static class SpawnHandler
             (var childNode, var childAnim) = child is not null
                 ? context.Board.SpawnBlock(child, childPos)
                 : default;
+
+            context.Board.BringToFront(parentNode);
             var anim = child is not null ? Task.WhenAll(parentAnim, childAnim) : parentAnim;
 
             context.Parent = parentNode;

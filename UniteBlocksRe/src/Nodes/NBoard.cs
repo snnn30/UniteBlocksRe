@@ -55,6 +55,11 @@ public partial class NBoard : Node2D
         spawnIcon.Position = s_realPositions.Value[BoardEntity.SpawnPosition];
     }
 
+    public void BringToFront(NBlock block)
+    {
+        _clipMask.MoveChild(block, -1);
+    }
+
     public (NBlock block, Task task) SpawnBlock(BlockEntity entity, Vector2I pos)
     {
         var block = NBlock.Create(entity);

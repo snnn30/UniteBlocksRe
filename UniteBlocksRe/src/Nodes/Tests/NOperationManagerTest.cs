@@ -29,21 +29,23 @@ public partial class NOperationManagerTest : Node
         );
     }
 
-    public override async void _Input(InputEvent @event)
+    public override void _Input(InputEvent @event)
     {
         if (@event is InputEventKey key && key.Pressed)
         {
             if (key.Keycode == Key.Key1)
             {
-                _ = _item.SpawnBlock(
+                var result = _item.Spawn(
                     new BlockEntity(BlockColor.Blue),
                     new BlockEntity(BlockColor.Green)
                 );
+                result.Apply();
                 Log.Info("ブロック2つをスポーン");
             }
             if (key.Keycode == Key.Key2)
             {
-                await _item.SetOnBoard();
+                var result = _item.Settle();
+                result.Apply();
                 Log.Info("ボード上に設置");
             }
             if (key.Keycode == Key.Key3)

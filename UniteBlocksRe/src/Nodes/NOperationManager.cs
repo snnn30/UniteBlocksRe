@@ -41,7 +41,7 @@ public partial class NOperationManager : Node
                     {
                         while (!ct.IsCancellationRequested)
                         {
-                            await ExecuteDropSudden();
+                            await ExecuteDrop(true);
                             await Task.Delay(TimeSpan.FromSeconds(0.005f), ct);
                         }
                     });
@@ -59,7 +59,7 @@ public partial class NOperationManager : Node
                             {
                                 if (ActivateAutoDrop)
                                 {
-                                    await ExecuteDropLinear();
+                                    await ExecuteDrop(false);
                                 }
                             })
                         );
@@ -69,18 +69,11 @@ public partial class NOperationManager : Node
             .Subscribe()
             .AddTo(this);
 
-        async Task ExecuteDropLinear()
+        Task ExecuteDrop(bool isSingle)
         {
-            var result = _item.DropLinear();
-            await result.Task;
+            var result = _item.Drop(isSingle);
             Log.Debug($"落下 {(result.Sucess ? "成功" : "失敗")}");
-        }
-
-        async Task ExecuteDropSudden()
-        {
-            var result = _item.DropSudden();
-            await result.Task;
-            Log.Debug($"落下 {(result.Sucess ? "成功" : "失敗")}");
+            return result.Apply();
         }
     }
 
@@ -141,13 +134,13 @@ public partial class NOperationManager : Node
             {
                 var result = _item.Rotate(false);
                 Log.Debug($"反時計回り {(result.Sucess ? "成功" : "失敗")}");
-                return result;
+                return (result.Sucess, result.Apply());
             }
             else if (dir == Vector2I.Right)
             {
                 var result = _item.Rotate(true);
                 Log.Debug($"時計回り {(result.Sucess ? "成功" : "失敗")}");
-                return result;
+                return (result.Sucess, result.Apply());
             }
             else
             {
@@ -206,23 +199,24 @@ public partial class NOperationManager : Node
             .Subscribe() //実際の処理はSelectだが、Subscribeしないとそこまでの処理も一切行われない
             .AddTo(this);
 
-        async Task ExecuteMove(Vector2I dir)
+        Task ExecuteMove(Vector2I dir)
         {
             if (dir == Vector2I.Left)
             {
-                var result = _item.MoveLeft();
-                await result.Task;
+                var result = _item.Move(false);
                 Log.Debug($"左移動 {(result.Sucess ? "成功" : "失敗")}");
+                return result.Apply();
             }
             else if (dir == Vector2I.Right)
             {
-                var result = _item.MoveRight();
-                await result.Task;
+                var result = _item.Move(true);
                 Log.Debug($"右移動 {(result.Sucess ? "成功" : "失敗")}");
+                return result.Apply();
             }
             else
             {
                 Log.Error($"想定していない方向 {dir}");
+                return default;
             }
         }
     }

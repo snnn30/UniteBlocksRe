@@ -25,53 +25,60 @@ public partial class OperationItemTest : Node
         );
     }
 
-    public override async void _Input(InputEvent @event)
+    public override void _Input(InputEvent @event)
     {
         if (@event is InputEventKey key && key.Pressed)
         {
             if (key.Keycode == Key.Key1)
             {
-                _ = _item.SpawnBlock(new BlockEntity(BlockColor.Red));
-                Log.Info($"ブロック1つをスポーン {_item.ParentPos}");
+                var result = _item.Spawn(new BlockEntity(BlockColor.Red));
+                Log.Info($"ブロック1つをスポーン  {(result.Sucess ? "成功" : "失敗")}");
+                result.Apply();
             }
             if (key.Keycode == Key.Key2)
             {
-                _ = _item.SpawnBlock(
+                var result = _item.Spawn(
                     new BlockEntity(BlockColor.Blue),
                     new BlockEntity(BlockColor.Green)
                 );
-                Log.Info("ブロック2つをスポーン");
+                Log.Info($"ブロック2つをスポーン  {(result.Sucess ? "成功" : "失敗")}");
+                result.Apply();
             }
             if (key.Keycode == Key.A)
             {
-                (var sucess, var task) = _item.MoveLeft();
-                Log.Info($"左移動 {(sucess ? "成功" : "失敗")}");
+                var result = _item.Move(false);
+                Log.Info($"左移動 {(result.Sucess ? "成功" : "失敗")}");
+                result.Apply();
             }
             if (key.Keycode == Key.D)
             {
-                (var sucess, var task) = _item.MoveRight();
-                Log.Info($"右移動 {(sucess ? "成功" : "失敗")}");
+                var result = _item.Move(true);
+                Log.Info($"右移動 {(result.Sucess ? "成功" : "失敗")}");
+                result.Apply();
             }
             if (key.Keycode == Key.S)
             {
-                (var sucess, var task) = _item.DropSudden();
-                Log.Info($"落下 {(sucess ? "成功" : "失敗")}");
+                var result = _item.Drop(true);
+                Log.Info($"落下 {(result.Sucess ? "成功" : "失敗")}");
+                result.Apply();
             }
             if (key.Keycode == Key.U)
             {
-                (var sucess, var task) = _item.Rotate(false);
-                Log.Info($"反時計周りの回転 {(sucess ? "成功" : "失敗")}");
+                var result = _item.Rotate(false);
+                Log.Info($"反時計周りの回転 {(result.Sucess ? "成功" : "失敗")}");
+                result.Apply();
             }
             if (key.Keycode == Key.I)
             {
-                (var sucess, var task) = _item.Rotate(true);
-                Log.Info($"時計回りの回転 {(sucess ? "成功" : "失敗")}");
+                var result = _item.Rotate(true);
+                Log.Info($"時計回りの回転 {(result.Sucess ? "成功" : "失敗")}");
+                result.Apply();
             }
             if (key.Keycode == Key.Space)
             {
-                Log.Info("ボード上に設置 Tween終了待ち");
-                await _item.SetOnBoard();
-                Log.Info("ボード上に設置 完了");
+                var result = _item.Settle();
+                Log.Info($"ボード上に設置  {(result.Sucess ? "成功" : "失敗")}");
+                result.Apply();
             }
         }
     }

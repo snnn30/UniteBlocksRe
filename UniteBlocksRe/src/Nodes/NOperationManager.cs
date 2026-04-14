@@ -185,13 +185,22 @@ public partial class NOperationManager : Node
                 // 非同期処理をストリームとして扱う
                 return Observable.FromAsync(async ct =>
                 {
-                    await ExecuteMove(dir);
-                    await Task.Delay(TimeSpan.FromSeconds(0.16f), ct);
+                    var wasLastMoveSucess = false;
                     while (!ct.IsCancellationRequested)
                     {
-                        await ExecuteMove(dir);
-                        //0fにすると移動に失敗したときに何万回とループしてしまう
-                        await Task.Delay(TimeSpan.FromSeconds(0.01f), ct);
+                        (var sucess, var task) = ExecuteMove(dir);
+                        if (sucess)
+                        {
+                            var delayTime = wasLastMoveSucess ? 0.01f : 0.18f;
+                            await task;
+                            await Task.Delay(TimeSpan.FromSeconds(delayTime), ct);
+                            wasLastMoveSucess = true;
+                        }
+                        else
+                        {
+                            await Task.Delay(TimeSpan.FromSeconds(0.05f), ct);
+                            wasLastMoveSucess = false;
+                        }
                     }
                 });
             })
@@ -199,24 +208,24 @@ public partial class NOperationManager : Node
             .Subscribe() //実際の処理はSelectだが、Subscribeしないとそこまでの処理も一切行われない
             .AddTo(this);
 
-        Task ExecuteMove(Vector2I dir)
+        (bool Sucess, Task Task) ExecuteMove(Vector2I dir)
         {
             if (dir == Vector2I.Left)
             {
                 var result = _item.Move(false);
                 Log.Debug($"左移動 {(result.Sucess ? "成功" : "失敗")}");
-                return result.Apply();
+                return (result.Sucess, result.Apply());
             }
             else if (dir == Vector2I.Right)
             {
                 var result = _item.Move(true);
                 Log.Debug($"右移動 {(result.Sucess ? "成功" : "失敗")}");
-                return result.Apply();
+                return (result.Sucess, result.Apply());
             }
             else
             {
                 Log.Error($"想定していない方向 {dir}");
-                return default;
+                return (false, default);
             }
         }
     }

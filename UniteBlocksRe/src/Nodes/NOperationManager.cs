@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Godot;
 using R3;
 using UniteBlocksRe.Logging;
+using UniteBlocksRe.Nodes.OperationItem;
 
 namespace UniteBlocksRe.Nodes;
 
@@ -41,8 +42,12 @@ public partial class NOperationManager : Node
                     {
                         while (!ct.IsCancellationRequested)
                         {
-                            await ExecuteDrop(false);
-                            await Task.Delay(TimeSpan.FromSeconds(0.005f), ct);
+                            var result = _item.Drop(false);
+                            await result.Task;
+                            if (!result.Sucess)
+                            {
+                                await Task.Delay(TimeSpan.FromSeconds(0.05f), ct);
+                            }
                         }
                     });
                 }
@@ -59,7 +64,8 @@ public partial class NOperationManager : Node
                             {
                                 if (ActivateAutoDrop)
                                 {
-                                    await ExecuteDrop(true);
+                                    var result = _item.Drop(true);
+                                    await result.Task;
                                 }
                             })
                         );
@@ -68,13 +74,6 @@ public partial class NOperationManager : Node
             .Switch()
             .Subscribe()
             .AddTo(this);
-
-        Task ExecuteDrop(bool isSingle)
-        {
-            var result = _item.Drop(isSingle);
-            Log.Debug($"落下 {(result.Sucess ? "成功" : "失敗")}");
-            return result.Apply();
-        }
     }
 
     private void SubscribeRotateInput()
@@ -128,19 +127,17 @@ public partial class NOperationManager : Node
             .Subscribe()
             .AddTo(this);
 
-        (bool Sucess, Task task) ExecuteRotate(Vector2I dir)
+        OperationResult ExecuteRotate(Vector2I dir)
         {
             if (dir == Vector2I.Left)
             {
                 var result = _item.Rotate(false);
-                Log.Debug($"反時計回り {(result.Sucess ? "成功" : "失敗")}");
-                return (result.Sucess, result.Apply());
+                return result;
             }
             else if (dir == Vector2I.Right)
             {
                 var result = _item.Rotate(true);
-                Log.Debug($"時計回り {(result.Sucess ? "成功" : "失敗")}");
-                return (result.Sucess, result.Apply());
+                return result;
             }
             else
             {
@@ -208,24 +205,22 @@ public partial class NOperationManager : Node
             .Subscribe() //実際の処理はSelectだが、Subscribeしないとそこまでの処理も一切行われない
             .AddTo(this);
 
-        (bool Sucess, Task Task) ExecuteMove(Vector2I dir)
+        OperationResult ExecuteMove(Vector2I dir)
         {
             if (dir == Vector2I.Left)
             {
                 var result = _item.Move(false);
-                Log.Debug($"左移動 {(result.Sucess ? "成功" : "失敗")}");
-                return (result.Sucess, result.Apply());
+                return result;
             }
             else if (dir == Vector2I.Right)
             {
                 var result = _item.Move(true);
-                Log.Debug($"右移動 {(result.Sucess ? "成功" : "失敗")}");
-                return (result.Sucess, result.Apply());
+                return result;
             }
             else
             {
                 Log.Error($"想定していない方向 {dir}");
-                return (false, default);
+                return default;
             }
         }
     }

@@ -33,7 +33,6 @@ public partial class OperationItemTest : Node
             {
                 var result = _item.Spawn(new BlockEntity(BlockColor.Red));
                 Log.Info($"ブロック1つをスポーン  {(result.Sucess ? "成功" : "失敗")}");
-                result.Apply();
             }
             if (key.Keycode == Key.Key2)
             {
@@ -42,43 +41,36 @@ public partial class OperationItemTest : Node
                     new BlockEntity(BlockColor.Green)
                 );
                 Log.Info($"ブロック2つをスポーン  {(result.Sucess ? "成功" : "失敗")}");
-                result.Apply();
             }
             if (key.Keycode == Key.A)
             {
                 var result = _item.Move(false);
                 Log.Info($"左移動 {(result.Sucess ? "成功" : "失敗")}");
-                result.Apply();
             }
             if (key.Keycode == Key.D)
             {
                 var result = _item.Move(true);
                 Log.Info($"右移動 {(result.Sucess ? "成功" : "失敗")}");
-                result.Apply();
             }
             if (key.Keycode == Key.S)
             {
                 var result = _item.Drop(true);
                 Log.Info($"落下 {(result.Sucess ? "成功" : "失敗")}");
-                result.Apply();
             }
             if (key.Keycode == Key.U)
             {
                 var result = _item.Rotate(false);
                 Log.Info($"反時計周りの回転 {(result.Sucess ? "成功" : "失敗")}");
-                result.Apply();
             }
             if (key.Keycode == Key.I)
             {
                 var result = _item.Rotate(true);
                 Log.Info($"時計回りの回転 {(result.Sucess ? "成功" : "失敗")}");
-                result.Apply();
             }
             if (key.Keycode == Key.Space)
             {
                 var result = _item.Settle();
                 Log.Info($"ボード上に設置  {(result.Sucess ? "成功" : "失敗")}");
-                result.Apply();
             }
         }
     }

@@ -1,4 +1,3 @@
-using System;
 using System.Threading.Tasks;
 using Godot;
 using UniteBlocksRe.Extensions;
@@ -9,80 +8,54 @@ public static class MoveHandler
 {
     public static OperationResult Move(OperationContext context, bool isRight)
     {
-        var current = context.OperationState;
-
-        if (!context.CanOperate(OperationPhase.Operating, current))
+        if (!context.CanOperate(OperationPhase.Operating))
         {
-            return OperationResult.Failed(current);
+            return OperationResult.Failed();
         }
-
         var direction = isRight ? Vector2I.Right : Vector2I.Left;
-
-        if (!CanMove(current, context, direction))
+        if (!CanMove(context, direction))
         {
-            return OperationResult.Failed(current);
+            return OperationResult.Failed();
         }
 
-        var target = current with
-        {
-            ParentPos = current.ParentPos + direction,
-            ChildPos = current.ChildPos + direction,
-        };
-
-        var playAnimation = CreateMoveAnimation(context, current, target, direction);
-
-        return OperationResult.Succeeded(target, playAnimation);
+        var task = ApplyAndAnim(context, direction);
+        return OperationResult.Succeeded(task);
     }
 
-    private static bool CanMove(
-        OperationState current,
-        OperationContext context,
-        Vector2I direction
-    )
+    private static bool CanMove(OperationContext context, Vector2I direction)
     {
-        var targetParentPos = current.ParentPos + direction;
+        var targetParentPos = context.ParentPos + direction;
         var canPlace = context.Board.Model.CanPlace(targetParentPos, context.Parent.Model);
         canPlace &=
             context.Board.Model.CanPlace(targetParentPos + Vector2I.Up, context.Parent.Model)
-            || !current.IsBetweenCells;
+            || !context.IsBetweenCells;
 
         if (context.Child is not null)
         {
-            var targetChildPos = current.ChildPos + direction;
+            var targetChildPos = context.ChildPos + direction;
             canPlace &= context.Board.Model.CanPlace(targetChildPos, context.Child.Model);
             canPlace &=
                 context.Board.Model.CanPlace(targetChildPos + Vector2I.Up, context.Child.Model)
-                || !current.IsBetweenCells;
+                || !context.IsBetweenCells;
         }
 
         return canPlace;
     }
 
-    private static Func<Task> CreateMoveAnimation(
-        OperationContext context,
-        OperationState current,
-        OperationState target,
-        Vector2I direction
-    )
+    private static async Task ApplyAndAnim(OperationContext context, Vector2I direction)
     {
-        async Task PlayAnim()
-        {
-            if (!context.CanOperate(OperationPhase.Operating, current))
-            {
-                return;
-            }
+        var snapshot = context.CreateSnapshot();
 
-            context.OperationState = target;
-            await MoveAnimation(context, direction);
-        }
+        context.ParentPos += direction;
+        context.ChildPos += direction;
 
-        return context.TrackAnim(PlayAnim);
+        await context.TrackAnim(MoveAnimation(snapshot, direction));
     }
 
-    private static Task MoveAnimation(OperationContext context, Vector2I direction)
+    private static Task MoveAnimation(OperationContext snapshot, Vector2I direction)
     {
-        var tween = context
-            .OperationItem.CreateTween()
+        var tween = snapshot
+            .CreateTween()
             .SetTrans(Tween.TransitionType.Sine)
             .SetEase(Tween.EaseType.InOut);
         var sum = Vector2.Zero;
@@ -90,10 +63,10 @@ public static class MoveHandler
             Callable.From<Vector2>(val =>
             {
                 var diff = val - sum;
-                context.Parent.Position += diff;
-                if (context.Child != null)
+                snapshot.Parent.Position += diff;
+                if (snapshot.Child != null)
                 {
-                    context.Child.Position += diff;
+                    snapshot.Child.Position += diff;
                 }
                 sum = val;
             }),

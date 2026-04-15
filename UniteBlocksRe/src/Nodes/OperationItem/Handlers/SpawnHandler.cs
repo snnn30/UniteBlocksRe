@@ -12,53 +12,43 @@ public static class SpawnHandler
         BlockEntity child = null
     )
     {
-        var current = context.OperationState;
-
-        if (!context.CanOperate(OperationPhase.WaitingSpawn, current))
+        if (!context.CanOperate(OperationPhase.WaitingSpawn))
         {
-            return OperationResult.Failed(current);
+            return OperationResult.Failed();
         }
+
+        var task = ApplyAndAnim(context, parent, child);
+        return OperationResult.Succeeded(task);
+    }
+
+    private static async Task ApplyAndAnim(
+        OperationContext context,
+        BlockEntity parent,
+        BlockEntity child
+    )
+    {
+        context.IsLocked = true;
 
         var parentPos = BoardEntity.SpawnPosition;
-        var childPos = child is not null ? parentPos + Vector2I.Up : Vector2I.Zero;
+        var childPos = child != null ? parentPos + Vector2I.Up : Vector2I.Zero;
 
-        var target = current with
-        {
-            Parent = parent,
-            Child = child,
-            ParentPos = parentPos,
-            ChildPos = childPos,
-            Phase = OperationPhase.Operating,
-            IsBetweenCells = false,
-        };
+        (var parentNode, var parentAnim) = context.Board.SpawnBlock(parent, parentPos);
+        parentNode.Outlined = true;
+        (var childNode, var childAnim) =
+            child != null ? context.Board.SpawnBlock(child, childPos) : default;
 
-        async Task PlayAnim()
-        {
-            if (!context.CanOperate(OperationPhase.WaitingSpawn, current))
-            {
-                return;
-            }
-            context.IsLocked = true;
+        context.Board.BringToFront(parentNode);
 
-            (var parentNode, var parentAnim) = context.Board.SpawnBlock(parent, parentPos);
-            parentNode.Outlined = true;
-            (var childNode, var childAnim) = child is not null
-                ? context.Board.SpawnBlock(child, childPos)
-                : default;
+        context.Parent = parentNode;
+        context.Child = childNode;
+        context.ParentPos = parentPos;
+        context.ChildPos = childPos;
+        context.Phase = OperationPhase.Operating;
+        context.IsBetweenCells = false;
 
-            context.Board.BringToFront(parentNode);
-            var anim = child is not null ? Task.WhenAll(parentAnim, childAnim) : parentAnim;
+        var anim = child is not null ? Task.WhenAll(parentAnim, childAnim) : parentAnim;
+        await context.TrackAnim(anim);
 
-            context.Parent = parentNode;
-            context.Child = childNode;
-
-            context.OperationState = target;
-
-            await anim;
-
-            context.IsLocked = false;
-        }
-
-        return OperationResult.Succeeded(target, context.TrackAnim(PlayAnim));
+        context.IsLocked = false;
     }
 }

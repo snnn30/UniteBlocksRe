@@ -35,17 +35,12 @@ public partial class NOperationManagerTest : Node
         {
             if (key.Keycode == Key.Key1)
             {
-                var result = _item.Spawn(
-                    new BlockEntity(BlockColor.Blue),
-                    new BlockEntity(BlockColor.Green)
-                );
-                result.Apply();
+                _item.Spawn(new BlockEntity(BlockColor.Blue), new BlockEntity(BlockColor.Green));
                 Log.Info("ブロック2つをスポーン");
             }
             if (key.Keycode == Key.Key2)
             {
-                var result = _item.Settle();
-                result.Apply();
+                _item.Settle();
                 Log.Info("ボード上に設置");
             }
             if (key.Keycode == Key.Key3)

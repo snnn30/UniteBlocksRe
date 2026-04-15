@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Godot;
@@ -10,18 +9,30 @@ public class OperationContext
 {
     public NBlock Parent { get; set; }
     public NBlock Child { get; set; }
+    public Vector2I ParentPos { get; set; }
+    public Vector2I ChildPos { get; set; }
+
+    public bool IsLocked { get; set; }
+    public bool IsBetweenCells { get; set; }
+    public OperationPhase Phase { get; set; }
+
     public NBoard Board { get; init; }
-    public Node OperationItem { get; init; }
-    public OperationState OperationState { get; set; }
-    public bool IsLocked { get; set; } = false;
 
     private readonly List<Task> _activeAnims = [];
 
-    public OperationContext(NBoard board, Node operationItem, OperationState state)
+    public OperationContext(NBoard board)
     {
         Board = board;
-        OperationItem = operationItem;
-        OperationState = state;
+    }
+
+    public Tween CreateTween()
+    {
+        return Board.CreateTween();
+    }
+
+    public OperationContext CreateSnapshot()
+    {
+        return (OperationContext)this.MemberwiseClone();
     }
 
     public Task WaitForAnimations()
@@ -29,41 +40,27 @@ public class OperationContext
         return Task.WhenAll(_activeAnims);
     }
 
-    public Func<Task> TrackAnim(Func<Task> func)
+    public Task TrackAnim(Task anim)
     {
-        return () =>
+        var task = anim ?? Task.CompletedTask;
+        _activeAnims.Add(task);
+        _ = task.ContinueWith(_ =>
         {
-            var task = func?.Invoke() ?? Task.CompletedTask;
-            _activeAnims.Add(task);
-            _ = task.ContinueWith(_ =>
-            {
-                _activeAnims.Remove(task);
-            });
-            return task;
-        };
+            _activeAnims.Remove(task);
+        });
+        return task;
     }
 
-    public bool CanOperate(OperationPhase requiredPhase, OperationState before)
+    public bool CanOperate(OperationPhase requiredPhase)
     {
         if (IsLocked)
         {
             Log.Debug("ロックされている");
             return false;
         }
-        else if (OperationState.Phase != requiredPhase)
+        else if (Phase != requiredPhase)
         {
-            Log.Debug($"フェーズが{requiredPhase}ではなく{OperationState.Phase}になっている");
-            return false;
-        }
-        else if (before != OperationState)
-        {
-            Log.Warn(
-                $"""
-                現時点のOperationStateと判断時点のものに差異がある
-                判断時点 {before}
-                現時点 {OperationState}
-                """
-            );
+            Log.Debug($"フェーズが{requiredPhase}ではなく{Phase}になっている");
             return false;
         }
         else

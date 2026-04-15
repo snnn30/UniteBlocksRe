@@ -11,15 +11,7 @@ public partial class NOperationItem : Node2D
 
     public void Init(NBoard board)
     {
-        var state = new OperationState(
-            null,
-            null,
-            Vector2I.Zero,
-            Vector2I.Zero,
-            false,
-            OperationPhase.WaitingSpawn
-        );
-        _context = new(board, this, state);
+        _context = new(board);
     }
 
     public OperationResult Settle() => SettleHandler.Settle(_context);

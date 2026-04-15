@@ -1,4 +1,3 @@
-using System;
 using System.Threading.Tasks;
 using Godot;
 using UniteBlocksRe.Extensions;
@@ -23,92 +22,74 @@ public static class DropHandler
         Tween.EaseType ease
     )
     {
-        var current = context.OperationState;
-
-        if (!context.CanOperate(OperationPhase.Operating, current))
+        if (!context.CanOperate(OperationPhase.Operating))
         {
-            return OperationResult.Failed(current);
+            return OperationResult.Failed();
+        }
+        if (!CanDrop(context))
+        {
+            return OperationResult.Failed();
         }
 
-        if (!CanDrop(current, context))
-        {
-            return OperationResult.Failed(current);
-        }
-
-        var target = current.IsBetweenCells
-            ? current with
-            {
-                IsBetweenCells = false,
-            }
-            : current with
-            {
-                ParentPos = current.ParentPos + Vector2I.Down,
-                ChildPos = current.ChildPos + Vector2I.Down,
-                IsBetweenCells = true,
-            };
-
-        var dropAnimation = CreateDropAnimation(context, current, target, duration, trans, ease);
-
-        return OperationResult.Succeeded(target, dropAnimation);
+        var task = ApplyAndAnim(context, duration, trans, ease);
+        return OperationResult.Succeeded(task);
     }
 
-    private static bool CanDrop(OperationState current, OperationContext context)
+    private static bool CanDrop(OperationContext context)
     {
-        if (current.IsBetweenCells)
+        if (context.IsBetweenCells)
         {
             return true;
         }
 
-        var targetParentPos = current.ParentPos + Vector2I.Down;
+        var targetParentPos = context.ParentPos + Vector2I.Down;
         var canPlace = context.Board.Model.CanPlace(targetParentPos, context.Parent.Model);
-        if (current.Child != null)
+        if (context.Child != null)
         {
-            var targetChildPos = current.ChildPos + Vector2I.Down;
+            var targetChildPos = context.ChildPos + Vector2I.Down;
             canPlace &= context.Board.Model.CanPlace(targetChildPos, context.Child.Model);
         }
 
         return canPlace;
     }
 
-    private static Func<Task> CreateDropAnimation(
+    private static async Task ApplyAndAnim(
         OperationContext context,
-        OperationState current,
-        OperationState target,
         float duration,
         Tween.TransitionType trans,
         Tween.EaseType ease
     )
     {
-        async Task PlayAnim()
+        var snapshot = context.CreateSnapshot();
+
+        if (!context.IsBetweenCells)
         {
-            if (!context.CanOperate(OperationPhase.Operating, current))
-            {
-                return;
-            }
-            context.OperationState = target;
-            await DropAnimation(context, duration, trans, ease);
+            context.ParentPos += Vector2I.Down;
+            context.ChildPos += Vector2I.Down;
         }
 
-        return context.TrackAnim(PlayAnim);
+        context.IsBetweenCells = !context.IsBetweenCells;
+
+        await context.TrackAnim(DropAnimation(snapshot, duration, trans, ease));
     }
 
     private static Task DropAnimation(
-        OperationContext context,
+        OperationContext snapshot,
         float duration,
         Tween.TransitionType trans,
         Tween.EaseType ease
     )
     {
-        var tween = context.OperationItem.CreateTween().SetTrans(trans).SetEase(ease);
+        var tween = snapshot.CreateTween().SetTrans(trans).SetEase(ease);
         var sum = Vector2.Zero;
         tween.TweenMethod(
             Callable.From<Vector2>(val =>
             {
                 var diff = val - sum;
-                context.Parent.Position += diff;
-                if (context.Child != null)
+                snapshot.Parent.Position += diff;
+                if (snapshot.Child != null)
                 {
-                    context.Child.Position += diff;
+                    snapshot.Child.Position += diff;
                 }
                 sum = val;
             }),

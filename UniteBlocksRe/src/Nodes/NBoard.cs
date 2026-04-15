@@ -17,7 +17,7 @@ public partial class NBoard : Node2D
 
     private BiMap<NBlock, Vector2I> _blocks = [];
 
-    private static readonly Lazy<Dictionary<Vector2I, Vector2>> s_realPositions = new(() =>
+    public static readonly Lazy<Dictionary<Vector2I, Vector2>> s_realPositions = new(() =>
     {
         var size = BoardEntity.Size;
         var dic = new Dictionary<Vector2I, Vector2>();
@@ -78,6 +78,7 @@ public partial class NBoard : Node2D
         }
 
         _blocks.Add(block, pos);
+        block.Position = s_realPositions.Value[pos];
         return block.PlayPlacedAnimeAsync();
     }
 }

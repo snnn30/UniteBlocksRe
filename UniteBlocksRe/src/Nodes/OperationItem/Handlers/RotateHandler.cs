@@ -141,7 +141,7 @@ public static class RotateHandler
         await context.TrackAnim(NormalRotateAnimation(snapshot, isCW, duration, pivotIsChild));
     }
 
-    private static Task ShiftRotateAnimation(
+    private static async Task ShiftRotateAnimation(
         OperationContext snapshot,
         bool isCW,
         float duration,
@@ -154,17 +154,16 @@ public static class RotateHandler
             .SetTrans(Tween.TransitionType.Quart)
             .SetEase(Tween.EaseType.Out);
 
-        var sum = Vector2.Zero;
+        var offset = new RealPositions();
+        snapshot.Offsets.Add(offset);
         var relativePos = pivotIsChild
             ? snapshot.ParentPos - snapshot.ChildPos
             : snapshot.ChildPos - snapshot.ParentPos;
         tween.TweenMethod(
             Callable.From<Vector2>(val =>
             {
-                var diff = val - sum;
-                snapshot.Parent.Position += diff;
-                snapshot.Child.Position += diff;
-                sum = val;
+                offset.Parent = val;
+                offset.Child = val;
             }),
             Vector2.Zero,
             (Vector2)relativePos * NBlock.BaseSize,
@@ -172,11 +171,12 @@ public static class RotateHandler
         );
 
         var task2 = tween.WaitForFinished();
-
-        return Task.WhenAll(task, task2);
+        await Task.WhenAll(task, task2);
+        snapshot.Offsets.Remove(offset);
+        snapshot.BasePoasitions.Add(offset);
     }
 
-    private static Task NormalRotateAnimation(
+    private static async Task NormalRotateAnimation(
         OperationContext snapshot,
         bool isCW,
         float duration,
@@ -187,32 +187,31 @@ public static class RotateHandler
             .CreateTween()
             .SetTrans(Tween.TransitionType.Quart)
             .SetEase(Tween.EaseType.Out);
-        var sum = 0f;
+        var offset = new RealPositions();
+        snapshot.Offsets.Add(offset);
+        Vector2 relativePos = pivotIsChild
+            ? (snapshot.ParentPos - snapshot.ChildPos) * NBlock.BaseSize
+            : (snapshot.ChildPos - snapshot.ParentPos) * NBlock.BaseSize;
         tween.TweenMethod(
             Callable.From<float>(deg =>
             {
-                var diff = deg - sum;
-                var radDiff = Mathf.DegToRad(diff);
+                var rad = Mathf.DegToRad(deg);
                 if (pivotIsChild)
                 {
-                    var relativePos = snapshot.Parent.Position - snapshot.Child.Position;
-                    snapshot.Parent.Position =
-                        snapshot.Child.Position + relativePos.Rotated(radDiff);
+                    offset.Parent = relativePos.Rotated(rad) - relativePos;
                 }
                 else
                 {
-                    var relativePos = snapshot.Child.Position - snapshot.Parent.Position;
-                    snapshot.Child.Position =
-                        snapshot.Parent.Position + relativePos.Rotated(radDiff);
+                    offset.Child = relativePos.Rotated(rad) - relativePos;
                 }
-
-                sum = deg;
             }),
             0f,
             isCW ? 90f : -90f,
             duration
         );
 
-        return tween.WaitForFinished();
+        await tween.WaitForFinished();
+        snapshot.Offsets.Remove(offset);
+        snapshot.BasePoasitions.Add(offset);
     }
 }

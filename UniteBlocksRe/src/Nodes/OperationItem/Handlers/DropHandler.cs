@@ -67,13 +67,12 @@ public static class DropHandler
             context.ParentPos += Vector2I.Down;
             context.ChildPos += Vector2I.Down;
         }
-
         context.IsBetweenCells = !context.IsBetweenCells;
 
         await context.TrackAnim(DropAnimation(snapshot, duration, trans, ease));
     }
 
-    private static Task DropAnimation(
+    private static async Task DropAnimation(
         OperationContext snapshot,
         float duration,
         Tween.TransitionType trans,
@@ -81,23 +80,24 @@ public static class DropHandler
     )
     {
         var tween = snapshot.CreateTween().SetTrans(trans).SetEase(ease);
-        var sum = Vector2.Zero;
+        var offset = new RealPositions();
+        snapshot.Offsets.Add(offset);
         tween.TweenMethod(
             Callable.From<Vector2>(val =>
             {
-                var diff = val - sum;
-                snapshot.Parent.Position += diff;
+                offset.Parent = val;
                 if (snapshot.Child != null)
                 {
-                    snapshot.Child.Position += diff;
+                    offset.Child = val;
                 }
-                sum = val;
             }),
             Vector2.Zero,
             Vector2.Down * NBlock.BaseSize * 0.5f,
             duration
         );
 
-        return tween.WaitForFinished();
+        await tween.WaitForFinished();
+        snapshot.Offsets.Remove(offset);
+        snapshot.BasePoasitions.Add(offset);
     }
 }

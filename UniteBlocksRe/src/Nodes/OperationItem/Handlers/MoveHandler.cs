@@ -52,29 +52,30 @@ public static class MoveHandler
         await context.TrackAnim(MoveAnimation(snapshot, direction));
     }
 
-    private static Task MoveAnimation(OperationContext snapshot, Vector2I direction)
+    private static async Task MoveAnimation(OperationContext snapshot, Vector2I direction)
     {
         var tween = snapshot
             .CreateTween()
             .SetTrans(Tween.TransitionType.Sine)
             .SetEase(Tween.EaseType.InOut);
-        var sum = Vector2.Zero;
+        var offset = new RealPositions();
+        snapshot.Offsets.Add(offset);
         tween.TweenMethod(
             Callable.From<Vector2>(val =>
             {
-                var diff = val - sum;
-                snapshot.Parent.Position += diff;
+                offset.Parent = val;
                 if (snapshot.Child != null)
                 {
-                    snapshot.Child.Position += diff;
+                    offset.Child = val;
                 }
-                sum = val;
             }),
             Vector2.Zero,
             (Vector2)direction * NBlock.BaseSize,
             0.06f
         );
 
-        return tween.WaitForFinished();
+        await tween.WaitForFinished();
+        snapshot.Offsets.Remove(offset);
+        snapshot.BasePoasitions.Add(offset);
     }
 }

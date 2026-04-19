@@ -12,6 +12,9 @@ public class OperationContext
     public Vector2I ParentPos { get; set; }
     public Vector2I ChildPos { get; set; }
 
+    public HashSet<RealPositions> Offsets { get; } = [];
+    public RealPositions BasePoasitions { get; } = new();
+
     public bool IsLocked { get; set; }
     public bool IsBetweenCells { get; set; }
     public OperationPhase Phase { get; set; }
@@ -25,14 +28,14 @@ public class OperationContext
         Board = board;
     }
 
-    public Tween CreateTween()
-    {
-        return Board.CreateTween();
-    }
-
     public OperationContext CreateSnapshot()
     {
         return (OperationContext)this.MemberwiseClone();
+    }
+
+    public Tween CreateTween()
+    {
+        return Board.CreateTween();
     }
 
     public Task WaitForAnimations()

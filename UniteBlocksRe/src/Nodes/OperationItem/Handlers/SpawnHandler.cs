@@ -35,16 +35,22 @@ public static class SpawnHandler
         (var parentNode, var parentAnim) = context.Board.SpawnBlock(parent, parentPos);
         parentNode.Outlined = true;
         (var childNode, var childAnim) =
-            child != null ? context.Board.SpawnBlock(child, childPos) : default;
+            child != null ? context.Board.SpawnBlock(child, childPos) : (null, Task.CompletedTask);
 
         context.Board.BringToFront(parentNode);
 
         context.Parent = parentNode;
-        context.Child = childNode;
         context.ParentPos = parentPos;
-        context.ChildPos = childPos;
+        context.Child = childNode;
+        if (childNode is not null)
+        {
+            context.ChildPos = childPos;
+            context.BasePoasitions.Child = childNode.Position;
+        }
         context.Phase = OperationPhase.Operating;
         context.IsBetweenCells = false;
+        context.Offsets.Clear();
+        context.BasePoasitions.Parent = parentNode.Position;
 
         var anim = child is not null ? Task.WhenAll(parentAnim, childAnim) : parentAnim;
         await context.TrackAnim(anim);

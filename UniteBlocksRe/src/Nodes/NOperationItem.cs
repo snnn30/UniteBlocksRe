@@ -9,6 +9,9 @@ public partial class NOperationItem : Node2D
 {
     private OperationContext _context;
 
+    public Vector2I ParentPos => _context.ParentPos;
+    public Vector2I ChildPos => _context.ChildPos;
+
     public void Init(NBoard board)
     {
         _context = new(board);

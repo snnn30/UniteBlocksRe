@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3 uid="uid://co8do70c768gp"]
+
+[ext_resource type="Texture2D" uid="uid://b1y842raldfp8" path="res://images/blocks/RedBlock.png" id="1_2ddto"]
+[ext_resource type="Script" uid="uid://qs07yigwchd6" path="res://src/Nodes/NSandbox.cs" id="2_rgld7"]
+
+[node name="Node" type="Node"]
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(72, 322)
+texture = ExtResource("1_2ddto")
+script = ExtResource("2_rgld7")

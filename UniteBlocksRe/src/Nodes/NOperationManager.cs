@@ -21,6 +21,8 @@ public partial class NOperationManager : Node
     private int _maxAltitude;
     private TaskCompletionSource _endOperationSignal;
 
+    private int _counter = 0; // デバッグ用
+
     private Timer _initialDelayTimer;
 
     public OperationResult Spawn(BlockEntity parent, BlockEntity child = null)
@@ -30,6 +32,7 @@ public partial class NOperationManager : Node
 
     public async Task StartRun()
     {
+        Log.Debug($"StartRun {++_counter}");
         _endOperationSignal = new TaskCompletionSource();
         _maxAltitude = BoardEntity.SpawnPosition.Y;
         _maxLockTimer.Start();
@@ -68,6 +71,7 @@ public partial class NOperationManager : Node
         };
         _idleTimer.Timeout += () =>
         {
+            Log.Debug($"Idle timeout {_counter}");
             EndOperation();
         };
         _initialDelayTimer.Timeout += () => _activeAutoDrop = true;
@@ -135,7 +139,7 @@ public partial class NOperationManager : Node
         OperationResult ExecuteDrop(bool isSingle)
         {
             var result = _item.Drop(isSingle);
-            StopIdleTimer(result);
+            StopIdleTimer(result); // sucessならidleタイマー止まる
             if (result.Sucess)
             {
                 if (!isSingle)

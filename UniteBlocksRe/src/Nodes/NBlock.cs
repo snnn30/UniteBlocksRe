@@ -104,8 +104,10 @@ public partial class NBlock : Node2D
         return tween.WaitForFinished();
     }
 
-    public Task PlayExplodeAnimeAsync(float explodeDuration = 0.6f)
+    public Task PlayExplodeAnimeAsync()
     {
+        const float ExplodeDuration = 0.5f;
+
         var targetScale = _visualsOriginalScale * 1.5f;
 
         var tween = CreateTween();
@@ -114,7 +116,7 @@ public partial class NBlock : Node2D
                 Callable.From<Vector2>(x => _visuals.Scale = x),
                 _visualsOriginalScale,
                 targetScale,
-                explodeDuration / 2f
+                ExplodeDuration / 2f
             )
             .SetEase(Tween.EaseType.Out)
             .SetTrans(Tween.TransitionType.Cubic);
@@ -123,7 +125,7 @@ public partial class NBlock : Node2D
                 Callable.From<Vector2>(x => _visuals.Scale = x),
                 targetScale,
                 Vector2.Zero,
-                explodeDuration / 2f
+                ExplodeDuration / 2f
             )
             .SetEase(Tween.EaseType.Out)
             .SetTrans(Tween.TransitionType.Cubic);

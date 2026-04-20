@@ -163,6 +163,7 @@ public partial class NBoard : Node2D
                 foreach (var block in step.Exploded)
                 {
                     var node = _blockIdentities[block];
+                    BringToFront(node);
                     tasks.Add(node.PlayExplodeAnimeAsync());
                 }
                 await Task.WhenAll(tasks);

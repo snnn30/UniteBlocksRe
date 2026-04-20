@@ -12,7 +12,6 @@ public class OperationContext
     public Vector2I ParentPos { get; set; }
     public Vector2I ChildPos { get; set; }
 
-    public HashSet<RealPositions> Offsets { get; } = [];
     public RealPositions BasePoasitions { get; } = new();
 
     public bool IsLocked { get; set; }
@@ -20,6 +19,7 @@ public class OperationContext
     public OperationPhase Phase { get; set; }
 
     public NBoard Board { get; init; }
+    public readonly HashSet<RealPositions> Offsets = [];
 
     private readonly List<Task> _activeAnims = [];
 
@@ -43,15 +43,12 @@ public class OperationContext
         return Task.WhenAll(_activeAnims);
     }
 
-    public Task TrackAnim(Task anim)
+    public async Task TrackAnim(Task anim)
     {
         var task = anim ?? Task.CompletedTask;
         _activeAnims.Add(task);
-        _ = task.ContinueWith(_ =>
-        {
-            _activeAnims.Remove(task);
-        });
-        return task;
+        await task;
+        _activeAnims.Remove(task);
     }
 
     public bool CanOperate(OperationPhase requiredPhase)

@@ -58,12 +58,12 @@ public class OperationContext
     {
         if (IsLocked)
         {
-            Log.Debug("ロックされている");
+            Log.Debug("ロックされている", 1);
             return false;
         }
         else if (Phase != requiredPhase)
         {
-            Log.Debug($"フェーズが{requiredPhase}ではなく{Phase}になっている");
+            Log.Debug($"フェーズが{requiredPhase}ではなく{Phase}になっている", 1);
             return false;
         }
         else

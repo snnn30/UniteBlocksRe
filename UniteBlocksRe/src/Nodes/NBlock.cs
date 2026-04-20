@@ -57,9 +57,22 @@ public partial class NBlock : Node2D
         return nBlock;
     }
 
-    public Task PlayFalledAnimeAsync() => PlayPlacedAnimeAsync();
+    public Task PlayFalledAnimeAsync()
+    {
+        var tween = CreateTween();
+        tween
+            .TweenMethod(
+                Callable.From<Vector2>(x => _visuals.Scale = x),
+                _visualsOriginalScale * 0.6f,
+                _visualsOriginalScale,
+                0.6f
+            )
+            .SetEase(Tween.EaseType.Out)
+            .SetTrans(Tween.TransitionType.Elastic);
+        return tween.WaitForFinished();
+    }
 
-    public Task PlayUniteAnimeAsync() => PlayPlacedAnimeAsync();
+    public Task PlayUniteAnimeAsync() => PlayFalledAnimeAsync();
 
     public Task PlaySpawnAnimeAsync()
     {
@@ -84,7 +97,7 @@ public partial class NBlock : Node2D
                 Callable.From<Vector2>(x => _visuals.Scale = x),
                 _visualsOriginalScale * 0.6f,
                 _visualsOriginalScale,
-                0.6f
+                0.1f
             )
             .SetEase(Tween.EaseType.Out)
             .SetTrans(Tween.TransitionType.Elastic);

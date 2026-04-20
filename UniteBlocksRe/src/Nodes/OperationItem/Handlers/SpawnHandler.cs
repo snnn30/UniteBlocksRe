@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using Godot;
+using UniteBlocksRe.Logging;
 using UniteBlocksRe.Models.Entities;
 
 namespace UniteBlocksRe.Nodes.OperationItem.Handlers;
@@ -14,6 +15,12 @@ public static class SpawnHandler
     {
         if (!context.CanOperate(OperationPhase.WaitingSpawn))
         {
+            Log.Warn("フェーズが不正");
+            return OperationResult.Failed();
+        }
+        if (!context.Board.Model.CanPlace(BoardEntity.SpawnPosition, Vector2I.One))
+        {
+            Log.Info("スポーン位置が埋まっている");
             return OperationResult.Failed();
         }
 

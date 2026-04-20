@@ -8,17 +8,14 @@ namespace UniteBlocksRe.Nodes.Tests;
 public partial class NOperationManagerTest : Node
 {
     private NOperationManager _manager;
-    private NOperationItem _item;
     private NBoard _board;
 
     public override async void _Ready()
     {
         _manager = GetNode<NOperationManager>("%Manager");
-        _item = GetNode<NOperationItem>("%Item");
         _board = GetNode<NBoard>("%Board");
 
-        _item.Init(_board);
-        _manager.Init(_item);
+        _manager.Init(_board);
 
         Log.Info(
             """
@@ -29,11 +26,10 @@ public partial class NOperationManagerTest : Node
 
         while (true)
         {
-            await _manager.SpawnAndRun(
-                new BlockEntity(BlockColor.Blue),
-                new BlockEntity(BlockColor.Green)
-            );
-            await _item.Settle().Task;
+            await _manager
+                .Spawn(new BlockEntity(BlockColor.Blue), new BlockEntity(BlockColor.Green))
+                .Task;
+            await _manager.StartRun();
         }
     }
 }

@@ -22,6 +22,7 @@ public class BoardUniterTests
         result.HasUnited.ShouldBeTrue();
         result.ChainCount.ShouldBe(1);
         result.Steps[0].CreatedBlock.Size.ShouldBe(new Vector2I(2, 2));
+        result.Steps[0].Position.ShouldBe(new Vector2I(0, 0));
     }
 
     [Fact(DisplayName = "基本的な合体テスト2")]

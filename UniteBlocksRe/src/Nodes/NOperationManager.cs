@@ -23,9 +23,13 @@ public partial class NOperationManager : Node
 
     private Timer _initialDelayTimer;
 
-    public async Task SpawnAndRun(BlockEntity parent, BlockEntity child = null)
+    public OperationResult Spawn(BlockEntity parent, BlockEntity child = null)
     {
-        await _item.Spawn(parent, child).Task;
+        return _item.Spawn(parent, child);
+    }
+
+    public async Task StartRun()
+    {
         _endOperationSignal = new TaskCompletionSource();
         _maxAltitude = BoardEntity.SpawnPosition.Y;
         _maxLockTimer.Start();
@@ -33,15 +37,18 @@ public partial class NOperationManager : Node
         _activeAutoDrop = false;
         _initialDelayTimer.Start();
         await _endOperationSignal.Task;
+        await _item.Settle().Task;
     }
 
-    public void Init(NOperationItem item)
+    public void Init(NBoard board)
     {
-        _item = item;
+        _item.Init(board);
     }
 
     public override void _Ready()
     {
+        _item = GetNode<NOperationItem>("%OperationItem");
+
         _maxLockTimer = new Timer { OneShot = true, WaitTime = 3f };
         AddChild(_maxLockTimer);
 
@@ -58,12 +65,10 @@ public partial class NOperationManager : Node
         _maxLockTimer.Timeout += () =>
         {
             _activeInput = false;
-            Log.Debug("maxLockTimer.Timeout");
         };
         _idleTimer.Timeout += () =>
         {
             EndOperation();
-            Log.Debug("idleTimer.Timeout");
         };
         _initialDelayTimer.Timeout += () => _activeAutoDrop = true;
     }

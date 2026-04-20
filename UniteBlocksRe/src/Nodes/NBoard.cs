@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Godot;
+using UniteBlocksRe.Extensions;
 using UniteBlocksRe.Helpers;
 using UniteBlocksRe.Logging;
 using UniteBlocksRe.Models.Entities;
+using UniteBlocksRe.Models.Services;
 
 namespace UniteBlocksRe.Nodes;
 
@@ -15,7 +17,8 @@ public partial class NBoard : Node2D
     private Control _visuals;
     private Control _clipMask;
 
-    private BiMap<NBlock, Vector2I> _blocks = [];
+    private readonly BiMap<NBlock, Vector2I> _blockLocations = [];
+    private readonly Dictionary<BlockEntity, NBlock> _blockIdentities = [];
 
     public static readonly Lazy<Dictionary<Vector2I, Vector2>> s_realPositions = new(() =>
     {
@@ -77,8 +80,99 @@ public partial class NBoard : Node2D
             return Task.CompletedTask;
         }
 
-        _blocks.Add(block, pos);
-        block.Position = s_realPositions.Value[pos];
+        Add(block, pos);
         return block.PlayPlacedAnimeAsync();
+    }
+
+    private void Add(NBlock block, Vector2I pos)
+    {
+        _blockIdentities.Add(block.Model, block);
+        _blockLocations.Add(block, pos);
+        block.Position = s_realPositions.Value[pos];
+    }
+
+    private void Remove(NBlock block)
+    {
+        _blockIdentities.Remove(block.Model);
+        _blockLocations.RemoveByKey(block);
+        block.QueueFree();
+    }
+
+    public async Task Fall()
+    {
+        var result = BoardFaller.Fall(Model);
+        var targets = new HashSet<NBlock>();
+
+        if (!result.HasChanged)
+        {
+            return;
+        }
+
+        var tween = CreateTween()
+            .SetTrans(Tween.TransitionType.Linear)
+            .SetEase(Tween.EaseType.InOut)
+            .SetParallel(true);
+
+        foreach (var step in result.Steps)
+        {
+            var block = _blockIdentities[step.Block];
+            var from = s_realPositions.Value[step.From];
+            var to = s_realPositions.Value[step.To];
+            _blockLocations.ForceAdd(block, step.To);
+            tween.TweenProperty(block, "position", to, 0.2f).From(from);
+            targets.Add(block);
+        }
+
+        await tween.WaitForFinished();
+        var tasks = new List<Task>();
+        foreach (var block in targets)
+        {
+            tasks.Add(block.PlayFalledAnimeAsync());
+        }
+        await Task.WhenAll(tasks);
+    }
+
+    public Task Unite()
+    {
+        var result = BoardUniter.Unite(Model);
+        List<Task> tasks = [];
+
+        foreach (var step in result.Steps)
+        {
+            foreach (var block in step.RemovedBlocks)
+            {
+                var node = _blockIdentities[block];
+                Remove(node);
+            }
+            var (created, _) = SpawnBlock(step.CreatedBlock, step.Position);
+            Add(created, step.Position);
+            tasks.Add(created.PlayUniteAnimeAsync());
+        }
+        return Task.WhenAll(tasks);
+    }
+
+    public Task Explode(BlockEntity bomb)
+    {
+        var result = BoardExploder.Explode(Model, bomb);
+
+        async Task PlayAnimation()
+        {
+            foreach (var step in result.Steps)
+            {
+                var tasks = new List<Task>();
+                foreach (var block in step.Exploded)
+                {
+                    var node = _blockIdentities[block];
+                    tasks.Add(node.PlayExplodeAnimeAsync());
+                }
+                await Task.WhenAll(tasks);
+                foreach (var block in step.Exploded)
+                {
+                    Remove(_blockIdentities[block]);
+                }
+            }
+        }
+
+        return PlayAnimation();
     }
 }

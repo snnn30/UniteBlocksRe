@@ -5,7 +5,7 @@ using UniteBlocksRe.Nodes.OperationItem.Handlers;
 
 namespace UniteBlocksRe.Nodes;
 
-public partial class NOperationItem : Node2D
+public partial class NOperationItem : Node
 {
     private OperationContext _context;
 

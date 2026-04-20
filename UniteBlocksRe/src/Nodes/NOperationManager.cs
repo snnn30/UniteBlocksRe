@@ -18,12 +18,9 @@ public partial class NOperationManager : Node
 
     private Timer _maxLockTimer; // 無限上昇を防ぐためのタイマー 最低高度に達するたびにリセット
     private Timer _idleTimer; // 一定時間動かない時に自動で設置するためのタイマー
+    private Timer _initialDelayTimer;
     private int _maxAltitude;
     private TaskCompletionSource _endOperationSignal;
-
-    private int _counter = 0; // デバッグ用
-
-    private Timer _initialDelayTimer;
 
     public OperationResult Spawn(BlockEntity parent, BlockEntity child = null)
     {
@@ -32,14 +29,22 @@ public partial class NOperationManager : Node
 
     public async Task StartRun()
     {
-        Log.Debug($"StartRun {++_counter}");
+        CompositeDisposable operationDisposable = [];
+
+        SubscribeDropInput(operationDisposable);
+        SubscribeMoveInput(operationDisposable);
+        SubscribeRotateInput(operationDisposable);
+
         _endOperationSignal = new TaskCompletionSource();
         _maxAltitude = BoardEntity.SpawnPosition.Y;
         _maxLockTimer.Start();
         _activeInput = true;
         _activeAutoDrop = false;
         _initialDelayTimer.Start();
+
         await _endOperationSignal.Task;
+        operationDisposable.Dispose();
+
         await _item.Settle().Task;
     }
 
@@ -61,17 +66,12 @@ public partial class NOperationManager : Node
         _initialDelayTimer = new Timer { OneShot = true, WaitTime = 1.2f };
         AddChild(_initialDelayTimer);
 
-        SubscribeMoveInput();
-        SubscribeRotateInput();
-        SubscribeDropInput();
-
         _maxLockTimer.Timeout += () =>
         {
             _activeInput = false;
         };
         _idleTimer.Timeout += () =>
         {
-            Log.Debug($"Idle timeout {_counter}");
             EndOperation();
         };
         _initialDelayTimer.Timeout += () => _activeAutoDrop = true;
@@ -87,7 +87,7 @@ public partial class NOperationManager : Node
         _endOperationSignal.TrySetResult();
     }
 
-    private void SubscribeDropInput()
+    private void SubscribeDropInput(CompositeDisposable disposables)
     {
         var dropInput = Observable
             .EveryUpdate()
@@ -134,7 +134,7 @@ public partial class NOperationManager : Node
             })
             .Switch()
             .Subscribe()
-            .AddTo(this);
+            .AddTo(disposables);
 
         OperationResult ExecuteDrop(bool isSingle)
         {
@@ -167,7 +167,7 @@ public partial class NOperationManager : Node
         }
     }
 
-    private void SubscribeRotateInput()
+    private void SubscribeRotateInput(CompositeDisposable disposables)
     {
         var rotateInput = Observable
             .EveryUpdate()
@@ -216,7 +216,7 @@ public partial class NOperationManager : Node
             })
             .Switch()
             .Subscribe()
-            .AddTo(this);
+            .AddTo(disposables);
 
         OperationResult ExecuteRotate(Vector2I dir)
         {
@@ -240,7 +240,7 @@ public partial class NOperationManager : Node
         }
     }
 
-    private void SubscribeMoveInput()
+    private void SubscribeMoveInput(CompositeDisposable disposables)
     {
         var moveInput = Observable
             .EveryUpdate()
@@ -296,7 +296,7 @@ public partial class NOperationManager : Node
             })
             .Switch() //新しいストリームが届くと古いものを破棄する
             .Subscribe() //実際の処理はSelectだが、Subscribeしないとそこまでの処理も一切行われない
-            .AddTo(this);
+            .AddTo(disposables);
 
         OperationResult ExecuteMove(Vector2I dir)
         {

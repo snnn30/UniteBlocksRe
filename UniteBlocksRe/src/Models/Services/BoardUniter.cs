@@ -34,7 +34,7 @@ public static class BoardUniter
                 }
 
                 var targetSize = CalculateLargestRectangle(board, block);
-                if (targetSize == block.Size || targetSize.X < 2 || targetSize.Y < 2)
+                if (targetSize == block.Size)
                 {
                     continue;
                 }
@@ -89,7 +89,7 @@ public static class BoardUniter
         {
             for (var x = startBlock.Size.X; origin.X + x <= BoardEntity.Size.X; x++)
             {
-                if (x * y <= largestSize.X * largestSize.Y)
+                if (x * y <= largestSize.X * largestSize.Y || x < 2 || y < 2)
                 {
                     continue;
                 }

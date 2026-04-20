@@ -116,4 +116,31 @@ public class BoardUniterTests
         result.Steps[1].CreatedBlock.Size.ShouldBe(new Vector2I(2, 3));
         result.Steps[1].Position.ShouldBe(new Vector2I(5, BoardEntity.Size.Y - 3));
     }
+
+    [Fact(DisplayName = "特定の条件下で発生しているバグのテスト")]
+    public void Test7()
+    {
+        /*
+        □□□□
+        □□
+        */
+
+        var board = new BoardEntity();
+        var block = new BlockEntity(BlockColor.Red);
+        var block2 = new BlockEntity(BlockColor.Red);
+        var block3 = new BlockEntity(BlockColor.Red);
+        var block4 = new BlockEntity(BlockColor.Red);
+        var block5 = new BlockEntity(BlockColor.Red);
+        var block6 = new BlockEntity(BlockColor.Red);
+
+        board.TrySetBlock(new(0, 0), block);
+        board.TrySetBlock(new(1, 0), block2);
+        board.TrySetBlock(new(2, 0), block3);
+        board.TrySetBlock(new(3, 0), block4);
+        board.TrySetBlock(new(0, 1), block5);
+        board.TrySetBlock(new(1, 1), block6);
+        var result = BoardUniter.Unite(board);
+
+        result.HasUnited.ShouldBeTrue();
+    }
 }

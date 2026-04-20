@@ -109,8 +109,8 @@ public partial class NBoard : Node2D
         }
 
         var tween = CreateTween()
-            .SetTrans(Tween.TransitionType.Linear)
-            .SetEase(Tween.EaseType.InOut)
+            .SetTrans(Tween.TransitionType.Bounce)
+            .SetEase(Tween.EaseType.Out)
             .SetParallel(true);
 
         foreach (var step in result.Steps)
@@ -119,7 +119,7 @@ public partial class NBoard : Node2D
             var from = s_realPositions.Value[step.From];
             var to = s_realPositions.Value[step.To];
             _blockLocations.ForceAdd(block, step.To);
-            tween.TweenProperty(block, "position", to, 0.2f).From(from);
+            tween.TweenProperty(block, "position", to, 0.4f).From(from);
             targets.Add(block);
         }
 

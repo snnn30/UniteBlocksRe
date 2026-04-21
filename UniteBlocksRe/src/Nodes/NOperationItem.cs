@@ -17,37 +17,16 @@ public partial class NOperationItem : Node
         _context = new(board);
     }
 
-    public override void _Process(double delta)
-    {
-        if (_context == null)
-        {
-            return;
-        }
-
-        var totalOffset = new RealPositions();
-        foreach (var offset in _context.Offsets)
-        {
-            totalOffset.Add(offset);
-        }
-
-        if (_context.Parent != null)
-        {
-            _context.Parent.Position = _context.BasePoasitions.Parent + totalOffset.Parent;
-        }
-        if (_context.Child != null)
-        {
-            _context.Child.Position = _context.BasePoasitions.Child + totalOffset.Child;
-        }
-    }
-
     public OperationResult Settle() => SettleHandler.Settle(_context);
 
     public OperationResult Spawn(BlockEntity parent, BlockEntity child = null) =>
         SpawnHandler.Spawn(_context, parent, child);
 
-    public OperationResult Rotate(bool isCW) => RotateHandler.Rotate(_context, isCW);
+    public OperationResult Rotate(bool isCW, float duration) =>
+        RotateHandler.Rotate(_context, isCW, duration);
 
-    public OperationResult Move(bool isRight) => MoveHandler.Move(_context, isRight);
+    public OperationResult Move(bool isRight, float duration) =>
+        MoveHandler.Move(_context, isRight, duration);
 
-    public OperationResult Drop(bool isSingle) => DropHandler.Drop(_context, isSingle);
+    public OperationResult Drop(float duration) => DropHandler.Drop(_context, duration);
 }

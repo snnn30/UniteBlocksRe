@@ -6,7 +6,7 @@ namespace UniteBlocksRe.Nodes.OperationItem.Handlers;
 
 public static class MoveHandler
 {
-    public static OperationResult Move(OperationContext context, bool isRight)
+    public static OperationResult Move(OperationContext context, bool isRight, float duration)
     {
         if (!context.CanOperate(OperationPhase.Operating))
         {
@@ -18,7 +18,9 @@ public static class MoveHandler
             return OperationResult.Failed();
         }
 
-        var task = ApplyAndAnim(context, direction);
+        var snapshot = context.CreateSnapshot();
+        Apply(context, direction);
+        var task = context.TrackAnim(MoveAnimation(snapshot, direction, duration));
         return OperationResult.Succeeded(task);
     }
 
@@ -42,40 +44,42 @@ public static class MoveHandler
         return canPlace;
     }
 
-    private static async Task ApplyAndAnim(OperationContext context, Vector2I direction)
+    private static void Apply(OperationContext context, Vector2I direction)
     {
-        var snapshot = context.CreateSnapshot();
-
         context.ParentPos += direction;
         context.ChildPos += direction;
-
-        await context.TrackAnim(MoveAnimation(snapshot, direction));
     }
 
-    private static async Task MoveAnimation(OperationContext snapshot, Vector2I direction)
+    private static async Task MoveAnimation(
+        OperationContext snapshot,
+        Vector2I direction,
+        float duration
+    )
     {
         var tween = snapshot
             .CreateTween()
             .SetTrans(Tween.TransitionType.Sine)
             .SetEase(Tween.EaseType.InOut);
-        var offset = new RealPositions();
-        snapshot.Offsets.Add(offset);
+
+        var parentHandler = snapshot.Parent.AddOffset();
+        var childHandler = snapshot.Child?.AddOffset();
+
         tween.TweenMethod(
-            Callable.From<Vector2>(val =>
+            Callable.From<Vector2>(v =>
             {
-                offset.Parent = val;
-                if (snapshot.Child != null)
+                parentHandler.Val = v;
+                if (snapshot.HasChild)
                 {
-                    offset.Child = val;
+                    childHandler.Val = v;
                 }
             }),
             Vector2.Zero,
             (Vector2)direction * NBlock.BaseSize,
-            0.06f
+            duration
         );
 
         await tween.WaitForFinished();
-        snapshot.Offsets.Remove(offset);
-        snapshot.BasePoasitions.Add(offset);
+        parentHandler.Apply();
+        childHandler?.Apply();
     }
 }

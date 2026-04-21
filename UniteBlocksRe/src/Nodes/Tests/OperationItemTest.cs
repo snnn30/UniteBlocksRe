@@ -44,27 +44,27 @@ public partial class OperationItemTest : Node
             }
             if (key.Keycode == Key.A)
             {
-                var result = _item.Move(false);
+                var result = _item.Move(false, 0.06f);
                 Log.Info($"左移動 {(result.Sucess ? "成功" : "失敗")}");
             }
             if (key.Keycode == Key.D)
             {
-                var result = _item.Move(true);
+                var result = _item.Move(true, 0.06f);
                 Log.Info($"右移動 {(result.Sucess ? "成功" : "失敗")}");
             }
             if (key.Keycode == Key.S)
             {
-                var result = _item.Drop(true);
+                var result = _item.Drop(0.1f);
                 Log.Info($"落下 {(result.Sucess ? "成功" : "失敗")}");
             }
             if (key.Keycode == Key.U)
             {
-                var result = _item.Rotate(false);
+                var result = _item.Rotate(false, 0.2f);
                 Log.Info($"反時計周りの回転 {(result.Sucess ? "成功" : "失敗")}");
             }
             if (key.Keycode == Key.I)
             {
-                var result = _item.Rotate(true);
+                var result = _item.Rotate(true, 0.2f);
                 Log.Info($"時計回りの回転 {(result.Sucess ? "成功" : "失敗")}");
             }
             if (key.Keycode == Key.Space)

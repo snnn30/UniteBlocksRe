@@ -103,8 +103,8 @@ public partial class NOperationManager : Node
                     {
                         while (!ct.IsCancellationRequested)
                         {
-                            var result = ExecuteDrop(false);
-                            await result.Task;
+                            var result = ExecuteDrop(false, 0.04f);
+                            await Task.Delay(TimeSpan.FromSeconds(0.03f));
                             if (!result.Sucess)
                             {
                                 await Task.Delay(TimeSpan.FromSeconds(0.05f), ct);
@@ -125,7 +125,7 @@ public partial class NOperationManager : Node
                             {
                                 if (_activeAutoDrop)
                                 {
-                                    var result = ExecuteDrop(true);
+                                    var result = ExecuteDrop(true, 0.1f);
                                     await result.Task;
                                 }
                             })
@@ -136,13 +136,13 @@ public partial class NOperationManager : Node
             .Subscribe()
             .AddTo(disposables);
 
-        OperationResult ExecuteDrop(bool isSingle)
+        OperationResult ExecuteDrop(bool isAutoDrop, float duration)
         {
-            var result = _item.Drop(isSingle);
+            var result = _item.Drop(duration);
             StopIdleTimer(result); // sucessならidleタイマー止まる
             if (result.Sucess)
             {
-                if (!isSingle)
+                if (!isAutoDrop)
                 {
                     _initialDelayTimer.ForceTimeout();
                 }
@@ -158,7 +158,7 @@ public partial class NOperationManager : Node
             }
             else
             {
-                if (!isSingle)
+                if (!isAutoDrop)
                 {
                     _idleTimer.ForceTimeout();
                 }
@@ -220,15 +220,17 @@ public partial class NOperationManager : Node
 
         OperationResult ExecuteRotate(Vector2I dir)
         {
+            const float duration = 0.2f;
+
             if (dir == Vector2I.Left)
             {
-                var result = _item.Rotate(false);
+                var result = _item.Rotate(false, duration);
                 StopIdleTimer(result);
                 return result;
             }
             else if (dir == Vector2I.Right)
             {
-                var result = _item.Rotate(true);
+                var result = _item.Rotate(true, duration);
                 StopIdleTimer(result);
                 return result;
             }
@@ -300,15 +302,17 @@ public partial class NOperationManager : Node
 
         OperationResult ExecuteMove(Vector2I dir)
         {
+            const float duration = 0.06f;
+
             if (dir == Vector2I.Left)
             {
-                var result = _item.Move(false);
+                var result = _item.Move(false, duration);
                 StopIdleTimer(result);
                 return result;
             }
             else if (dir == Vector2I.Right)
             {
-                var result = _item.Move(true);
+                var result = _item.Move(true, duration);
                 StopIdleTimer(result);
                 return result;
             }

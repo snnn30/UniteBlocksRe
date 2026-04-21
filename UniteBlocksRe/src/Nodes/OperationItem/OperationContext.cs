@@ -11,15 +11,13 @@ public class OperationContext
     public NBlock Child { get; set; }
     public Vector2I ParentPos { get; set; }
     public Vector2I ChildPos { get; set; }
-
-    public RealPositions BasePoasitions { get; } = new();
+    public bool HasChild => Child != null;
 
     public bool IsLocked { get; set; }
     public bool IsBetweenCells { get; set; }
     public OperationPhase Phase { get; set; }
 
     public NBoard Board { get; init; }
-    public readonly HashSet<RealPositions> Offsets = [];
 
     private readonly List<Task> _activeAnims = [];
 

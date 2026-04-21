@@ -6,21 +6,7 @@ namespace UniteBlocksRe.Nodes.OperationItem.Handlers;
 
 public static class DropHandler
 {
-    public static OperationResult Drop(OperationContext context, bool isSingle)
-    {
-        return isSingle switch
-        {
-            true => Drop(context, 0.1f, Tween.TransitionType.Quart, Tween.EaseType.Out),
-            false => Drop(context, 0.02f, Tween.TransitionType.Linear, Tween.EaseType.In),
-        };
-    }
-
-    private static OperationResult Drop(
-        OperationContext context,
-        float duration,
-        Tween.TransitionType trans,
-        Tween.EaseType ease
-    )
+    public static OperationResult Drop(OperationContext context, float duration)
     {
         if (!context.CanOperate(OperationPhase.Operating))
         {
@@ -31,7 +17,9 @@ public static class DropHandler
             return OperationResult.Failed();
         }
 
-        var task = ApplyAndAnim(context, duration, trans, ease);
+        var snapshot = context.CreateSnapshot();
+        Apply(context);
+        var task = context.TrackAnim(PlayAnim(snapshot, duration));
         return OperationResult.Succeeded(task);
     }
 
@@ -53,42 +41,33 @@ public static class DropHandler
         return canPlace;
     }
 
-    private static async Task ApplyAndAnim(
-        OperationContext context,
-        float duration,
-        Tween.TransitionType trans,
-        Tween.EaseType ease
-    )
+    private static void Apply(OperationContext context)
     {
-        var snapshot = context.CreateSnapshot();
-
         if (!context.IsBetweenCells)
         {
             context.ParentPos += Vector2I.Down;
             context.ChildPos += Vector2I.Down;
         }
         context.IsBetweenCells = !context.IsBetweenCells;
-
-        await context.TrackAnim(DropAnimation(snapshot, duration, trans, ease));
     }
 
-    private static async Task DropAnimation(
-        OperationContext snapshot,
-        float duration,
-        Tween.TransitionType trans,
-        Tween.EaseType ease
-    )
+    private static async Task PlayAnim(OperationContext snapshot, float duration)
     {
-        var tween = snapshot.CreateTween().SetTrans(trans).SetEase(ease);
-        var offset = new RealPositions();
-        snapshot.Offsets.Add(offset);
+        var tween = snapshot
+            .CreateTween()
+            .SetTrans(Tween.TransitionType.Linear)
+            .SetEase(Tween.EaseType.In);
+
+        var parentHandler = snapshot.Parent.AddOffset();
+        var childHandler = snapshot.Child?.AddOffset();
+
         tween.TweenMethod(
-            Callable.From<Vector2>(val =>
+            Callable.From<Vector2>(v =>
             {
-                offset.Parent = val;
-                if (snapshot.Child != null)
+                parentHandler.Val = v;
+                if (childHandler != null)
                 {
-                    offset.Child = val;
+                    childHandler.Val = v;
                 }
             }),
             Vector2.Zero,
@@ -97,7 +76,7 @@ public static class DropHandler
         );
 
         await tween.WaitForFinished();
-        snapshot.Offsets.Remove(offset);
-        snapshot.BasePoasitions.Add(offset);
+        parentHandler.Apply();
+        childHandler?.Apply();
     }
 }

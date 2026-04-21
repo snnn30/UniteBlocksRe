@@ -52,12 +52,9 @@ public static class SpawnHandler
         if (childNode is not null)
         {
             context.ChildPos = childPos;
-            context.BasePoasitions.Child = childNode.Position;
         }
         context.Phase = OperationPhase.Operating;
         context.IsBetweenCells = false;
-        context.Offsets.Clear();
-        context.BasePoasitions.Parent = parentNode.Position;
 
         var anim = child is not null ? Task.WhenAll(parentAnim, childAnim) : parentAnim;
         await context.TrackAnim(anim);

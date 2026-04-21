@@ -6,10 +6,8 @@ namespace UniteBlocksRe.Nodes.OperationItem.Handlers;
 
 public static class RotateHandler
 {
-    public static OperationResult Rotate(OperationContext context, bool isCW)
+    public static OperationResult Rotate(OperationContext context, bool isCW, float duration)
     {
-        const float Duration = 0.2f;
-
         if (!context.CanOperate(OperationPhase.Operating))
         {
             return OperationResult.Failed();
@@ -25,19 +23,19 @@ public static class RotateHandler
         {
             _ when CanNormalRotate(context, isCW, false) is (true, var parentPos, var childPos) =>
                 OperationResult.Succeeded(
-                    ApplyAndAnimNormal(context, parentPos, childPos, isCW, Duration, false)
+                    ApplyAndAnimNormal(context, parentPos, childPos, isCW, duration, false)
                 ),
             _ when CanShiftRotate(context, isCW, false) is (true, var parentPos, var childPos) =>
                 OperationResult.Succeeded(
-                    ApplyAndAnimShift(context, parentPos, childPos, isCW, Duration, false)
+                    ApplyAndAnimShift(context, parentPos, childPos, isCW, duration, false)
                 ),
             _ when CanNormalRotate(context, isCW, true) is (true, var parentPos, var childPos) =>
                 OperationResult.Succeeded(
-                    ApplyAndAnimNormal(context, parentPos, childPos, isCW, Duration, true)
+                    ApplyAndAnimNormal(context, parentPos, childPos, isCW, duration, true)
                 ),
             _ when CanShiftRotate(context, isCW, true) is (true, var parentPos, var childPos) =>
                 OperationResult.Succeeded(
-                    ApplyAndAnimShift(context, parentPos, childPos, isCW, Duration, true)
+                    ApplyAndAnimShift(context, parentPos, childPos, isCW, duration, true)
                 ),
             _ => OperationResult.Failed(),
         };
@@ -154,16 +152,18 @@ public static class RotateHandler
             .SetTrans(Tween.TransitionType.Quart)
             .SetEase(Tween.EaseType.Out);
 
-        var offset = new RealPositions();
-        snapshot.Offsets.Add(offset);
         var relativePos = pivotIsChild
             ? snapshot.ParentPos - snapshot.ChildPos
             : snapshot.ChildPos - snapshot.ParentPos;
+
+        var parentHandler = snapshot.Parent.AddOffset();
+        var childHandler = snapshot.Child.AddOffset();
+
         tween.TweenMethod(
-            Callable.From<Vector2>(val =>
+            Callable.From<Vector2>(v =>
             {
-                offset.Parent = val;
-                offset.Child = val;
+                parentHandler.Val = v;
+                childHandler.Val = v;
             }),
             Vector2.Zero,
             (Vector2)relativePos * NBlock.BaseSize,
@@ -172,8 +172,8 @@ public static class RotateHandler
 
         var task2 = tween.WaitForFinished();
         await Task.WhenAll(task, task2);
-        snapshot.Offsets.Remove(offset);
-        snapshot.BasePoasitions.Add(offset);
+        parentHandler.Apply();
+        childHandler.Apply();
     }
 
     private static async Task NormalRotateAnimation(
@@ -187,22 +187,28 @@ public static class RotateHandler
             .CreateTween()
             .SetTrans(Tween.TransitionType.Quart)
             .SetEase(Tween.EaseType.Out);
-        var offset = new RealPositions();
-        snapshot.Offsets.Add(offset);
+
         Vector2 relativePos = pivotIsChild
             ? (snapshot.ParentPos - snapshot.ChildPos) * NBlock.BaseSize
             : (snapshot.ChildPos - snapshot.ParentPos) * NBlock.BaseSize;
+
+        var parentHandler = snapshot.Parent.AddOffset();
+        var childHandler = snapshot.Child.AddOffset();
+
         tween.TweenMethod(
             Callable.From<float>(deg =>
             {
                 var rad = Mathf.DegToRad(deg);
+                var rotatedOffset = relativePos.Rotated(rad);
+                var targetOffset = rotatedOffset - relativePos;
+
                 if (pivotIsChild)
                 {
-                    offset.Parent = relativePos.Rotated(rad) - relativePos;
+                    parentHandler.Val = targetOffset;
                 }
                 else
                 {
-                    offset.Child = relativePos.Rotated(rad) - relativePos;
+                    childHandler.Val = targetOffset;
                 }
             }),
             0f,
@@ -211,7 +217,7 @@ public static class RotateHandler
         );
 
         await tween.WaitForFinished();
-        snapshot.Offsets.Remove(offset);
-        snapshot.BasePoasitions.Add(offset);
+        parentHandler.Apply();
+        childHandler.Apply();
     }
 }

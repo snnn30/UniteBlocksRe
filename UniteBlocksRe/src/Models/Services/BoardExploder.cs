@@ -16,46 +16,74 @@ public static class BoardExploder
             return new ExplodeResult([]);
         }
 
-        var steps = new List<ExplodeStep> { new([bomb]) };
-
         if (board.TryGetOrigin(bomb) is not (true, var bombPos))
         {
             Log.Warn("Bombがボード上に存在しない");
             return new ExplodeResult([]);
         }
 
+        var steps = new List<ExplodeStep> { new([bomb]) };
         board.TryRemoveBlock(bomb);
 
-        if (board.TryGetBlock(bombPos + Vector2I.Down) is not (true, var blockBelow))
+        if (board.TryGetBlock(bombPos + Vector2I.Down) is not (true, var firsetTarget))
         {
             return new ExplodeResult(steps);
         }
-        var currentTarget = new HashSet<BlockEntity> { blockBelow };
 
-        while (currentTarget.Count > 0)
+        var currentChainOrigin = new HashSet<BlockEntity>();
+        var pendingObstacles = new HashSet<BlockEntity>();
+
+        if (firsetTarget.Type == BlockType.Obstacle)
         {
-            var explodedInThisStep = new HashSet<BlockEntity>(currentTarget);
-            var nextNeighbors = FindNextNeighbors(board, explodedInThisStep);
+            pendingObstacles.Add(firsetTarget);
+        }
+        else if (firsetTarget.Type == BlockType.Normal)
+        {
+            currentChainOrigin.Add(firsetTarget);
+        }
+
+        while (currentChainOrigin.Count > 0 || pendingObstacles.Count > 0)
+        {
+            var explodedInThisStep = new HashSet<BlockEntity>(currentChainOrigin);
+            explodedInThisStep.UnionWith(pendingObstacles);
+
+            var (nextNeighbors, nextObstacles) = FindNextNeighbors(
+                board,
+                currentChainOrigin,
+                pendingObstacles
+            );
+
             ApplyExplode(board, explodedInThisStep);
             steps.Add(new ExplodeStep(explodedInThisStep));
-            currentTarget = nextNeighbors;
+
+            currentChainOrigin = nextNeighbors;
+            pendingObstacles = nextObstacles;
         }
 
         return new ExplodeResult(steps);
     }
 
-    private static HashSet<BlockEntity> FindNextNeighbors(
+    private static (
+        HashSet<BlockEntity> nextOrigins,
+        HashSet<BlockEntity> obstacles
+    ) FindNextNeighbors(
         BoardEntity board,
-        HashSet<BlockEntity> currentStep
+        HashSet<BlockEntity> currentOrigins,
+        HashSet<BlockEntity> currentObstacles
     )
     {
-        var neighbors = new HashSet<BlockEntity>();
-        foreach (var block in currentStep)
+        var nextOrigins = new HashSet<BlockEntity>();
+        var obstacles = new HashSet<BlockEntity>();
+
+        foreach (var block in currentOrigins)
         {
-            neighbors.UnionWith(GetAdjacentSameTypeBlocks(board, block));
+            var adjacents = GetAdjacentSameTypeBlocks(board, block);
+            nextOrigins.UnionWith(adjacents.sameTypes);
+            obstacles.UnionWith(adjacents.obstacles);
         }
-        neighbors.ExceptWith(currentStep);
-        return neighbors;
+        nextOrigins.ExceptWith(currentOrigins);
+        obstacles.ExceptWith(currentObstacles);
+        return (nextOrigins, obstacles);
     }
 
     private static void ApplyExplode(BoardEntity board, IEnumerable<BlockEntity> blocks)
@@ -66,10 +94,10 @@ public static class BoardExploder
         }
     }
 
-    private static List<BlockEntity> GetAdjacentSameTypeBlocks(
-        BoardEntity board,
-        BlockEntity centerBlock
-    )
+    private static (
+        HashSet<BlockEntity> sameTypes,
+        HashSet<BlockEntity> obstacles
+    ) GetAdjacentSameTypeBlocks(BoardEntity board, BlockEntity centerBlock)
     {
         var origin = board.TryGetOrigin(centerBlock).Position;
 
@@ -83,7 +111,8 @@ public static class BoardExploder
         }
 
         (int, int)[] directions = [(0, 1), (0, -1), (1, 0), (-1, 0)];
-        var results = new List<BlockEntity>();
+        var sameTypes = new HashSet<BlockEntity>();
+        var obstacles = new HashSet<BlockEntity>();
 
         foreach (var pos in occupied)
         {
@@ -92,17 +121,22 @@ public static class BoardExploder
                 var checkPos = new Vector2I(pos.X + dx, pos.Y + dy);
                 (var success, var foundBlock) = board.TryGetBlock(checkPos);
 
-                if (
-                    success
-                    && foundBlock != centerBlock
-                    && foundBlock.Type == BlockType.Normal
-                    && foundBlock.Color == centerBlock.Color
-                )
+                if (success && foundBlock != centerBlock)
                 {
-                    results.Add(foundBlock);
+                    if (
+                        foundBlock.Type == BlockType.Normal
+                        && foundBlock.Color == centerBlock.Color
+                    )
+                    {
+                        sameTypes.Add(foundBlock);
+                    }
+                    else if (foundBlock.Type == BlockType.Obstacle)
+                    {
+                        obstacles.Add(foundBlock);
+                    }
                 }
             }
         }
-        return results;
+        return (sameTypes, obstacles);
     }
 }

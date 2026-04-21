@@ -32,6 +32,8 @@ public partial class NPlayerScene : Node2D
 
         while (true)
         {
+            await _board.SpawnObstacles();
+
             OperationResult spawnResult;
             BlockEntity parent;
             if (_bombManager.IsBombActive)

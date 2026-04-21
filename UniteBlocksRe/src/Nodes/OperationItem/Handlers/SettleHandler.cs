@@ -48,10 +48,10 @@ public static class SettleHandler
 
     private static Task SettleAnimation(OperationContext snapshot)
     {
-        var parentAnim = snapshot.Board.SetOnBoard(snapshot.Parent, snapshot.ParentPos);
+        var parentAnim = snapshot.Board.SetOnBoardAsync(snapshot.Parent, snapshot.ParentPos);
         var childAnim =
             snapshot.Child != null
-                ? snapshot.Board.SetOnBoard(snapshot.Child, snapshot.ChildPos)
+                ? snapshot.Board.SetOnBoardAsync(snapshot.Child, snapshot.ChildPos)
                 : Task.CompletedTask;
 
         return Task.WhenAll(parentAnim, childAnim);

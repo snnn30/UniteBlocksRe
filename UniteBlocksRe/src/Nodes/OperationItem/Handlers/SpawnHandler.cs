@@ -39,24 +39,30 @@ public static class SpawnHandler
         var parentPos = BoardEntity.SpawnPosition;
         var childPos = child != null ? parentPos + Vector2I.Up : Vector2I.Zero;
 
-        (var parentNode, var parentAnim) = context.Board.SpawnBlock(parent, parentPos);
+        var parentNode = NBlock.Create(parent);
         parentNode.Outlined = true;
-        (var childNode, var childAnim) =
-            child != null ? context.Board.SpawnBlock(child, childPos) : (null, Task.CompletedTask);
+        context.Board.AddAsBoardElement(parentNode);
+        parentNode.Position = NBoard.GetRealPosition(parentPos);
 
+        NBlock childNode = null;
+        if (child != null)
+        {
+            childNode = NBlock.Create(child);
+            context.Board.AddAsBoardElement(childNode);
+            childNode.Position = NBoard.GetRealPosition(childPos);
+        }
         context.Board.BringToFront(parentNode);
 
         context.Parent = parentNode;
         context.ParentPos = parentPos;
         context.Child = childNode;
-        if (childNode is not null)
-        {
-            context.ChildPos = childPos;
-        }
+        context.ChildPos = childPos;
         context.Phase = OperationPhase.Operating;
         context.IsBetweenCells = false;
 
-        var anim = child is not null ? Task.WhenAll(parentAnim, childAnim) : parentAnim;
+        var parentAnim = parentNode.PlaySpawnAnimeAsync();
+        var childAnim = child == null ? Task.CompletedTask : childNode.PlaySpawnAnimeAsync();
+        var anim = Task.WhenAll(parentAnim, childAnim);
         await context.TrackAnim(anim);
 
         context.IsLocked = false;

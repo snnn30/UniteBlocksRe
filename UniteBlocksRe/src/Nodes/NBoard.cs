@@ -1,5 +1,5 @@
-using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Godot;
 using UniteBlocksRe.Extensions;
@@ -16,35 +16,13 @@ public partial class NBoard : Node2D
 
     private Control _visuals;
     private Control _clipMask;
+    private NObstacleCounter _obstacleCounter;
 
     private readonly BiMap<NBlock, Vector2I> _blockLocations = [];
     private readonly Dictionary<BlockEntity, NBlock> _blockIdentities = [];
 
-    public static readonly Lazy<Dictionary<Vector2I, Vector2>> s_realPositions = new(() =>
-    {
-        var size = BoardEntity.Size;
-        var dic = new Dictionary<Vector2I, Vector2>();
-        for (var x = 0; x < size.X; x++)
-        {
-            for (var y = 0; y < size.Y; y++)
-            {
-                dic[new Vector2I(x, y)] = new Vector2(x + 0.5f, y + 0.5f) * NBlock.BaseSize;
-            }
-        }
-        return dic;
-    });
-
-    static NBoard()
-    {
-        for (var x = 0; x < BoardEntity.Size.X; x++)
-        {
-            for (var y = 0; y < BoardEntity.Size.Y; y++)
-            {
-                s_realPositions.Value[new Vector2I(x, y)] =
-                    new Vector2(x + 0.5f, y + 0.5f) * NBlock.BaseSize;
-            }
-        }
-    }
+    public static Vector2 GetRealPosition(Vector2I gridPos) =>
+        new Vector2(gridPos.X + 0.5f, gridPos.Y + 0.5f) * NBlock.BaseSize;
 
     public override void _Ready()
     {
@@ -54,55 +32,97 @@ public partial class NBoard : Node2D
 
         _clipMask = GetNode<Control>("%ClipMask");
 
+        _obstacleCounter = GetNode<NObstacleCounter>("%ObstacleCounter");
+        _obstacleCounter.Init(this);
+
         var spawnIcon = GetNode<Sprite2D>("%SpawnIcon");
-        spawnIcon.Position = s_realPositions.Value[BoardEntity.SpawnPosition];
+        spawnIcon.Position = GetRealPosition(BoardEntity.SpawnPosition);
     }
 
-    public void BringToFront(NBlock block)
+    #region ブロック管理
+
+    /// <summary>
+    /// モデルからノードを作成、紐づけてボード上に登録する
+    /// すでにModel側でボード上に設置されていることが前提
+    /// </summary>
+    private NBlock RegisterBlock(
+        BlockEntity entity,
+        Vector2I gridPos,
+        Vector2? initialWorldPos = null
+    )
     {
-        _clipMask.MoveChild(block, -1);
+        var nBlock = NBlock.Create(entity);
+        _clipMask.AddChild(nBlock);
+        nBlock.Position = initialWorldPos ?? GetRealPosition(gridPos);
+
+        _blockIdentities[entity] = nBlock;
+        _blockLocations.ForceAdd(nBlock, gridPos);
+
+        return nBlock;
     }
 
-    public (NBlock block, Task task) SpawnBlock(BlockEntity entity, Vector2I pos)
+    /// <summary>
+    /// ボードからノードと管理情報を削除する
+    /// Model側の削除は行わない
+    /// </summary>
+    private void UnregisterBlock(BlockEntity entity)
     {
-        var block = NBlock.Create(entity);
-        _clipMask.AddChild(block);
-        block.Position = s_realPositions.Value[pos];
-        var task = block.PlaySpawnAnimeAsync();
-        return (block, task);
+        if (_blockIdentities.Remove(entity, out var nBlock))
+        {
+            _blockLocations.RemoveByKey(nBlock);
+            nBlock.QueueFree();
+        }
     }
 
-    public Task SetOnBoard(NBlock block, Vector2I pos)
+    #endregion
+
+    #region 公開メソッド
+
+    public void AddAsBoardElement(Node node)
     {
-        if (Model.TrySetBlock(pos, block.Model) is false)
+        if (node == null)
+        {
+            return;
+        }
+        _clipMask.AddChild(node);
+    }
+
+    public void BringToFront(Node node)
+    {
+        if (node == null || node.GetParent() != _clipMask)
+        {
+            return;
+        }
+        _clipMask.MoveChild(node, -1);
+    }
+
+    public async Task SetOnBoardAsync(NBlock block, Vector2I pos)
+    {
+        if (!Model.TrySetBlock(pos, block.Model))
         {
             Log.Warn($"pos {pos} には置けない");
-            return Task.CompletedTask;
+            return;
         }
 
-        Add(block, pos);
-        return block.PlayPlacedAnimeAsync();
-    }
-
-    private void Add(NBlock block, Vector2I pos)
-    {
-        _blockIdentities.Add(block.Model, block);
+        if (block.GetParent() == null)
+        {
+            _clipMask.AddChild(block);
+        }
+        else if (block.GetParent() != _clipMask)
+        {
+            block.GetParent().RemoveChild(block);
+            _clipMask.AddChild(block);
+        }
+        _blockIdentities[block.Model] = block;
         _blockLocations.Add(block, pos);
-        block.Position = s_realPositions.Value[pos];
-    }
+        block.Position = GetRealPosition(pos);
 
-    private void Remove(NBlock block)
-    {
-        _blockIdentities.Remove(block.Model);
-        _blockLocations.RemoveByKey(block);
-        block.QueueFree();
+        await block.PlayPlacedAnimeAsync();
     }
 
     public async Task Fall()
     {
         var result = BoardFaller.Fall(Model);
-        var targets = new HashSet<NBlock>();
-
         if (!result.HasChanged)
         {
             return;
@@ -115,21 +135,18 @@ public partial class NBoard : Node2D
 
         foreach (var step in result.Steps)
         {
-            var block = _blockIdentities[step.Block];
-            var from = s_realPositions.Value[step.From];
-            var to = s_realPositions.Value[step.To];
-            _blockLocations.ForceAdd(block, step.To);
-            tween.TweenProperty(block, "position", to, 0.4f).From(from);
-            targets.Add(block);
+            var nBlock = _blockIdentities[step.Block];
+            _blockLocations.ForceAdd(nBlock, step.To);
+
+            tween
+                .TweenProperty(nBlock, "position", GetRealPosition(step.To), 0.4f)
+                .From(GetRealPosition(step.From));
         }
 
         await tween.WaitForFinished();
-        var tasks = new List<Task>();
-        foreach (var block in targets)
-        {
-            tasks.Add(block.PlayFalledAnimeAsync());
-        }
-        await Task.WhenAll(tasks);
+        await Task.WhenAll(
+            result.Steps.Select(s => _blockIdentities[s.Block].PlayFalledAnimeAsync())
+        );
     }
 
     public Task Unite()
@@ -141,39 +158,71 @@ public partial class NBoard : Node2D
         {
             foreach (var block in step.RemovedBlocks)
             {
-                var node = _blockIdentities[block];
-                Remove(node);
+                UnregisterBlock(block);
             }
-            var (created, _) = SpawnBlock(step.CreatedBlock, step.Position);
-            Add(created, step.Position);
-            tasks.Add(created.PlayUniteAnimeAsync());
+            var nBlock = RegisterBlock(step.CreatedBlock, step.Position);
+            tasks.Add(nBlock.PlayUniteAnimeAsync());
         }
         return Task.WhenAll(tasks);
     }
 
-    public Task Explode(BlockEntity bomb)
+    public async Task Explode(BlockEntity bomb)
     {
         var result = BoardExploder.Explode(Model, bomb);
 
-        async Task PlayAnimation()
+        foreach (var step in result.Steps)
         {
-            foreach (var step in result.Steps)
+            var tasks = step.Exploded.Select(b =>
             {
-                var tasks = new List<Task>();
-                foreach (var block in step.Exploded)
-                {
-                    var node = _blockIdentities[block];
-                    BringToFront(node);
-                    tasks.Add(node.PlayExplodeAnimeAsync());
-                }
-                await Task.WhenAll(tasks);
-                foreach (var block in step.Exploded)
-                {
-                    Remove(_blockIdentities[block]);
-                }
+                var node = _blockIdentities[b];
+                BringToFront(node);
+                return node.PlayExplodeAnimeAsync();
+            });
+
+            _obstacleCounter.AddCount(step);
+            await Task.WhenAll(tasks);
+            foreach (var block in step.Exploded)
+            {
+                UnregisterBlock(block);
+            }
+        }
+        _obstacleCounter.OnEndExplode();
+    }
+
+    public async Task SpawnObstacles()
+    {
+        var count = _obstacleCounter.ViewCount;
+        var result = BoardObstaclePlacer.Place(Model, count, 5);
+        if (!result.Placed)
+        {
+            return;
+        }
+
+        _obstacleCounter.SubCount(result);
+
+        var tween = CreateTween()
+            .SetTrans(Tween.TransitionType.Bounce)
+            .SetEase(Tween.EaseType.Out)
+            .SetParallel(true);
+
+        foreach (var colmun in result.Colmuns.Values)
+        {
+            var lowest = colmun.Blocks.Max(b => b.position.Y);
+
+            foreach (var (entity, pos) in colmun.Blocks)
+            {
+                var targetPos = GetRealPosition(pos);
+                var offset = new Vector2(0, -(lowest + 2) * NBlock.BaseSize);
+                var startPos = targetPos + offset;
+
+                var nBlock = RegisterBlock(entity, pos, startPos);
+
+                tween.TweenProperty(nBlock, "position", targetPos, 1.6f).From(startPos);
             }
         }
 
-        return PlayAnimation();
+        await tween.WaitForFinished();
     }
+
+    #endregion
 }

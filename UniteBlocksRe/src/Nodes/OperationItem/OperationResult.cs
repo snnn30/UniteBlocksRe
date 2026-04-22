@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
 
-namespace UniteBlocksRe.Nodes.OperationItem;
+namespace UniteBlocksRe.src.Nodes.OperationItem;
 
 public record OperationResult(bool Sucess, Task Task)
 {

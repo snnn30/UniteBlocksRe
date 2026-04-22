@@ -1,7 +1,7 @@
 using Godot;
-using UniteBlocksRe.Models.Entities;
-using UniteBlocksRe.Nodes.OperationItem;
-using UniteBlocksRe.Nodes.OperationItem.Handlers;
+using UniteBlocksRe.src.Models.Entities;
+using UniteBlocksRe.src.Nodes.OperationItem;
+using UniteBlocksRe.src.Nodes.OperationItem.Handlers;
 
 namespace UniteBlocksRe.Nodes;
 

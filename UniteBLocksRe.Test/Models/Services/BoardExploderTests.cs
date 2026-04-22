@@ -1,7 +1,7 @@
 using Shouldly;
-using UniteBlocksRe.Models.Entities;
-using UniteBlocksRe.Models.Services;
-using UniteBlocksRe.Models.ValueObjects;
+using UniteBlocksRe.src.Models.Entities;
+using UniteBlocksRe.src.Models.Services;
+using UniteBlocksRe.src.Models.ValueObjects;
 
 namespace UniteBlocksRe.Test.Models.Services;
 

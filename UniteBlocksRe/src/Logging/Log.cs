@@ -2,7 +2,7 @@ using System.Diagnostics;
 using System.IO;
 using Godot;
 
-namespace UniteBlocksRe.Logging;
+namespace UniteBlocksRe.src.Logging;
 
 public static class Log
 {

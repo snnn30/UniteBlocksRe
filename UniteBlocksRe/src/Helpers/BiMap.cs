@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace UniteBlocksRe.Helpers;
+namespace UniteBlocksRe.src.Helpers;
 
 public class BiMap<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>>
 {

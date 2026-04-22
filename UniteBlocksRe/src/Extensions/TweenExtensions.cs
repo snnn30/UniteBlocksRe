@@ -1,8 +1,8 @@
-﻿using System.Threading;
+using System.Threading;
 using System.Threading.Tasks;
 using Godot;
 
-namespace UniteBlocksRe.Extensions;
+namespace UniteBlocksRe.src.Extensions;
 
 public static class TweenExtensions
 {

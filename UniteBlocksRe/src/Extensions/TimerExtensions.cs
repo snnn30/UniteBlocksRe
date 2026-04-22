@@ -1,6 +1,6 @@
 using Godot;
 
-namespace UniteBlocksRe.Extensions;
+namespace UniteBlocksRe.src.Extensions;
 
 public static class TimerExtensions
 {

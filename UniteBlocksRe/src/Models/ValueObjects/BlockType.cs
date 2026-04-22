@@ -1,4 +1,4 @@
-namespace UniteBlocksRe.Models.ValueObjects;
+namespace UniteBlocksRe.src.Models.ValueObjects;
 
 public enum BlockType
 {

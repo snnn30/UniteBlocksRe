@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
-using UniteBlocksRe.Models.Entities;
+using UniteBlocksRe.src.Models.Entities;
 
-namespace UniteBlocksRe.Models.ValueObjects;
+namespace UniteBlocksRe.src.Models.ValueObjects.BoardOperationResults;
 
 public record ExplodeResult(List<ExplodeStep> Steps)
 {

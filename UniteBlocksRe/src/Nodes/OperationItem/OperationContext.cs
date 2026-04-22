@@ -1,9 +1,10 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Godot;
-using UniteBlocksRe.Logging;
+using UniteBlocksRe.Nodes;
+using UniteBlocksRe.src.Logging;
 
-namespace UniteBlocksRe.Nodes.OperationItem;
+namespace UniteBlocksRe.src.Nodes.OperationItem;
 
 public class OperationContext
 {
@@ -28,7 +29,7 @@ public class OperationContext
 
     public OperationContext CreateSnapshot()
     {
-        return (OperationContext)this.MemberwiseClone();
+        return (OperationContext)MemberwiseClone();
     }
 
     public Tween CreateTween()

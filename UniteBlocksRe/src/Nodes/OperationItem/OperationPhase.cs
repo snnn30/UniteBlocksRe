@@ -1,4 +1,4 @@
-namespace UniteBlocksRe.Nodes.OperationItem;
+namespace UniteBlocksRe.src.Nodes.OperationItem;
 
 public enum OperationPhase
 {

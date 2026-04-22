@@ -1,10 +1,10 @@
 using System;
 using System.Threading.Tasks;
 using Godot;
-using UniteBlocksRe.Logging;
-using UniteBlocksRe.Models.Entities;
-using UniteBlocksRe.Models.ValueObjects;
-using UniteBlocksRe.Nodes.OperationItem;
+using UniteBlocksRe.src.Logging;
+using UniteBlocksRe.src.Models.Entities;
+using UniteBlocksRe.src.Models.ValueObjects;
+using UniteBlocksRe.src.Nodes.OperationItem;
 
 namespace UniteBlocksRe.Nodes;
 

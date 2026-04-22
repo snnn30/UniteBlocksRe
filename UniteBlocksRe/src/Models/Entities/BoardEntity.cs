@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Godot;
 
-namespace UniteBlocksRe.Models.Entities;
+namespace UniteBlocksRe.src.Models.Entities;
 
 public class BoardEntity
 {

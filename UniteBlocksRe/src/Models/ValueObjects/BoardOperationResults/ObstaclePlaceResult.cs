@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
-using UniteBlocksRe.Models.Entities;
+using UniteBlocksRe.src.Models.Entities;
 
-namespace UniteBlocksRe.Models.ValueObjects;
+namespace UniteBlocksRe.src.Models.ValueObjects.BoardOperationResults;
 
 public record ObstaclePlaceResult(Dictionary<int, ColumnResult> Colmuns)
 {

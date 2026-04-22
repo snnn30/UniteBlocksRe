@@ -1,8 +1,8 @@
 using System.Threading.Tasks;
 using Godot;
-using UniteBlocksRe.Extensions;
-using UniteBlocksRe.Models.Entities;
-using UniteBlocksRe.Models.ValueObjects;
+using UniteBlocksRe.src.Extensions;
+using UniteBlocksRe.src.Models.Entities;
+using UniteBlocksRe.src.Models.ValueObjects;
 
 namespace UniteBlocksRe.Nodes;
 

@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Godot;
-using UniteBlocksRe.Models.Entities;
-using UniteBlocksRe.Models.ValueObjects;
+using UniteBlocksRe.src.Models.Entities;
+using UniteBlocksRe.src.Models.ValueObjects.BoardOperationResults;
 
-namespace UniteBlocksRe.Models.Services;
+namespace UniteBlocksRe.src.Models.Services;
 
 public static class BoardFaller
 {

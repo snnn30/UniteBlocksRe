@@ -1,6 +1,7 @@
 using Godot;
-using UniteBlocksRe.Extensions;
-using UniteBlocksRe.Models.ValueObjects;
+using UniteBlocksRe.src.Extensions;
+using UniteBlocksRe.src.Models.ValueObjects;
+using UniteBlocksRe.src.Models.ValueObjects.BoardOperationResults;
 
 namespace UniteBlocksRe.Nodes;
 

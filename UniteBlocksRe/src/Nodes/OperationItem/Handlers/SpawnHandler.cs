@@ -1,9 +1,11 @@
 using System.Threading.Tasks;
 using Godot;
-using UniteBlocksRe.Logging;
-using UniteBlocksRe.Models.Entities;
+using UniteBlocksRe.Nodes;
+using UniteBlocksRe.src.Logging;
+using UniteBlocksRe.src.Models.Entities;
+using UniteBlocksRe.src.Nodes.OperationItem;
 
-namespace UniteBlocksRe.Nodes.OperationItem.Handlers;
+namespace UniteBlocksRe.src.Nodes.OperationItem.Handlers;
 
 public static class SpawnHandler
 {

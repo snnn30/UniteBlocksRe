@@ -1,7 +1,7 @@
 using Godot;
-using UniteBlocksRe.Models.ValueObjects;
+using UniteBlocksRe.src.Models.ValueObjects;
 
-namespace UniteBlocksRe.Models.Entities;
+namespace UniteBlocksRe.src.Models.Entities;
 
 public class BlockEntity
 {

@@ -1,11 +1,11 @@
 using System;
-using UniteBlocksRe.Models.ValueObjects;
+using UniteBlocksRe.src.Models.ValueObjects;
 using BlockPair = (
-    UniteBlocksRe.Models.Entities.BlockEntity Parent,
-    UniteBlocksRe.Models.Entities.BlockEntity Child
+    UniteBlocksRe.src.Models.Entities.BlockEntity Parent,
+    UniteBlocksRe.src.Models.Entities.BlockEntity Child
 );
 
-namespace UniteBlocksRe.Models.Entities;
+namespace UniteBlocksRe.src.Models.Entities;
 
 public class BlockQueueEntity
 {

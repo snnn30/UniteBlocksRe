@@ -1,5 +1,5 @@
 using Godot;
-using UniteBlocksRe.Logging;
+using UniteBlocksRe.src.Logging;
 
 namespace UniteBlocksRe.Nodes.Tests;
 

@@ -2,11 +2,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Godot;
-using UniteBlocksRe.Extensions;
-using UniteBlocksRe.Helpers;
-using UniteBlocksRe.Logging;
-using UniteBlocksRe.Models.Entities;
-using UniteBlocksRe.Models.Services;
+using UniteBlocksRe.src.Extensions;
+using UniteBlocksRe.src.Helpers;
+using UniteBlocksRe.src.Logging;
+using UniteBlocksRe.src.Models.Entities;
+using UniteBlocksRe.src.Models.Services;
 
 namespace UniteBlocksRe.Nodes;
 

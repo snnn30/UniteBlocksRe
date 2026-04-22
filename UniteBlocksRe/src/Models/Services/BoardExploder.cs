@@ -1,10 +1,11 @@
 using System.Collections.Generic;
 using Godot;
-using UniteBlocksRe.Logging;
-using UniteBlocksRe.Models.Entities;
-using UniteBlocksRe.Models.ValueObjects;
+using UniteBlocksRe.src.Logging;
+using UniteBlocksRe.src.Models.Entities;
+using UniteBlocksRe.src.Models.ValueObjects;
+using UniteBlocksRe.src.Models.ValueObjects.BoardOperationResults;
 
-namespace UniteBlocksRe.Models.Services;
+namespace UniteBlocksRe.src.Models.Services;
 
 public static class BoardExploder
 {

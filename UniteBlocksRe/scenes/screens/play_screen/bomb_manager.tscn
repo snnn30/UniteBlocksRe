@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://coh74eywd1q88"]
 
-[ext_resource type="Script" uid="uid://dbcsxpsxcg3jv" path="res://src/Nodes/NBombManager.cs" id="1_hhxt5"]
+[ext_resource type="Script" uid="uid://dpvtiwu4gcheu" path="res://src/Nodes/PlayerScene/NBombManager.cs" id="1_hhxt5"]
 [ext_resource type="PackedScene" uid="uid://dqn6mw5pl1sqp" path="res://scenes/screens/play_screen/bomb_gauge.tscn" id="2_wgurq"]
 
 [node name="BombManager" type="Node2D"]

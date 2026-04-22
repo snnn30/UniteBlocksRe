@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://bepogq5wvg41"]
 
 [ext_resource type="Texture2D" uid="uid://b1y842raldfp8" path="res://images/blocks/RedBlock.png" id="1_8r6n6"]
-[ext_resource type="Script" uid="uid://cs5l1bi3brc5q" path="res://src/Nodes/NBlock.cs" id="1_cgrg5"]
+[ext_resource type="Script" uid="uid://6rsmekxj7lt8" path="res://src/Nodes/PlayerScene/NBlock.cs" id="1_cgrg5"]
 
 [node name="Block" type="Node2D"]
 script = ExtResource("1_cgrg5")

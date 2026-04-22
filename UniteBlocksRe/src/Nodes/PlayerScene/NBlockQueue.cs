@@ -19,7 +19,7 @@ public partial class NBlockQueue : Node2D
     private NBlockPair _nextPair;
     private NBlockPair _nextNextPair;
     private NBlockPair _spawnPair;
-    private BlockQueueEntity _blockQueueEntity = new();
+    private readonly BlockQueueEntity _blockQueueEntity = new();
 
     private Tween _activeTween;
 

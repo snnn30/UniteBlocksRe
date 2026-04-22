@@ -4,7 +4,7 @@ using Godot;
 using UniteBlocksRe.src.Logging;
 using UniteBlocksRe.src.Models.Entities;
 using UniteBlocksRe.src.Models.ValueObjects;
-using UniteBlocksRe.src.Nodes.OperationItem;
+using UniteBlocksRe.src.Nodes.PlayerScene;
 
 namespace UniteBlocksRe.Nodes;
 

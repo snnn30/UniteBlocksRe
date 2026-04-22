@@ -2,6 +2,7 @@ using Godot;
 using UniteBlocksRe.src.Logging;
 using UniteBlocksRe.src.Models.Entities;
 using UniteBlocksRe.src.Models.ValueObjects;
+using UniteBlocksRe.src.Models.ValueObjects.BlocksOperation;
 
 namespace UniteBlocksRe.Nodes.Tests;
 
@@ -44,12 +45,12 @@ public partial class OperationItemTest : Node
             }
             if (key.Keycode == Key.A)
             {
-                var result = _item.Move(false, 0.06f);
+                var result = _item.Move(MoveDirection.Left, 0.06f);
                 Log.Info($"左移動 {(result.Sucess ? "成功" : "失敗")}");
             }
             if (key.Keycode == Key.D)
             {
-                var result = _item.Move(true, 0.06f);
+                var result = _item.Move(MoveDirection.Right, 0.06f);
                 Log.Info($"右移動 {(result.Sucess ? "成功" : "失敗")}");
             }
             if (key.Keycode == Key.S)
@@ -59,12 +60,12 @@ public partial class OperationItemTest : Node
             }
             if (key.Keycode == Key.U)
             {
-                var result = _item.Rotate(false, 0.2f);
+                var result = _item.Rotate(RotationDirection.ACW, 0.2f);
                 Log.Info($"反時計周りの回転 {(result.Sucess ? "成功" : "失敗")}");
             }
             if (key.Keycode == Key.I)
             {
-                var result = _item.Rotate(true, 0.2f);
+                var result = _item.Rotate(RotationDirection.CW, 0.2f);
                 Log.Info($"時計回りの回転 {(result.Sucess ? "成功" : "失敗")}");
             }
             if (key.Keycode == Key.Space)

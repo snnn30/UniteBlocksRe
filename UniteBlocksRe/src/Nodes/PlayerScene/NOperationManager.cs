@@ -5,7 +5,8 @@ using R3;
 using UniteBlocksRe.src.Extensions;
 using UniteBlocksRe.src.Logging;
 using UniteBlocksRe.src.Models.Entities;
-using UniteBlocksRe.src.Nodes.OperationItem;
+using UniteBlocksRe.src.Models.ValueObjects.BlocksOperation;
+using UniteBlocksRe.src.Nodes.PlayerScene;
 
 namespace UniteBlocksRe.Nodes;
 
@@ -224,13 +225,13 @@ public partial class NOperationManager : Node
 
             if (dir == Vector2I.Left)
             {
-                var result = _item.Rotate(false, duration);
+                var result = _item.Rotate(RotationDirection.ACW, duration);
                 StopIdleTimer(result);
                 return result;
             }
             else if (dir == Vector2I.Right)
             {
-                var result = _item.Rotate(true, duration);
+                var result = _item.Rotate(RotationDirection.CW, duration);
                 StopIdleTimer(result);
                 return result;
             }
@@ -306,13 +307,13 @@ public partial class NOperationManager : Node
 
             if (dir == Vector2I.Left)
             {
-                var result = _item.Move(false, duration);
+                var result = _item.Move(MoveDirection.Left, duration);
                 StopIdleTimer(result);
                 return result;
             }
             else if (dir == Vector2I.Right)
             {
-                var result = _item.Move(true, duration);
+                var result = _item.Move(MoveDirection.Right, duration);
                 StopIdleTimer(result);
                 return result;
             }

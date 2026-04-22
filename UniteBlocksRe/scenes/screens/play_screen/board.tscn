@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://bse5vr6vscgqi"]
 
-[ext_resource type="Script" uid="uid://c8rtue324dv7t" path="res://src/Nodes/NBoard.cs" id="1_bw3vb"]
+[ext_resource type="Script" uid="uid://p3xljtpa8tlh" path="res://src/Nodes/PlayerScene/NBoard.cs" id="1_bw3vb"]
 [ext_resource type="Texture2D" uid="uid://dhq4gs2x5ye4o" path="res://images/board/SpawnIcon.png" id="2_tx6nw"]
 [ext_resource type="PackedScene" uid="uid://d1blssmj6rop2" path="res://scenes/screens/play_screen/obstacle_counter.tscn" id="3_452qj"]
 

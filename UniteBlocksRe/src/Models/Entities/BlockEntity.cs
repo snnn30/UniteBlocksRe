@@ -27,6 +27,11 @@ public class BlockEntity
         Size = size;
     }
 
+    public BlockEntity DeepCopy()
+    {
+        return new(Type, Color, Size);
+    }
+
     public override string ToString()
     {
         return $"BlockEntity(Type:{Type}, Color:{Color}, Size:{Size.X}x{Size.Y})";

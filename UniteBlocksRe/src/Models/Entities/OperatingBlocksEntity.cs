@@ -10,11 +10,10 @@ public class OperatingBlocksEntity
     public BlockEntity Child { get; }
     public Vector2I ParentPos { get; private set; }
     public Vector2I ChildPos { get; private set; }
+    public BoardEntity Board { get; }
 
     public bool HasChild => Child != null;
     public bool IsHalfUp { get; private set; } = false;
-
-    private readonly BoardEntity _board;
 
     #region Spawn
 
@@ -73,7 +72,7 @@ public class OperatingBlocksEntity
         Child = child;
         ParentPos = parentPos;
         ChildPos = childPos;
-        _board = board;
+        Board = board;
     }
 
     private OperatingBlocksEntity(BlockEntity parent, Vector2I parentPos, BoardEntity board)
@@ -82,7 +81,17 @@ public class OperatingBlocksEntity
         Child = null;
         ParentPos = parentPos;
         ChildPos = Vector2I.Zero;
-        _board = board;
+        Board = board;
+    }
+
+    private OperatingBlocksEntity(OperatingBlocksEntity entity)
+    {
+        Parent = entity.Parent;
+        Child = entity.Child;
+        ParentPos = entity.ParentPos;
+        ChildPos = entity.ChildPos;
+        IsHalfUp = entity.IsHalfUp;
+        Board = entity.Board;
     }
 
     #endregion
@@ -156,10 +165,10 @@ public class OperatingBlocksEntity
     {
         var (targetParentPos, targetChildPos) = CalcNextPosDrop();
 
-        var canPlace = _board.CanPlace(targetParentPos, Parent);
+        var canPlace = Board.CanPlace(targetParentPos, Parent);
         if (HasChild)
         {
-            canPlace &= _board.CanPlace(targetChildPos, Child);
+            canPlace &= Board.CanPlace(targetChildPos, Child);
         }
         return canPlace;
     }
@@ -167,13 +176,13 @@ public class OperatingBlocksEntity
     private bool CanMove(MoveDirection direction)
     {
         var (targetParentPos, targetChildPos) = CalcNextPosMove(direction);
-        var canPlace = _board.CanPlace(targetParentPos, Parent);
-        canPlace &= _board.CanPlace(targetParentPos + Vector2I.Up, Parent) || !IsHalfUp;
+        var canPlace = Board.CanPlace(targetParentPos, Parent);
+        canPlace &= Board.CanPlace(targetParentPos + Vector2I.Up, Parent) || !IsHalfUp;
 
         if (HasChild)
         {
-            canPlace &= _board.CanPlace(targetChildPos, Child);
-            canPlace &= _board.CanPlace(targetChildPos + Vector2I.Up, Child) || !IsHalfUp;
+            canPlace &= Board.CanPlace(targetChildPos, Child);
+            canPlace &= Board.CanPlace(targetChildPos + Vector2I.Up, Child) || !IsHalfUp;
         }
         return canPlace;
     }
@@ -187,10 +196,10 @@ public class OperatingBlocksEntity
 
         var (targetParentPos, targetChildPos) = CalcNextPosRotate(direction, pivotIsChild, isShift);
 
-        var canPlace = _board.CanPlace(targetParentPos, Parent);
-        canPlace &= _board.CanPlace(targetParentPos + Vector2I.Up, Parent) || !IsHalfUp;
-        canPlace &= _board.CanPlace(targetChildPos, Child);
-        canPlace &= _board.CanPlace(targetChildPos + Vector2I.Up, Child) || !IsHalfUp;
+        var canPlace = Board.CanPlace(targetParentPos, Parent);
+        canPlace &= Board.CanPlace(targetParentPos + Vector2I.Up, Parent) || !IsHalfUp;
+        canPlace &= Board.CanPlace(targetChildPos, Child);
+        canPlace &= Board.CanPlace(targetChildPos + Vector2I.Up, Child) || !IsHalfUp;
         return canPlace;
     }
 
@@ -262,6 +271,7 @@ public class OperatingBlocksEntity
         {
             RotationDirection.CW => new Vector2I(-relativePos.Y, relativePos.X),
             RotationDirection.ACW => new Vector2I(relativePos.Y, -relativePos.X),
+            RotationDirection.None => relativePos,
             _ => throw new ArgumentException("無効な入力", nameof(direction)),
         };
 
@@ -270,4 +280,9 @@ public class OperatingBlocksEntity
     }
 
     #endregion
+
+    public OperatingBlocksEntity ShallowCopy()
+    {
+        return new OperatingBlocksEntity(this);
+    }
 }

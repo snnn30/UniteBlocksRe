@@ -12,6 +12,45 @@ public class BoardEntity
     private readonly BlockEntity[,] _grid = new BlockEntity[Size.X, Size.Y];
     private readonly Dictionary<BlockEntity, Vector2I> _blockOrigins = [];
 
+    public IEnumerable<BlockEntity> GetAdjacentBlocks(BlockEntity root)
+    {
+        if (!_blockOrigins.TryGetValue(root, out var origin))
+        {
+            yield break;
+        }
+
+        var foundBlocks = new HashSet<BlockEntity>();
+        var directions = new Vector2I[]
+        {
+            Vector2I.Up,
+            Vector2I.Down,
+            Vector2I.Left,
+            Vector2I.Right,
+        };
+
+        foreach (var cell in CalculateContains(origin, root.Size))
+        {
+            foreach (var dir in directions)
+            {
+                var targetPos = cell + dir;
+
+                var (success, block) = TryGetBlock(targetPos);
+                if (success && block != root)
+                {
+                    if (foundBlocks.Add(block))
+                    {
+                        yield return block;
+                    }
+                }
+            }
+        }
+    }
+
+    public IEnumerable<BlockEntity> GetAllBlocks()
+    {
+        return _blockOrigins.Keys;
+    }
+
     public bool IsWithinBounds(Vector2I position)
     {
         return position.X >= 0 && position.X < Size.X && position.Y >= 0 && position.Y < Size.Y;
@@ -113,5 +152,32 @@ public class BoardEntity
                 yield return new Vector2I(origin.X + x, origin.Y + y);
             }
         }
+    }
+
+    public BoardEntity DeepCopy()
+    {
+        var newBoard = new BoardEntity();
+        var entityMap = new Dictionary<BlockEntity, BlockEntity>();
+
+        foreach (var (oldEntity, origin) in _blockOrigins)
+        {
+            var newEntity = oldEntity.DeepCopy();
+            entityMap[oldEntity] = newEntity;
+            newBoard._blockOrigins[newEntity] = origin;
+        }
+
+        for (int x = 0; x < Size.X; x++)
+        {
+            for (int y = 0; y < Size.Y; y++)
+            {
+                var oldEntity = _grid[x, y];
+                if (oldEntity != null)
+                {
+                    newBoard._grid[x, y] = entityMap[oldEntity];
+                }
+            }
+        }
+
+        return newBoard;
     }
 }

@@ -100,44 +100,21 @@ public static class BoardExploder
         HashSet<BlockEntity> obstacles
     ) GetAdjacentSameTypeBlocks(BoardEntity board, BlockEntity centerBlock)
     {
-        var origin = board.TryGetOrigin(centerBlock).Position;
-
-        var occupied = new List<Vector2I>();
-        for (var dx = 0; dx < centerBlock.Size.X; dx++)
-        {
-            for (var dy = 0; dy < centerBlock.Size.Y; dy++)
-            {
-                occupied.Add(new Vector2I(origin.X + dx, origin.Y + dy));
-            }
-        }
-
-        (int, int)[] directions = [(0, 1), (0, -1), (1, 0), (-1, 0)];
         var sameTypes = new HashSet<BlockEntity>();
         var obstacles = new HashSet<BlockEntity>();
 
-        foreach (var pos in occupied)
+        foreach (var foundBlock in board.GetAdjacentBlocks(centerBlock))
         {
-            foreach ((var dx, var dy) in directions)
+            if (foundBlock.Type == BlockType.Normal && foundBlock.Color == centerBlock.Color)
             {
-                var checkPos = new Vector2I(pos.X + dx, pos.Y + dy);
-                (var success, var foundBlock) = board.TryGetBlock(checkPos);
-
-                if (success && foundBlock != centerBlock)
-                {
-                    if (
-                        foundBlock.Type == BlockType.Normal
-                        && foundBlock.Color == centerBlock.Color
-                    )
-                    {
-                        sameTypes.Add(foundBlock);
-                    }
-                    else if (foundBlock.Type == BlockType.Obstacle)
-                    {
-                        obstacles.Add(foundBlock);
-                    }
-                }
+                sameTypes.Add(foundBlock);
+            }
+            else if (foundBlock.Type == BlockType.Obstacle)
+            {
+                obstacles.Add(foundBlock);
             }
         }
+
         return (sameTypes, obstacles);
     }
 }

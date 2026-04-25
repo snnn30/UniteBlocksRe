@@ -5,6 +5,7 @@ namespace UniteBlocksRe.src.Models.ValueObjects.BlocksOperation;
 
 public enum MoveDirection
 {
+    None,
     Left,
     Right,
 }
@@ -17,6 +18,7 @@ public static class MoveDirectionExtensions
         {
             MoveDirection.Left => Vector2I.Left,
             MoveDirection.Right => Vector2I.Right,
+            MoveDirection.None => Vector2I.Zero,
             _ => throw new ArgumentException("無効な値", nameof(direction)),
         };
     }

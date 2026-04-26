@@ -5,6 +5,7 @@ using UniteBlocksRe.src.Logging;
 using UniteBlocksRe.src.Models.Entities;
 using UniteBlocksRe.src.Models.ValueObjects;
 using UniteBlocksRe.src.Nodes.PlayerScene;
+using UniteBlocksRe.src.Nodes.PlayerScene.Operation;
 
 namespace UniteBlocksRe.Nodes;
 
@@ -13,22 +14,23 @@ public partial class NPlayerScene : Node2D
     private NOperationManager _operationManager;
     private NBoard _board;
     private NBlockQueue _queue;
-    private NBombManager _bombManager;
+    private NBombGauge _bombGauge;
 
     public override void _Ready()
     {
         _operationManager = GetNode<NOperationManager>("%OperationManager");
         _board = GetNode<NBoard>("%Board");
         _queue = GetNode<NBlockQueue>("%Queue");
-        _bombManager = GetNode<NBombManager>("%BombManager");
+        _bombGauge = GetNode<NBombGauge>("%BombGauge");
 
-        _operationManager.Init(_board);
+        var inputSouce = new PlayerInputSource();
+
+        _operationManager.Init(_board, _bombGauge, inputSouce);
     }
 
     public async Task StartGameLoop()
     {
-        _bombManager.IsAutoCharging = true;
-        _bombManager.InputActive = true;
+        _bombGauge.IsAutoCharging = true;
 
         while (true)
         {
@@ -36,9 +38,9 @@ public partial class NPlayerScene : Node2D
 
             OperationResult spawnResult;
             BlockEntity parent;
-            if (_bombManager.IsBombActive)
+            if (_bombGauge.IsBombActive)
             {
-                _bombManager.TryUseBomb();
+                _bombGauge.TryUseBomb();
                 parent = BlockEntity.Bomb;
                 spawnResult = _operationManager.Spawn(parent);
             }
@@ -59,7 +61,7 @@ public partial class NPlayerScene : Node2D
 
             await _operationManager.StartRun();
 
-            _bombManager.IsAutoCharging = false;
+            _bombGauge.IsAutoCharging = false;
             await _board.Fall();
             await _board.Unite();
 
@@ -70,7 +72,7 @@ public partial class NPlayerScene : Node2D
                 await _board.Unite();
             }
 
-            _bombManager.IsAutoCharging = true;
+            _bombGauge.IsAutoCharging = true;
         }
     }
 }

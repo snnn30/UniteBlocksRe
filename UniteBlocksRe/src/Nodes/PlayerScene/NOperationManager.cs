@@ -7,12 +7,15 @@ using UniteBlocksRe.src.Logging;
 using UniteBlocksRe.src.Models.Entities;
 using UniteBlocksRe.src.Models.ValueObjects.BlocksOperation;
 using UniteBlocksRe.src.Nodes.PlayerScene;
+using UniteBlocksRe.src.Nodes.PlayerScene.Operation;
 
 namespace UniteBlocksRe.Nodes;
 
 public partial class NOperationManager : Node
 {
     private NOperationItem _item;
+    private NBombGauge _bombGauge;
+    private IOperationInputSource _inputSource;
 
     private bool _activeInput = false;
     private bool _activeAutoDrop = false;
@@ -23,6 +26,8 @@ public partial class NOperationManager : Node
     private int _maxAltitude;
     private TaskCompletionSource _endOperationSignal;
 
+    private const float CheckInterval = 0.05f;
+
     public OperationResult Spawn(BlockEntity parent, BlockEntity child = null)
     {
         return _item.Spawn(parent, child);
@@ -32,9 +37,9 @@ public partial class NOperationManager : Node
     {
         CompositeDisposable operationDisposable = [];
 
-        SubscribeDropInput(operationDisposable);
-        SubscribeMoveInput(operationDisposable);
-        SubscribeRotateInput(operationDisposable);
+        SubscribeDropInput(_inputSource, operationDisposable);
+        SubscribeMoveInput(_inputSource, operationDisposable);
+        SubscribeRotateInput(_inputSource, operationDisposable);
 
         _endOperationSignal = new TaskCompletionSource();
         _maxAltitude = BoardEntity.SpawnPosition.Y;
@@ -49,9 +54,13 @@ public partial class NOperationManager : Node
         await _item.Settle().Task;
     }
 
-    public void Init(NBoard board)
+    public void Init(NBoard board, NBombGauge bombGauge, IOperationInputSource inputSource)
     {
         _item.Init(board);
+        _bombGauge = bombGauge;
+        _inputSource = inputSource;
+
+        SubscribeSwitchInput(_inputSource);
     }
 
     public override void _Ready()
@@ -88,11 +97,24 @@ public partial class NOperationManager : Node
         _endOperationSignal.TrySetResult();
     }
 
-    private void SubscribeDropInput(CompositeDisposable disposables)
+    private void SubscribeSwitchInput(IOperationInputSource source)
     {
+        source
+            .SwitchBomb.Subscribe(_ =>
+            {
+                _bombGauge.TrySetBombActive(!_bombGauge.IsBombActive);
+            })
+            .AddTo(this);
+    }
+
+    private void SubscribeDropInput(IOperationInputSource source, CompositeDisposable disposables)
+    {
+        const float AutoDropDuration = 0.1f;
+        const float ManualDropDuration = 0.03f;
+
         var dropInput = Observable
             .EveryUpdate()
-            .Select(_ => _activeInput && Input.IsActionPressed("down"))
+            .Select(_ => _activeInput && source.IsDropActive.CurrentValue)
             .DistinctUntilChanged();
 
         dropInput
@@ -104,32 +126,23 @@ public partial class NOperationManager : Node
                     {
                         while (!ct.IsCancellationRequested)
                         {
-                            var result = ExecuteDrop(false, 0.04f);
-                            await Task.Delay(TimeSpan.FromSeconds(0.03f));
+                            var result = ExecuteDrop(false, ManualDropDuration + 0.01f); // 滑らかな演出のため演出に少し時間をかける
+                            await Task.Delay(TimeSpan.FromSeconds(ManualDropDuration), ct);
                             if (!result.Sucess)
                             {
-                                await Task.Delay(TimeSpan.FromSeconds(0.05f), ct);
+                                await Task.Delay(TimeSpan.FromSeconds(CheckInterval), ct);
                             }
                         }
                     });
                 }
                 else
                 {
-                    return Observable
-                        .FromEvent<int>(
-                            h => NBeatManager.Instance.OnBeat += h,
-                            h => NBeatManager.Instance.OnBeat -= h
-                        )
-                        //並列に合成する
+                    return NBeatManager
+                        .Instance.OnBeat.Where(_ => _activeAutoDrop)
                         .SelectMany(_ =>
-                            Observable.FromAsync(async ct =>
-                            {
-                                if (_activeAutoDrop)
-                                {
-                                    var result = ExecuteDrop(true, 0.1f);
-                                    await result.Task;
-                                }
-                            })
+                            Observable.FromAsync(async _ =>
+                                await ExecuteDrop(true, AutoDropDuration).Task
+                            )
                         );
                 }
             })
@@ -143,60 +156,47 @@ public partial class NOperationManager : Node
             StopIdleTimer(result); // sucessならidleタイマー止まる
             if (result.Sucess)
             {
-                if (!isAutoDrop)
+                if (!isAutoDrop) // 待機状態の時に手動落下が来たら自動落下を開始する
                 {
                     _initialDelayTimer.ForceTimeout();
                 }
-                if (_item.ParentPos.Y > _maxAltitude)
+                if (_item.ParentPos.Y > _maxAltitude) // 最低高度更新でmaxLockTimerをリセット
                 {
                     _maxAltitude = _item.ParentPos.Y;
                     _maxLockTimer.Start();
                 }
             }
-            else if (_idleTimer.IsStopped())
-            {
-                _idleTimer.Start();
-            }
             else
             {
-                if (!isAutoDrop)
+                if (_idleTimer.IsStopped()) // 落下失敗でidleTimerスタート
+                {
+                    _idleTimer.Start();
+                }
+                else if (!isAutoDrop) // 手動落下失敗で即設置
                 {
                     _idleTimer.ForceTimeout();
                 }
             }
+
             return result;
         }
     }
 
-    private void SubscribeRotateInput(CompositeDisposable disposables)
+    private void SubscribeRotateInput(IOperationInputSource source, CompositeDisposable disposables)
     {
+        const float RotateDuration = 0.2f;
+
         var rotateInput = Observable
             .EveryUpdate()
             .Select(_ =>
-            {
-                if (!_activeInput)
-                {
-                    return Vector2I.Zero;
-                }
-                var right = Input.IsActionPressed("rotate_right");
-                var left = Input.IsActionPressed("rotate_left");
-
-                if (right && !left)
-                {
-                    return Vector2I.Right;
-                }
-                if (!right && left)
-                {
-                    return Vector2I.Left;
-                }
-                return Vector2I.Zero;
-            })
+                _activeInput ? source.RotateDirectionState.CurrentValue : RotationDirection.None
+            )
             .DistinctUntilChanged();
 
         rotateInput
             .Select(dir =>
             {
-                if (dir == Vector2I.Zero)
+                if (dir == RotationDirection.None)
                 {
                     return Observable.Empty<Unit>();
                 }
@@ -205,13 +205,13 @@ public partial class NOperationManager : Node
                 {
                     while (!ct.IsCancellationRequested)
                     {
-                        (var sucess, var task) = ExecuteRotate(dir);
+                        (var sucess, var task) = ExecuteRotate(dir, RotateDuration);
                         if (sucess)
                         {
                             await task;
                             return;
                         }
-                        await Task.Delay(TimeSpan.FromSeconds(0.05f), ct);
+                        await Task.Delay(TimeSpan.FromSeconds(CheckInterval), ct);
                     }
                 });
             })
@@ -219,17 +219,15 @@ public partial class NOperationManager : Node
             .Subscribe()
             .AddTo(disposables);
 
-        OperationResult ExecuteRotate(Vector2I dir)
+        OperationResult ExecuteRotate(RotationDirection dir, float duration)
         {
-            const float duration = 0.2f;
-
-            if (dir == Vector2I.Left)
+            if (dir == RotationDirection.ACW)
             {
                 var result = _item.Rotate(RotationDirection.ACW, duration);
                 StopIdleTimer(result);
                 return result;
             }
-            else if (dir == Vector2I.Right)
+            else if (dir == RotationDirection.CW)
             {
                 var result = _item.Rotate(RotationDirection.CW, duration);
                 StopIdleTimer(result);
@@ -243,35 +241,21 @@ public partial class NOperationManager : Node
         }
     }
 
-    private void SubscribeMoveInput(CompositeDisposable disposables)
+    private void SubscribeMoveInput(IOperationInputSource source, CompositeDisposable disposables)
     {
+        const float MoveDuration = 0.06f;
+        const float InitialDelay = 0.1f;
+        const float RepeatDelay = 0.01f;
+
         var moveInput = Observable
             .EveryUpdate()
-            .Select(_ =>
-            {
-                if (!_activeInput)
-                {
-                    return Vector2I.Zero;
-                }
-                var right = Input.IsActionPressed("right");
-                var left = Input.IsActionPressed("left");
-
-                if (right && !left)
-                {
-                    return Vector2I.Right;
-                }
-                if (!right && left)
-                {
-                    return Vector2I.Left;
-                }
-                return Vector2I.Zero;
-            })
-            .DistinctUntilChanged(); //値が変化した時だけ通す
+            .Select(_ => _activeInput ? source.MoveDirectionState.CurrentValue : MoveDirection.None)
+            .DistinctUntilChanged();
 
         moveInput
             .Select(dir =>
             {
-                if (dir == Vector2I.Zero)
+                if (dir == MoveDirection.None)
                 {
                     return Observable.Empty<Unit>(); //通知しない
                 }
@@ -281,17 +265,17 @@ public partial class NOperationManager : Node
                     var wasLastMoveSucess = false;
                     while (!ct.IsCancellationRequested)
                     {
-                        (var sucess, var task) = ExecuteMove(dir);
+                        (var sucess, var task) = ExecuteMove(dir, MoveDuration);
                         if (sucess)
                         {
-                            var delayTime = wasLastMoveSucess ? 0.01f : 0.1f;
+                            var delayTime = wasLastMoveSucess ? RepeatDelay : InitialDelay;
                             await task;
                             await Task.Delay(TimeSpan.FromSeconds(delayTime), ct);
                             wasLastMoveSucess = true;
                         }
                         else
                         {
-                            await Task.Delay(TimeSpan.FromSeconds(0.05f), ct);
+                            await Task.Delay(TimeSpan.FromSeconds(CheckInterval), ct);
                             wasLastMoveSucess = false;
                         }
                     }
@@ -301,17 +285,15 @@ public partial class NOperationManager : Node
             .Subscribe() //実際の処理はSelectだが、Subscribeしないとそこまでの処理も一切行われない
             .AddTo(disposables);
 
-        OperationResult ExecuteMove(Vector2I dir)
+        OperationResult ExecuteMove(MoveDirection dir, float duration)
         {
-            const float duration = 0.06f;
-
-            if (dir == Vector2I.Left)
+            if (dir == MoveDirection.Left)
             {
                 var result = _item.Move(MoveDirection.Left, duration);
                 StopIdleTimer(result);
                 return result;
             }
-            else if (dir == Vector2I.Right)
+            else if (dir == MoveDirection.Right)
             {
                 var result = _item.Move(MoveDirection.Right, duration);
                 StopIdleTimer(result);

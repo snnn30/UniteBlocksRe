@@ -1,5 +1,5 @@
-using System;
 using Godot;
+using R3;
 using UniteBlocksRe.src.Logging;
 
 namespace UniteBlocksRe.Nodes;
@@ -10,7 +10,9 @@ public partial class NBeatManager : Node
     public int BPM { get; set; } = 180;
 
     // 4拍で刻むと仮定して、0, 1, 2, 3の順でビートカウントを通知する
-    public event Action<int> OnBeat;
+    // public event Action<int> OnBeat;
+    private readonly Subject<int> _onBeat = new();
+    public Observable<int> OnBeat => _onBeat;
     public int BeatCount { get; private set; }
     private float _timer;
 
@@ -34,7 +36,7 @@ public partial class NBeatManager : Node
         while (_timer >= beatDuration)
         {
             _timer -= beatDuration;
-            OnBeat?.Invoke(BeatCount);
+            _onBeat.OnNext(BeatCount);
             BeatCount = (BeatCount + 1) % 4;
         }
     }

@@ -36,10 +36,11 @@ public class EvaluationTest
         {
             BlockSizeWeight = 10f,
             SameColorAdjacentWeight = 10f,
-            HeightPenalty = -4f,
+            HeightPenalty = -2f,
             ObstaclePenalty = -20f,
+            DifferentColorAdjacentPenalty = -4f,
         };
-        _explodeWeights = new ExplodeEvaluationWeights { Weight = 10f };
+        _explodeWeights = new ExplodeEvaluationWeights { Weight = 12f };
         _actionSelector = new ActionSelector(_boardWeights, _explodeWeights);
     }
 

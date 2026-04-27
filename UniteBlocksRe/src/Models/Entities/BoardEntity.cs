@@ -180,4 +180,41 @@ public class BoardEntity
 
         return newBoard;
     }
+
+    public override string ToString()
+    {
+        var sb = new System.Text.StringBuilder();
+        sb.AppendLine($"BoardEntity ({Size.X}x{Size.Y})");
+
+        // 上の枠線
+        sb.AppendLine("+" + new string('-', Size.X) + "+");
+
+        for (int y = 0; y < Size.Y; y++)
+        {
+            sb.Append("|"); // 左の枠線
+            for (int x = 0; x < Size.X; x++)
+            {
+                var block = _grid[x, y];
+                if (block == null)
+                {
+                    sb.Append("."); // 空きマス
+                }
+                else
+                {
+                    // ブロックの種類やID、あるいは一文字で表現
+                    // ここでは仮にブロックの色やハッシュ値に基づいた文字を出力する例
+                    sb.Append("#");
+                }
+            }
+            sb.AppendLine("|"); // 右の枠線
+        }
+
+        // 下の枠線
+        sb.AppendLine("+" + new string('-', Size.X) + "+");
+
+        // 統計情報の付記
+        sb.Append($"Blocks: {_blockOrigins.Count}");
+
+        return sb.ToString();
+    }
 }

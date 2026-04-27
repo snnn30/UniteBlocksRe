@@ -22,7 +22,8 @@ public partial class NPlayerScene : Node2D
         _queue = GetNode<NBlockQueue>("%Queue");
         _bombGauge = GetNode<NBombGauge>("%BombGauge");
 
-        var inputSource = new PlayerInputSource();
+        // var inputSource = new PlayerInputSource();
+        var inputSource = new EnemyInputSource(_operationManager);
 
         _operationManager.Init(_board, _bombGauge, inputSource);
     }

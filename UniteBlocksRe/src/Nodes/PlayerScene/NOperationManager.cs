@@ -14,8 +14,10 @@ public partial class NOperationManager : Node
 {
     private readonly Subject<OperationResult> _onOperationExecuted = new();
     public Observable<OperationResult> OnOperationExecuted => _onOperationExecuted;
+    private readonly Subject<OperatingBlocksEntity> _onSpawn = new();
+    public Observable<OperatingBlocksEntity> OnSpawn => _onSpawn;
 
-    private NOperationItem _item;
+    public NOperationItem Item { get; private set; }
     private NBombGauge _bombGauge;
     private IOperationInputSource _inputSource;
 
@@ -32,8 +34,9 @@ public partial class NOperationManager : Node
 
     public OperationResult Spawn(BlockEntity parent, BlockEntity child = null)
     {
-        var result = _item.Spawn(parent, child);
+        var result = Item.Spawn(parent, child);
         _onOperationExecuted.OnNext(result);
+        _onSpawn.OnNext(Item.Model);
         return result;
     }
 
@@ -55,14 +58,14 @@ public partial class NOperationManager : Node
         await _endOperationSignal.Task;
         operationDisposable.Dispose();
 
-        var result = _item.Settle();
+        var result = Item.Settle();
         _onOperationExecuted.OnNext(result);
         await result.Task;
     }
 
     public void Init(NBoard board, NBombGauge bombGauge, IOperationInputSource inputSource)
     {
-        _item.Init(board);
+        Item.Init(board);
         _bombGauge = bombGauge;
         _inputSource = inputSource;
 
@@ -71,7 +74,7 @@ public partial class NOperationManager : Node
 
     public override void _Ready()
     {
-        _item = GetNode<NOperationItem>("%OperationItem");
+        Item = GetNode<NOperationItem>("%OperationItem");
 
         _maxLockTimer = new Timer { OneShot = true, WaitTime = 3f };
         AddChild(_maxLockTimer);
@@ -158,7 +161,7 @@ public partial class NOperationManager : Node
 
         OperationResult ExecuteDrop(bool isAutoDrop, float duration)
         {
-            var result = _item.Drop(duration);
+            var result = Item.Drop(duration);
             _onOperationExecuted.OnNext(result);
             StopIdleTimer(result); // sucessならidleタイマー止まる
             if (result.Sucess)
@@ -167,9 +170,9 @@ public partial class NOperationManager : Node
                 {
                     _initialDelayTimer.ForceTimeout();
                 }
-                if (_item.ParentPos.Y > _maxAltitude) // 最低高度更新でmaxLockTimerをリセット
+                if (Item.ParentPos.Y > _maxAltitude) // 最低高度更新でmaxLockTimerをリセット
                 {
-                    _maxAltitude = _item.ParentPos.Y;
+                    _maxAltitude = Item.ParentPos.Y;
                     _maxLockTimer.Start();
                 }
             }
@@ -230,14 +233,14 @@ public partial class NOperationManager : Node
         {
             if (dir == RotateDirection.ACW)
             {
-                var result = _item.Rotate(RotateDirection.ACW, duration);
+                var result = Item.Rotate(RotateDirection.ACW, duration);
                 _onOperationExecuted.OnNext(result);
                 StopIdleTimer(result);
                 return result;
             }
             else if (dir == RotateDirection.CW)
             {
-                var result = _item.Rotate(RotateDirection.CW, duration);
+                var result = Item.Rotate(RotateDirection.CW, duration);
                 _onOperationExecuted.OnNext(result);
                 StopIdleTimer(result);
                 return result;
@@ -298,14 +301,14 @@ public partial class NOperationManager : Node
         {
             if (dir == MoveDirection.Left)
             {
-                var result = _item.Move(MoveDirection.Left, duration);
+                var result = Item.Move(MoveDirection.Left, duration);
                 _onOperationExecuted.OnNext(result);
                 StopIdleTimer(result);
                 return result;
             }
             else if (dir == MoveDirection.Right)
             {
-                var result = _item.Move(MoveDirection.Right, duration);
+                var result = Item.Move(MoveDirection.Right, duration);
                 _onOperationExecuted.OnNext(result);
                 StopIdleTimer(result);
                 return result;

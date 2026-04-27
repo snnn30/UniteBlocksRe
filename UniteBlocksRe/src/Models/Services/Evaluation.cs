@@ -2,6 +2,7 @@ using System.Linq;
 using Godot;
 using UniteBlocksRe.src.Extensions;
 using UniteBlocksRe.src.Models.Entities;
+using UniteBlocksRe.src.Models.ValueObjects;
 using UniteBlocksRe.src.Models.ValueObjects.BoardOperationResults;
 using UniteBlocksRe.src.Models.ValueObjects.Simulation;
 
@@ -54,14 +55,35 @@ public static class Evaluation
             var adjacents = board.GetAdjacentBlocks(block);
             foreach (var a in adjacents)
             {
-                if (a.Type == block.Type)
+                if (
+                    block.Type == BlockType.Normal
+                    && a.Type == BlockType.Normal
+                    && block.Color == a.Color
+                )
                 {
-                    result.AdjacentScore += weights.SameColorAdjacentWeight;
+                    result.SameAdjacentScore += weights.SameColorAdjacentWeight;
                 }
             }
         }
 
-        // 高さに基づくスコア
+        // 他色隣接数に基づくペナルティ
+        foreach (var block in blocks)
+        {
+            var adjacents = board.GetAdjacentBlocks(block);
+            foreach (var a in adjacents)
+            {
+                if (
+                    block.Type == BlockType.Normal
+                    && a.Type == BlockType.Normal
+                    && block.Color != a.Color
+                )
+                {
+                    result.DifferentAdjacentScore += weights.DifferentColorAdjacentPenalty;
+                }
+            }
+        }
+
+        // 高さに基づくペナルティ
         // 修正が必要　同じだけのエリアをとっていても大きなブロック１つと複数の小さなブロックでスコアが大きく変わる
         for (var x = 0; x < BoardEntity.Size.X; x++)
         {
@@ -75,7 +97,7 @@ public static class Evaluation
             }
         }
 
-        // 障害物の数に基づくスコア
+        // 障害物の数に基づくペナルティ
         foreach (var block in blocks)
         {
             if (block.Type == ValueObjects.BlockType.Obstacle)

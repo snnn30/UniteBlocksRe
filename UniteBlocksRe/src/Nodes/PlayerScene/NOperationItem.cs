@@ -12,13 +12,13 @@ namespace UniteBlocksRe.Nodes;
 
 public partial class NOperationItem : Node
 {
-    private OperatingBlocksEntity _entity;
+    public OperatingBlocksEntity Model { get; private set; }
     private NBoard _board;
 
     public NBlock Parent { get; private set; }
     public NBlock Child { get; private set; }
-    public Vector2I ParentPos => _entity.ParentPos;
-    public Vector2I ChildPos => _entity.ChildPos;
+    public Vector2I ParentPos => Model.ParentPos;
+    public Vector2I ChildPos => Model.ChildPos;
 
     #region Public Method
 
@@ -33,7 +33,7 @@ public partial class NOperationItem : Node
         {
             return OperationResult.Failed(OperationType.Settle);
         }
-        if (_entity.IsHalfUp)
+        if (Model.IsHalfUp)
         {
             Log.Warn("マスの半分の高さにある");
             return OperationResult.Failed(OperationType.Settle);
@@ -42,10 +42,10 @@ public partial class NOperationItem : Node
         var task = new Func<NBlock, NBlock, Task>(
             async (parent, child) =>
             {
-                var parentAnim = _board.SetOnBoardAsync(parent, _entity.ParentPos);
+                var parentAnim = _board.SetOnBoardAsync(parent, Model.ParentPos);
                 var childAnim =
                     child != null
-                        ? _board.SetOnBoardAsync(child, _entity.ChildPos)
+                        ? _board.SetOnBoardAsync(child, Model.ChildPos)
                         : Task.CompletedTask;
                 await Task.WhenAll(parentAnim, childAnim);
                 parent.Outlined = false;
@@ -75,10 +75,10 @@ public partial class NOperationItem : Node
             return OperationResult.Failed(OperationType.Rotate);
         }
 
-        var preParentPos = _entity.ParentPos;
-        var preChildPos = _entity.ChildPos;
+        var preParentPos = Model.ParentPos;
+        var preChildPos = Model.ChildPos;
 
-        var result = _entity.TryRotate(direction);
+        var result = Model.TryRotate(direction);
 
         if (result.Sucess && !result.IsShift)
         {
@@ -115,7 +115,7 @@ public partial class NOperationItem : Node
             return OperationResult.Failed(OperationType.Move);
         }
 
-        var sucess = _entity.TryMove(direction);
+        var sucess = Model.TryMove(direction);
         if (!sucess)
         {
             return OperationResult.Failed(OperationType.Move);
@@ -158,7 +158,7 @@ public partial class NOperationItem : Node
             return OperationResult.Failed(OperationType.Drop);
         }
 
-        var sucess = _entity.TryDrop();
+        var sucess = Model.TryDrop();
         if (!sucess)
         {
             return OperationResult.Failed(OperationType.Drop);
@@ -217,7 +217,7 @@ public partial class NOperationItem : Node
         {
             return OperationResult.Failed(OperationType.Spawn);
         }
-        _entity = entity;
+        Model = entity;
 
         Parent = NBlock.Create(parent);
         _board.AddAsBoardElement(Parent);
@@ -251,7 +251,7 @@ public partial class NOperationItem : Node
             return OperationResult.Failed(OperationType.Spawn);
         }
 
-        _entity = entity;
+        Model = entity;
 
         Parent = NBlock.Create(parent);
         _board.AddAsBoardElement(Parent);
@@ -342,14 +342,14 @@ public partial class NOperationItem : Node
 
     private void Reset()
     {
-        _entity = null;
+        Model = null;
         Parent = null;
         Child = null;
     }
 
     private bool CheckExistBlocks()
     {
-        var exist = _entity != null;
+        var exist = Model != null;
         if (!exist)
         {
             Log.Warn("まだスポーンしていない", 1);

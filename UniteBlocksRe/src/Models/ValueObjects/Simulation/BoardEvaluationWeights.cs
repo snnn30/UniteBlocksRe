@@ -7,4 +7,5 @@ public record struct BoardEvaluationWeights
 
     public required float HeightPenalty { get; init; }
     public required float ObstaclePenalty { get; init; }
+    public required float DifferentColorAdjacentPenalty { get; init; }
 }

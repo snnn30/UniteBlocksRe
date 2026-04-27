@@ -22,7 +22,7 @@ public class EnemyInputSource : IOperationInputSource
     public ReadOnlyReactiveProperty<bool> IsDropActiveState => _isDropActive;
     public Observable<Unit> SwitchBomb => _switchBomb;
 
-    private readonly OperatingBlocksEntity _operating;
+    private OperatingBlocksEntity _operating;
     private readonly NOperationManager _manager;
 
     private CancellationTokenSource _loopCts;
@@ -33,31 +33,32 @@ public class EnemyInputSource : IOperationInputSource
     private ExplodeEvaluationWeights _explodeWeights;
     private readonly ActionSelector _actionSelector;
 
-    public EnemyInputSource(OperatingBlocksEntity operating, NOperationManager manager)
+    public EnemyInputSource(NOperationManager manager)
     {
-        _operating = operating;
         _manager = manager;
 
         _boardWeights = new BoardEvaluationWeights
         {
             BlockSizeWeight = 10f,
             SameColorAdjacentWeight = 10f,
-            HeightPenalty = -4f,
+            HeightPenalty = -2f,
             ObstaclePenalty = -20f,
+            DifferentColorAdjacentPenalty = -4f,
         };
-        _explodeWeights = new ExplodeEvaluationWeights { Weight = 10f };
+        _explodeWeights = new ExplodeEvaluationWeights { Weight = 12f };
         _actionSelector = new ActionSelector(_boardWeights, _explodeWeights);
+
+        _manager.OnSpawn.Subscribe(item =>
+        {
+            _operating = item;
+            StartNpcLoop();
+        });
 
         _manager.OnOperationExecuted.Subscribe(result =>
         {
-            switch (result.Type)
+            if (result.Type == OperationType.Settle)
             {
-                case OperationType.Spawn:
-                    StartNpcLoop();
-                    break;
-                case OperationType.Settle:
-                    StopNpcLoop();
-                    break;
+                StopNpcLoop();
             }
         });
     }
@@ -87,6 +88,9 @@ public class EnemyInputSource : IOperationInputSource
             {
                 var best = _actionSelector.GetBestMoveBlock(_operating);
                 var steps = best.Instructions.Steps;
+
+                // Log.Debug(best.SimulatedBoard.ToString());
+                // Log.Debug(best.Instructions.ToString());
 
                 if (steps.Count == 0)
                 {

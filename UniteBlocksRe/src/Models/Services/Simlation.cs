@@ -137,7 +137,7 @@ public static class Simlation
         var visited = new HashSet<(Vector2I, Vector2I)> { (root.ParentPos, root.ChildPos) };
 
         var cwOpe = root.ShallowCopy();
-        for (var i = 1; i <= 3; i++)
+        for (var i = 1; i <= 2; i++)
         {
             var (success, _, _) = cwOpe.TryRotate(RotateDirection.CW);
             var pos = (cwOpe.ParentPos, cwOpe.ChildPos);
@@ -153,7 +153,7 @@ public static class Simlation
         }
 
         var acwOpe = root.ShallowCopy();
-        for (var i = 1; i <= 3; i++)
+        for (var i = 1; i <= 2; i++)
         {
             var (success, _, _) = acwOpe.TryRotate(RotateDirection.ACW);
             var pos = (acwOpe.ParentPos, acwOpe.ChildPos);

@@ -60,12 +60,12 @@ public partial class OperationItemTest : Node
             }
             if (key.Keycode == Key.U)
             {
-                var result = _item.Rotate(RotationDirection.ACW, 0.2f);
+                var result = _item.Rotate(RotateDirection.ACW, 0.2f);
                 Log.Info($"反時計周りの回転 {(result.Sucess ? "成功" : "失敗")}");
             }
             if (key.Keycode == Key.I)
             {
-                var result = _item.Rotate(RotationDirection.CW, 0.2f);
+                var result = _item.Rotate(RotateDirection.CW, 0.2f);
                 Log.Info($"時計回りの回転 {(result.Sucess ? "成功" : "失敗")}");
             }
             if (key.Keycode == Key.Space)

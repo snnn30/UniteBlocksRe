@@ -6,7 +6,7 @@ namespace UniteBlocksRe.src.Nodes.PlayerScene.Operation;
 public interface IOperationInputSource
 {
     ReadOnlyReactiveProperty<MoveDirection> MoveDirectionState { get; }
-    ReadOnlyReactiveProperty<RotationDirection> RotateDirectionState { get; }
-    ReadOnlyReactiveProperty<bool> IsDropActive { get; }
+    ReadOnlyReactiveProperty<RotateDirection> RotateDirectionState { get; }
+    ReadOnlyReactiveProperty<bool> IsDropActiveState { get; }
     Observable<Unit> SwitchBomb { get; }
 }

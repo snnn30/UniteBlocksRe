@@ -6,7 +6,7 @@ using UniteBlocksRe.src.Extensions;
 using UniteBlocksRe.src.Logging;
 using UniteBlocksRe.src.Models.Entities;
 using UniteBlocksRe.src.Models.ValueObjects.BlocksOperation;
-using UniteBlocksRe.src.Nodes.PlayerScene;
+using UniteBlocksRe.src.Nodes.PlayerScene.Operation;
 
 namespace UniteBlocksRe.Nodes;
 
@@ -31,12 +31,12 @@ public partial class NOperationItem : Node
     {
         if (!CheckExistBlocks())
         {
-            return OperationResult.Failed();
+            return OperationResult.Failed(OperationType.Settle);
         }
         if (_entity.IsHalfUp)
         {
             Log.Warn("マスの半分の高さにある");
-            return OperationResult.Failed();
+            return OperationResult.Failed(OperationType.Settle);
         }
 
         var task = new Func<NBlock, NBlock, Task>(
@@ -53,7 +53,7 @@ public partial class NOperationItem : Node
         )(Parent, Child);
 
         Reset();
-        return OperationResult.Succeeded(task);
+        return OperationResult.Succeeded(task, OperationType.Settle);
     }
 
     public OperationResult Spawn(BlockEntity parent, BlockEntity child = null)
@@ -68,11 +68,11 @@ public partial class NOperationItem : Node
         }
     }
 
-    public OperationResult Rotate(RotationDirection direction, float duration)
+    public OperationResult Rotate(RotateDirection direction, float duration)
     {
         if (!CheckExistBlocks())
         {
-            return OperationResult.Failed();
+            return OperationResult.Failed(OperationType.Rotate);
         }
 
         var preParentPos = _entity.ParentPos;
@@ -89,7 +89,7 @@ public partial class NOperationItem : Node
                 preChildPos,
                 result.PivotIsChild
             );
-            return OperationResult.Succeeded(task);
+            return OperationResult.Succeeded(task, OperationType.Rotate);
         }
         else if (result.Sucess && result.IsShift)
         {
@@ -100,11 +100,11 @@ public partial class NOperationItem : Node
                 preChildPos,
                 result.PivotIsChild
             );
-            return OperationResult.Succeeded(task);
+            return OperationResult.Succeeded(task, OperationType.Rotate);
         }
         else
         {
-            return OperationResult.Failed();
+            return OperationResult.Failed(OperationType.Rotate);
         }
     }
 
@@ -112,13 +112,13 @@ public partial class NOperationItem : Node
     {
         if (!CheckExistBlocks())
         {
-            return OperationResult.Failed();
+            return OperationResult.Failed(OperationType.Move);
         }
 
         var sucess = _entity.TryMove(direction);
         if (!sucess)
         {
-            return OperationResult.Failed();
+            return OperationResult.Failed(OperationType.Move);
         }
 
         var task = new Func<Task>(async () =>
@@ -148,20 +148,20 @@ public partial class NOperationItem : Node
             childHandler?.Apply();
         })();
 
-        return OperationResult.Succeeded(task);
+        return OperationResult.Succeeded(task, OperationType.Move);
     }
 
     public OperationResult Drop(float duration)
     {
         if (!CheckExistBlocks())
         {
-            return OperationResult.Failed();
+            return OperationResult.Failed(OperationType.Drop);
         }
 
         var sucess = _entity.TryDrop();
         if (!sucess)
         {
-            return OperationResult.Failed();
+            return OperationResult.Failed(OperationType.Drop);
         }
 
         var task = new Func<Task>(async () =>
@@ -191,7 +191,7 @@ public partial class NOperationItem : Node
             childHandler?.Apply();
         })();
 
-        return OperationResult.Succeeded(task);
+        return OperationResult.Succeeded(task, OperationType.Drop);
     }
 
     #endregion
@@ -215,7 +215,7 @@ public partial class NOperationItem : Node
 
         if (!sucess)
         {
-            return OperationResult.Failed();
+            return OperationResult.Failed(OperationType.Spawn);
         }
         _entity = entity;
 
@@ -231,7 +231,7 @@ public partial class NOperationItem : Node
         _board.BringToFront(Parent);
 
         var anim = Task.WhenAll(Parent.PlaySpawnAnimeAsync(), Child.PlaySpawnAnimeAsync());
-        return OperationResult.Succeeded(anim);
+        return OperationResult.Succeeded(anim, OperationType.Spawn);
     }
 
     private OperationResult SpawnSingle(BlockEntity parent)
@@ -248,7 +248,7 @@ public partial class NOperationItem : Node
 
         if (!sucess)
         {
-            return OperationResult.Failed();
+            return OperationResult.Failed(OperationType.Spawn);
         }
 
         _entity = entity;
@@ -261,11 +261,11 @@ public partial class NOperationItem : Node
         _board.BringToFront(Parent);
 
         var anim = Parent.PlaySpawnAnimeAsync();
-        return OperationResult.Succeeded(anim);
+        return OperationResult.Succeeded(anim, OperationType.Spawn);
     }
 
     private async Task ShiftRotateAnim(
-        RotationDirection direction,
+        RotateDirection direction,
         float duration,
         Vector2I preParentPos,
         Vector2I preChildPos,
@@ -300,7 +300,7 @@ public partial class NOperationItem : Node
     }
 
     private async Task NormalRotateAnim(
-        RotationDirection direction,
+        RotateDirection direction,
         float duration,
         Vector2I preParentPos,
         Vector2I preChildPos,
@@ -317,8 +317,8 @@ public partial class NOperationItem : Node
 
         var targetDeg = direction switch
         {
-            RotationDirection.CW => 90,
-            RotationDirection.ACW => -90,
+            RotateDirection.CW => 90,
+            RotateDirection.ACW => -90,
             _ => throw new ArgumentException("無効な回転方向", nameof(direction)),
         };
 

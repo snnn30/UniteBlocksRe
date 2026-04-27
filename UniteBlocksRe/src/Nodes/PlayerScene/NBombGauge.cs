@@ -6,7 +6,7 @@ namespace UniteBlocksRe.Nodes;
 public partial class NBombGauge : Node2D
 {
     public bool IsAutoCharging { get; set; } = false;
-    public int ChargeSpeed { get; set; } = 300;
+    public int ChargeSpeed { get; set; } = 1000;
     public int Value
     {
         get => _gauge.Value;

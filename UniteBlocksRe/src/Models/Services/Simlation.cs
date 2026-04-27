@@ -18,15 +18,19 @@ public static class Simlation
             var finalOp = moveData.Entity.ShallowCopy();
 
             List<OperationStep> operations = [];
-            operations.Add(new MoveStep(moveData.Direction, moveData.Count));
-
+            if (moveData.Count > 0)
+            {
+                operations.Add(new MoveStep(moveData.Direction, moveData.Count));
+            }
             var dropCount = 0;
             while (finalOp.TryDrop())
             {
                 dropCount++;
             }
-            operations.Add(new DropStep(dropCount));
-
+            if (dropCount > 0)
+            {
+                operations.Add(new DropStep(dropCount));
+            }
             var simBoard = board.DeepCopy();
             var bombCopy = finalOp.Parent.DeepCopy();
             simBoard.TrySetBlock(finalOp.ParentPos, bombCopy);
@@ -56,15 +60,24 @@ public static class Simlation
                 var finalOp = rotationData.Entity.ShallowCopy();
 
                 List<OperationStep> operations = [];
-                operations.Add(new MoveStep(moveData.Direction, moveData.Count));
-                operations.Add(new RotateStep(rotationData.Direction, rotationData.Count));
+                if (moveData.Count > 0)
+                {
+                    operations.Add(new MoveStep(moveData.Direction, moveData.Count));
+                }
+                if (rotationData.Count > 0)
+                {
+                    operations.Add(new RotateStep(rotationData.Direction, rotationData.Count));
+                }
 
                 var dropCount = 0;
                 while (finalOp.TryDrop())
                 {
                     dropCount++;
                 }
-                operations.Add(new DropStep(dropCount));
+                if (dropCount > 0)
+                {
+                    operations.Add(new DropStep(dropCount));
+                }
 
                 if (visited.Add((finalOp.ParentPos, finalOp.ChildPos)))
                 {
@@ -91,7 +104,7 @@ public static class Simlation
 
     private record struct RotateData(
         OperatingBlocksEntity Entity,
-        RotationDirection Direction,
+        RotateDirection Direction,
         int Count
     );
 
@@ -120,17 +133,17 @@ public static class Simlation
 
     private static List<RotateData> GetRotationClones(OperatingBlocksEntity root)
     {
-        var list = new List<RotateData> { new(root.ShallowCopy(), RotationDirection.None, 0) };
+        var list = new List<RotateData> { new(root.ShallowCopy(), RotateDirection.None, 0) };
         var visited = new HashSet<(Vector2I, Vector2I)> { (root.ParentPos, root.ChildPos) };
 
         var cwOpe = root.ShallowCopy();
         for (var i = 1; i <= 3; i++)
         {
-            var (success, _, _) = cwOpe.TryRotate(RotationDirection.CW);
+            var (success, _, _) = cwOpe.TryRotate(RotateDirection.CW);
             var pos = (cwOpe.ParentPos, cwOpe.ChildPos);
             if (success && !visited.Contains(pos))
             {
-                list.Add(new(cwOpe.ShallowCopy(), RotationDirection.CW, i));
+                list.Add(new(cwOpe.ShallowCopy(), RotateDirection.CW, i));
                 visited.Add(pos);
             }
             else
@@ -142,11 +155,11 @@ public static class Simlation
         var acwOpe = root.ShallowCopy();
         for (var i = 1; i <= 3; i++)
         {
-            var (success, _, _) = acwOpe.TryRotate(RotationDirection.ACW);
+            var (success, _, _) = acwOpe.TryRotate(RotateDirection.ACW);
             var pos = (acwOpe.ParentPos, acwOpe.ChildPos);
             if (success && !visited.Contains(pos))
             {
-                list.Add(new(acwOpe.ShallowCopy(), RotationDirection.ACW, i));
+                list.Add(new(acwOpe.ShallowCopy(), RotateDirection.ACW, i));
                 visited.Add(pos);
             }
             else

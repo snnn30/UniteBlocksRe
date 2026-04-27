@@ -6,17 +6,14 @@ namespace UniteBlocksRe.src.Nodes.PlayerScene.Operation;
 
 public class PlayerInputSource : IOperationInputSource
 {
-    private readonly ReactiveProperty<MoveDirection> _moveDirectionState = new(MoveDirection.None);
-    private readonly ReactiveProperty<RotationDirection> _rotateDirectionState = new(
-        RotationDirection.None
-    );
+    private readonly ReactiveProperty<MoveDirection> _moveDirection = new(MoveDirection.None);
+    private readonly ReactiveProperty<RotateDirection> _rotateDirection = new(RotateDirection.None);
     private readonly ReactiveProperty<bool> _isDropActive = new(false);
     private readonly Subject<Unit> _switchBomb = new();
 
-    public ReadOnlyReactiveProperty<MoveDirection> MoveDirectionState => _moveDirectionState;
-    public ReadOnlyReactiveProperty<RotationDirection> RotateDirectionState =>
-        _rotateDirectionState;
-    public ReadOnlyReactiveProperty<bool> IsDropActive => _isDropActive;
+    public ReadOnlyReactiveProperty<MoveDirection> MoveDirectionState => _moveDirection;
+    public ReadOnlyReactiveProperty<RotateDirection> RotateDirectionState => _rotateDirection;
+    public ReadOnlyReactiveProperty<bool> IsDropActiveState => _isDropActive;
     public Observable<Unit> SwitchBomb => _switchBomb;
 
     private readonly CompositeDisposable _disposables = [];
@@ -43,7 +40,7 @@ public class PlayerInputSource : IOperationInputSource
                 }
                 return MoveDirection.None;
             })
-            .Subscribe(dir => _moveDirectionState.Value = dir)
+            .Subscribe(dir => _moveDirection.Value = dir)
             .AddTo(_disposables);
 
         Observable
@@ -52,15 +49,15 @@ public class PlayerInputSource : IOperationInputSource
             {
                 if (Input.IsActionPressed("rotate_left"))
                 {
-                    return RotationDirection.ACW;
+                    return RotateDirection.ACW;
                 }
                 if (Input.IsActionPressed("rotate_right"))
                 {
-                    return RotationDirection.CW;
+                    return RotateDirection.CW;
                 }
-                return RotationDirection.None;
+                return RotateDirection.None;
             })
-            .Subscribe(dir => _rotateDirectionState.Value = dir)
+            .Subscribe(dir => _rotateDirection.Value = dir)
             .AddTo(_disposables);
 
         Observable

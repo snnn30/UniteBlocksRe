@@ -4,7 +4,6 @@ using Godot;
 using UniteBlocksRe.src.Logging;
 using UniteBlocksRe.src.Models.Entities;
 using UniteBlocksRe.src.Models.ValueObjects;
-using UniteBlocksRe.src.Nodes.PlayerScene;
 using UniteBlocksRe.src.Nodes.PlayerScene.Operation;
 
 namespace UniteBlocksRe.Nodes;
@@ -23,9 +22,9 @@ public partial class NPlayerScene : Node2D
         _queue = GetNode<NBlockQueue>("%Queue");
         _bombGauge = GetNode<NBombGauge>("%BombGauge");
 
-        var inputSouce = new PlayerInputSource();
+        var inputSource = new PlayerInputSource();
 
-        _operationManager.Init(_board, _bombGauge, inputSouce);
+        _operationManager.Init(_board, _bombGauge, inputSource);
     }
 
     public async Task StartGameLoop()

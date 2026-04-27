@@ -130,7 +130,7 @@ public class OperatingBlocksEntity
     /// ■×　　■□×
     /// </code>
     /// </summary>
-    public (bool Sucess, bool PivotIsChild, bool IsShift) TryRotate(RotationDirection direction)
+    public (bool Sucess, bool PivotIsChild, bool IsShift) TryRotate(RotateDirection direction)
     {
         if (CanRotate(direction, pivotIsChild: false, isShift: false)) // 親基準の通常回転
         {
@@ -187,7 +187,7 @@ public class OperatingBlocksEntity
         return canPlace;
     }
 
-    private bool CanRotate(RotationDirection direction, bool pivotIsChild, bool isShift)
+    private bool CanRotate(RotateDirection direction, bool pivotIsChild, bool isShift)
     {
         if (!HasChild)
         {
@@ -230,7 +230,7 @@ public class OperatingBlocksEntity
     }
 
     private (Vector2I TargetParentPos, Vector2I TargetChildPos) CalcNextPosRotate(
-        RotationDirection direction,
+        RotateDirection direction,
         bool pivotIsChild,
         bool isShift
     )
@@ -261,7 +261,7 @@ public class OperatingBlocksEntity
     /// </summary>
     /// <returns>回転後のmoverPosの位置</returns>
     private static Vector2I CalcNextPosRotate(
-        RotationDirection direction,
+        RotateDirection direction,
         Vector2I axisPos,
         Vector2I moverPos
     )
@@ -269,9 +269,9 @@ public class OperatingBlocksEntity
         var relativePos = moverPos - axisPos;
         var rotatedRelative = direction switch
         {
-            RotationDirection.CW => new Vector2I(-relativePos.Y, relativePos.X),
-            RotationDirection.ACW => new Vector2I(relativePos.Y, -relativePos.X),
-            RotationDirection.None => relativePos,
+            RotateDirection.CW => new Vector2I(-relativePos.Y, relativePos.X),
+            RotateDirection.ACW => new Vector2I(relativePos.Y, -relativePos.X),
+            RotateDirection.None => relativePos,
             _ => throw new ArgumentException("無効な入力", nameof(direction)),
         };
 

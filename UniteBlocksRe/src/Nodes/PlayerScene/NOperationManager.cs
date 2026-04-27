@@ -6,13 +6,15 @@ using UniteBlocksRe.src.Extensions;
 using UniteBlocksRe.src.Logging;
 using UniteBlocksRe.src.Models.Entities;
 using UniteBlocksRe.src.Models.ValueObjects.BlocksOperation;
-using UniteBlocksRe.src.Nodes.PlayerScene;
 using UniteBlocksRe.src.Nodes.PlayerScene.Operation;
 
 namespace UniteBlocksRe.Nodes;
 
 public partial class NOperationManager : Node
 {
+    private readonly Subject<OperationResult> _onOperationExecuted = new();
+    public Observable<OperationResult> OnOperationExecuted => _onOperationExecuted;
+
     private NOperationItem _item;
     private NBombGauge _bombGauge;
     private IOperationInputSource _inputSource;
@@ -30,7 +32,9 @@ public partial class NOperationManager : Node
 
     public OperationResult Spawn(BlockEntity parent, BlockEntity child = null)
     {
-        return _item.Spawn(parent, child);
+        var result = _item.Spawn(parent, child);
+        _onOperationExecuted.OnNext(result);
+        return result;
     }
 
     public async Task StartRun()
@@ -51,7 +55,9 @@ public partial class NOperationManager : Node
         await _endOperationSignal.Task;
         operationDisposable.Dispose();
 
-        await _item.Settle().Task;
+        var result = _item.Settle();
+        _onOperationExecuted.OnNext(result);
+        await result.Task;
     }
 
     public void Init(NBoard board, NBombGauge bombGauge, IOperationInputSource inputSource)
@@ -114,7 +120,7 @@ public partial class NOperationManager : Node
 
         var dropInput = Observable
             .EveryUpdate()
-            .Select(_ => _activeInput && source.IsDropActive.CurrentValue)
+            .Select(_ => _activeInput && source.IsDropActiveState.CurrentValue)
             .DistinctUntilChanged();
 
         dropInput
@@ -153,6 +159,7 @@ public partial class NOperationManager : Node
         OperationResult ExecuteDrop(bool isAutoDrop, float duration)
         {
             var result = _item.Drop(duration);
+            _onOperationExecuted.OnNext(result);
             StopIdleTimer(result); // sucessならidleタイマー止まる
             if (result.Sucess)
             {
@@ -189,14 +196,14 @@ public partial class NOperationManager : Node
         var rotateInput = Observable
             .EveryUpdate()
             .Select(_ =>
-                _activeInput ? source.RotateDirectionState.CurrentValue : RotationDirection.None
+                _activeInput ? source.RotateDirectionState.CurrentValue : RotateDirection.None
             )
             .DistinctUntilChanged();
 
         rotateInput
             .Select(dir =>
             {
-                if (dir == RotationDirection.None)
+                if (dir == RotateDirection.None)
                 {
                     return Observable.Empty<Unit>();
                 }
@@ -205,7 +212,7 @@ public partial class NOperationManager : Node
                 {
                     while (!ct.IsCancellationRequested)
                     {
-                        (var sucess, var task) = ExecuteRotate(dir, RotateDuration);
+                        (var sucess, var task, var type) = ExecuteRotate(dir, RotateDuration);
                         if (sucess)
                         {
                             await task;
@@ -219,17 +226,19 @@ public partial class NOperationManager : Node
             .Subscribe()
             .AddTo(disposables);
 
-        OperationResult ExecuteRotate(RotationDirection dir, float duration)
+        OperationResult ExecuteRotate(RotateDirection dir, float duration)
         {
-            if (dir == RotationDirection.ACW)
+            if (dir == RotateDirection.ACW)
             {
-                var result = _item.Rotate(RotationDirection.ACW, duration);
+                var result = _item.Rotate(RotateDirection.ACW, duration);
+                _onOperationExecuted.OnNext(result);
                 StopIdleTimer(result);
                 return result;
             }
-            else if (dir == RotationDirection.CW)
+            else if (dir == RotateDirection.CW)
             {
-                var result = _item.Rotate(RotationDirection.CW, duration);
+                var result = _item.Rotate(RotateDirection.CW, duration);
+                _onOperationExecuted.OnNext(result);
                 StopIdleTimer(result);
                 return result;
             }
@@ -265,7 +274,7 @@ public partial class NOperationManager : Node
                     var wasLastMoveSucess = false;
                     while (!ct.IsCancellationRequested)
                     {
-                        (var sucess, var task) = ExecuteMove(dir, MoveDuration);
+                        (var sucess, var task, var type) = ExecuteMove(dir, MoveDuration);
                         if (sucess)
                         {
                             var delayTime = wasLastMoveSucess ? RepeatDelay : InitialDelay;
@@ -290,12 +299,14 @@ public partial class NOperationManager : Node
             if (dir == MoveDirection.Left)
             {
                 var result = _item.Move(MoveDirection.Left, duration);
+                _onOperationExecuted.OnNext(result);
                 StopIdleTimer(result);
                 return result;
             }
             else if (dir == MoveDirection.Right)
             {
                 var result = _item.Move(MoveDirection.Right, duration);
+                _onOperationExecuted.OnNext(result);
                 StopIdleTimer(result);
                 return result;
             }

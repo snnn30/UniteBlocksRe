@@ -8,7 +8,6 @@ namespace UniteBlocksRe.Nodes;
 public partial class NObstacleCounter : Node2D
 {
     private Label _label;
-    private NBoard _board;
 
     private int _score = 0;
     private int _count;
@@ -23,11 +22,6 @@ public partial class NObstacleCounter : Node2D
         }
     }
     private float _obstacleRate = 4.5f;
-
-    public void Init(NBoard board)
-    {
-        _board = board;
-    }
 
     public override void _Ready()
     {

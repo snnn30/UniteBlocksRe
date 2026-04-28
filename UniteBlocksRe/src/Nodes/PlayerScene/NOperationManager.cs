@@ -6,6 +6,7 @@ using UniteBlocksRe.src.Extensions;
 using UniteBlocksRe.src.Logging;
 using UniteBlocksRe.src.Models.Entities;
 using UniteBlocksRe.src.Models.ValueObjects.BlocksOperation;
+using UniteBlocksRe.src.Nodes.PlayerScene;
 using UniteBlocksRe.src.Nodes.PlayerScene.Operation;
 
 namespace UniteBlocksRe.Nodes;
@@ -63,11 +64,11 @@ public partial class NOperationManager : Node
         await result.Task;
     }
 
-    public void Init(NBoard board, NBombGauge bombGauge, IOperationInputSource inputSource)
+    public void Init(IPlayerContext context)
     {
-        Item.Init(board);
-        _bombGauge = bombGauge;
-        _inputSource = inputSource;
+        Item.Init(context.Board);
+        _bombGauge = context.BombGauge;
+        _inputSource = context.InputSource;
 
         SubscribeSwitchInput(_inputSource);
     }

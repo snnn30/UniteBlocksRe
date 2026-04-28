@@ -1,10 +1,11 @@
-[gd_scene load_steps=6 format=3 uid="uid://qvvx1lcdi81m"]
+[gd_scene load_steps=7 format=3 uid="uid://qvvx1lcdi81m"]
 
-[ext_resource type="Script" uid="uid://kjwsta2fkybu" path="res://src/Nodes/NPlayerScene.cs" id="1_vill4"]
+[ext_resource type="Script" uid="uid://kjwsta2fkybu" path="res://src/Nodes/PlayerScene/NPlayerScene.cs" id="1_vill4"]
 [ext_resource type="PackedScene" uid="uid://bse5vr6vscgqi" path="res://scenes/screens/play_screen/board.tscn" id="2_f5nrd"]
 [ext_resource type="PackedScene" uid="uid://boh6uf6b2l7b" path="res://scenes/screens/play_screen/enemy/block_queue.tscn" id="2_qpqwq"]
 [ext_resource type="PackedScene" uid="uid://mvu67ni3qh6c" path="res://scenes/screens/play_screen/operation_manager.tscn" id="3_iofrs"]
 [ext_resource type="PackedScene" uid="uid://dqn6mw5pl1sqp" path="res://scenes/screens/play_screen/bomb_gauge.tscn" id="4_n5w2c"]
+[ext_resource type="PackedScene" uid="uid://d1blssmj6rop2" path="res://scenes/screens/play_screen/obstacle_counter.tscn" id="6_f5nrd"]
 
 [node name="PlayerScene" type="Node2D"]
 script = ExtResource("1_vill4")
@@ -20,8 +21,12 @@ unique_name_in_owner = true
 position = Vector2(-270, 31)
 scale = Vector2(0.605, 0.605)
 
-[node name="Queue2" parent="." instance=ExtResource("2_qpqwq")]
+[node name="Queue" parent="." instance=ExtResource("2_qpqwq")]
 unique_name_in_owner = true
 position = Vector2(-254.27, -179)
+
+[node name="ObstacleCounter" parent="." instance=ExtResource("6_f5nrd")]
+unique_name_in_owner = true
+position = Vector2(-129, -316)
 
 [editable path="BombGauge"]

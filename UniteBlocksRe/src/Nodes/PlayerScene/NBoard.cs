@@ -7,6 +7,7 @@ using UniteBlocksRe.src.Helpers;
 using UniteBlocksRe.src.Logging;
 using UniteBlocksRe.src.Models.Entities;
 using UniteBlocksRe.src.Models.Services;
+using UniteBlocksRe.src.Nodes.PlayerScene;
 
 namespace UniteBlocksRe.Nodes;
 
@@ -16,13 +17,20 @@ public partial class NBoard : Node2D
 
     private Control _visuals;
     private Control _clipMask;
-    private NObstacleCounter _obstacleCounter;
+    private NObstacleCounter _playerObstacleCounter;
+    private NObstacleCounter _opponentObstacleCounter;
 
     private readonly BiMap<NBlock, Vector2I> _blockLocations = [];
     private readonly Dictionary<BlockEntity, NBlock> _blockIdentities = [];
 
     public static Vector2 GetRealPosition(Vector2I gridPos) =>
         new Vector2(gridPos.X + 0.5f, gridPos.Y + 0.5f) * NBlock.BaseSize;
+
+    public void Init(IPlayerContext context)
+    {
+        _playerObstacleCounter = context.ObstacleCounter;
+        _opponentObstacleCounter = context.OpponentContext.ObstacleCounter;
+    }
 
     public override void _Ready()
     {
@@ -31,9 +39,6 @@ public partial class NBoard : Node2D
         _visuals.Position = -_visuals.Size / 2;
 
         _clipMask = GetNode<Control>("%ClipMask");
-
-        _obstacleCounter = GetNode<NObstacleCounter>("%ObstacleCounter");
-        _obstacleCounter.Init(this);
 
         var spawnIcon = GetNode<Sprite2D>("%SpawnIcon");
         spawnIcon.Position = GetRealPosition(BoardEntity.SpawnPosition);
@@ -179,26 +184,26 @@ public partial class NBoard : Node2D
                 return node.PlayExplodeAnimeAsync();
             });
 
-            _obstacleCounter.AddCount(step);
+            _opponentObstacleCounter.AddCount(step);
             await Task.WhenAll(tasks);
             foreach (var block in step.Exploded)
             {
                 UnregisterBlock(block);
             }
         }
-        _obstacleCounter.OnEndExplode();
+        _opponentObstacleCounter.OnEndExplode();
     }
 
     public async Task SpawnObstacles()
     {
-        var count = _obstacleCounter.ViewCount;
+        var count = _playerObstacleCounter.ViewCount;
         var result = BoardObstaclePlacer.Place(Model, count, 5);
         if (!result.Placed)
         {
             return;
         }
 
-        _obstacleCounter.SubCount(result);
+        _playerObstacleCounter.SubCount(result);
 
         var tween = CreateTween()
             .SetTrans(Tween.TransitionType.Bounce)

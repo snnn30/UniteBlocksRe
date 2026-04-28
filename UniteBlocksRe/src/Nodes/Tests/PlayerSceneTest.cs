@@ -1,4 +1,5 @@
 using Godot;
+using UniteBlocksRe.src.Nodes.PlayerScene.Operation;
 
 namespace UniteBlocksRe.Nodes.Tests;
 
@@ -9,8 +10,7 @@ public partial class PlayerSceneTest : Node
     public override void _Ready()
     {
         _scene = GetNode<NPlayerScene>("%PlayerScene");
-
-        _scene.InitEnemy();
+        _scene.Init(new EnemyInputSource(_scene.OperationManager), _scene); // 本来は相手を渡すがここでは自身を渡す
         _ = _scene.StartGameLoop();
     }
 }

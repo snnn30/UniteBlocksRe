@@ -1,5 +1,7 @@
 using Godot;
 using R3;
+using UniteBlocksRe.Nodes;
+using UniteBlocksRe.src.Models.Entities;
 using UniteBlocksRe.src.Models.ValueObjects.BlocksOperation;
 
 namespace UniteBlocksRe.src.Nodes.PlayerScene.Operation;
@@ -66,4 +68,6 @@ public class PlayerInputSource : IOperationInputSource
             .Subscribe(_ => _switchBomb.OnNext(Unit.Default))
             .AddTo(_disposables);
     }
+
+    public void UpdateStrategy(BoardEntity board, NBombGauge gauge, BlockQueueEntity queue) { }
 }

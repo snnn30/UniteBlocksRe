@@ -1,10 +1,13 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Godot;
 using R3;
 using UniteBlocksRe.Nodes;
 using UniteBlocksRe.src.Models.Entities;
+using UniteBlocksRe.src.Models.ValueObjects;
 using UniteBlocksRe.src.Models.ValueObjects.BlocksOperation;
 using UniteBlocksRe.src.Models.ValueObjects.Simulation;
 
@@ -45,7 +48,11 @@ public class EnemyInputSource : IOperationInputSource
             ObstaclePenalty = -20f,
             DifferentColorAdjacentPenalty = -4f,
         };
-        _explodeWeights = new ExplodeEvaluationWeights { Weight = 12f };
+        _explodeWeights = new ExplodeEvaluationWeights
+        {
+            ExplodedBlockWeight = 12f,
+            UseBombPenalty = -80f,
+        };
         _actionSelector = new ActionSelector(_boardWeights, _explodeWeights);
 
         _manager.OnSpawn.Subscribe(item =>
@@ -86,11 +93,7 @@ public class EnemyInputSource : IOperationInputSource
         {
             while (!ct.IsCancellationRequested)
             {
-                var best = _actionSelector.GetBestMoveBlock(_operating);
-                var steps = best.Instructions.Steps;
-
-                // Log.Debug(best.SimulatedBoard.ToString());
-                // Log.Debug(best.Instructions.ToString());
+                var steps = GetOperationSteps();
 
                 if (steps.Count == 0)
                 {
@@ -124,6 +127,20 @@ public class EnemyInputSource : IOperationInputSource
             }
         }
         catch (OperationCanceledException) { } // 正常終了
+    }
+
+    private List<OperationStep> GetOperationSteps()
+    {
+        if (_operating.Parent.Type == BlockType.Bomb)
+        {
+            var best = _actionSelector.GetBestMoveBomb(_operating);
+            return best.Instructions.Steps;
+        }
+        else
+        {
+            var best = _actionSelector.GetBestMoveBlock(_operating);
+            return best.Instructions.Steps;
+        }
     }
 
     public async Task<bool> SendDropInputAndWait(DropStep dropStep, CancellationToken ct)
@@ -213,6 +230,43 @@ public class EnemyInputSource : IOperationInputSource
         finally
         {
             _rotateDirection.Value = RotateDirection.None;
+        }
+    }
+
+    public void UpdateStrategy(BoardEntity board, NBombGauge gauge, BlockQueueEntity queue)
+    {
+        var (parent, child) = queue.Next;
+        var nextBlocks = OperatingBlocksEntity.TrySpawnDouble(
+            parent,
+            child,
+            BoardEntity.SpawnPosition,
+            BoardEntity.SpawnPosition + Vector2I.Up,
+            board
+        );
+
+        var nextBomb = OperatingBlocksEntity.TrySpawnSingle(
+            BlockEntity.Bomb,
+            BoardEntity.SpawnPosition,
+            board
+        );
+
+        var blockResult = _actionSelector.GetBestMoveBlock(nextBlocks.Entity);
+        var bombResult = _actionSelector.GetBestMoveBomb(nextBomb.Entity);
+
+        var blockTotalScore = blockResult.EvaluationResult.TotalScore;
+        var bombTotalScore =
+            bombResult.BoardEvaluationResult.TotalScore + bombResult.ExplodeEvaluationResult.Score;
+
+        var useBomb = bombTotalScore > blockTotalScore;
+        var isBombActive = gauge.IsBombActive;
+
+        if (useBomb && !isBombActive)
+        {
+            _switchBomb.OnNext(Unit.Default);
+        }
+        else if (!useBomb && isBombActive)
+        {
+            _switchBomb.OnNext(Unit.Default);
         }
     }
 }

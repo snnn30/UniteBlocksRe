@@ -38,6 +38,8 @@ public static class Simlation
             BoardFaller.Fall(simBoard);
             BoardUniter.Unite(simBoard);
             var exploadeResult = BoardExploder.Explode(simBoard, bombCopy);
+            BoardFaller.Fall(simBoard);
+            BoardUniter.Unite(simBoard);
 
             result.Results.Add((simBoard, new OperationInstructions(operations), exploadeResult));
         }

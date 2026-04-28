@@ -14,6 +14,19 @@ public partial class NPlayerScene : Node2D
     private NBoard _board;
     private NBlockQueue _queue;
     private NBombGauge _bombGauge;
+    private IOperationInputSource _inputSource;
+
+    public void InitEnemy()
+    {
+        _inputSource = new EnemyInputSource(_operationManager);
+        _operationManager.Init(_board, _bombGauge, _inputSource);
+    }
+
+    public void InitPlayer()
+    {
+        _inputSource = new PlayerInputSource();
+        _operationManager.Init(_board, _bombGauge, _inputSource);
+    }
 
     public override void _Ready()
     {
@@ -21,11 +34,6 @@ public partial class NPlayerScene : Node2D
         _board = GetNode<NBoard>("%Board");
         _queue = GetNode<NBlockQueue>("%Queue");
         _bombGauge = GetNode<NBombGauge>("%BombGauge");
-
-        // var inputSource = new PlayerInputSource();
-        var inputSource = new EnemyInputSource(_operationManager);
-
-        _operationManager.Init(_board, _bombGauge, inputSource);
     }
 
     public async Task StartGameLoop()
@@ -35,23 +43,8 @@ public partial class NPlayerScene : Node2D
         while (true)
         {
             await _board.SpawnObstacles();
-
-            OperationResult spawnResult;
-            BlockEntity parent;
-            if (_bombGauge.IsBombActive)
-            {
-                _bombGauge.TryUseBomb();
-                parent = BlockEntity.Bomb;
-                spawnResult = _operationManager.Spawn(parent);
-            }
-            else
-            {
-                var (pair, _) = _queue.Dequeue();
-                await Task.Delay(TimeSpan.FromSeconds(0.2f));
-                parent = pair.Parent;
-                spawnResult = _operationManager.Spawn(pair.Parent, pair.Child);
-            }
-
+            _inputSource.UpdateStrategy(_board.Model, _bombGauge, _queue.Model);
+            var (parent, spawnResult) = await Spawn();
             if (!spawnResult.Sucess)
             {
                 Log.Info("Game Over");
@@ -64,15 +57,32 @@ public partial class NPlayerScene : Node2D
             _bombGauge.IsAutoCharging = false;
             await _board.Fall();
             await _board.Unite();
-
             if (parent.Type == BlockType.Bomb)
             {
                 await _board.Explode(parent);
                 await _board.Fall();
                 await _board.Unite();
             }
-
             _bombGauge.IsAutoCharging = true;
+        }
+    }
+
+    private async Task<(BlockEntity Parent, OperationResult SpawnResult)> Spawn()
+    {
+        if (_bombGauge.IsBombActive)
+        {
+            _bombGauge.TryUseBomb();
+            var parent = BlockEntity.Bomb;
+            var spawnResult = _operationManager.Spawn(parent);
+            return (parent, spawnResult);
+        }
+        else
+        {
+            var (pair, _) = _queue.Dequeue();
+            await Task.Delay(TimeSpan.FromSeconds(0.2f));
+            var parent = pair.Parent;
+            var spawnResult = _operationManager.Spawn(pair.Parent, pair.Child);
+            return (parent, spawnResult);
         }
     }
 }

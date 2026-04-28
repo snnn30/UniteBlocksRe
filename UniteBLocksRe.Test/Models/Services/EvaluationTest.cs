@@ -40,7 +40,11 @@ public class EvaluationTest
             ObstaclePenalty = -20f,
             DifferentColorAdjacentPenalty = -4f,
         };
-        _explodeWeights = new ExplodeEvaluationWeights { Weight = 12f };
+        _explodeWeights = new ExplodeEvaluationWeights
+        {
+            ExplodedBlockWeight = 12f,
+            UseBombPenalty = -80f,
+        };
         _actionSelector = new ActionSelector(_boardWeights, _explodeWeights);
     }
 

@@ -1,0 +1,15 @@
+[gd_scene load_steps=2 format=3 uid="uid://boh6uf6b2l7b"]
+
+[ext_resource type="PackedScene" uid="uid://bkrjkiqwy4ve" path="res://scenes/screens/play_screen/player/block_queue.tscn" id="1_d3gmf"]
+
+[node name="BlockQueue" instance=ExtResource("1_d3gmf")]
+
+[node name="ClipMask" parent="." index="0"]
+polygon = PackedVector2Array(-8, -104, 56, -104, 56, 0, 24, 0, 24, 80, -24, 80, -24, -8, -8, -8)
+uv = PackedVector2Array(8, -104, -56, -104, -56, 0, -24, 0, -24, 80, 24, 80, 24, -8, 8, -8)
+
+[node name="Next" parent="ClipMask" index="0"]
+position = Vector2(24, -51.725)
+
+[node name="ExitPoint" parent="ClipMask" index="3"]
+position = Vector2(25, -160)

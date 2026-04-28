@@ -19,7 +19,7 @@ public partial class NBlockQueue : Node2D
     private NBlockPair _nextPair;
     private NBlockPair _nextNextPair;
     private NBlockPair _spawnPair;
-    private readonly BlockQueueEntity _blockQueueEntity = new();
+    public BlockQueueEntity Model { get; } = new();
 
     private Tween _activeTween;
 
@@ -38,15 +38,15 @@ public partial class NBlockQueue : Node2D
         {
             var parent = nextNode.GetNode<NBlock>("Parent");
             var child = nextNode.GetNode<NBlock>("Child");
-            parent.Model = _blockQueueEntity.Next.Parent;
-            child.Model = _blockQueueEntity.Next.Child;
+            parent.Model = Model.Next.Parent;
+            child.Model = Model.Next.Child;
             _nextPair = new(nextNode, parent, child);
         }
         {
             var parent = nextnextNode.GetNode<NBlock>("Parent");
             var child = nextnextNode.GetNode<NBlock>("Child");
-            parent.Model = _blockQueueEntity.NextNext.Parent;
-            child.Model = _blockQueueEntity.NextNext.Child;
+            parent.Model = Model.NextNext.Parent;
+            child.Model = Model.NextNext.Child;
             _nextNextPair = new(nextnextNode, parent, child);
         }
         {
@@ -66,9 +66,9 @@ public partial class NBlockQueue : Node2D
             .SetEase(Tween.EaseType.Out);
         _activeTween = tween;
 
-        var output = _blockQueueEntity.Dequeue();
-        _spawnPair.Parent.Model = _blockQueueEntity.NextNext.Parent;
-        _spawnPair.Child.Model = _blockQueueEntity.NextNext.Child;
+        var output = Model.Dequeue();
+        _spawnPair.Parent.Model = Model.NextNext.Parent;
+        _spawnPair.Child.Model = Model.NextNext.Child;
 
         MoveBlockPair(tween, _spawnPair, _nextnextPoint);
         MoveBlockPair(tween, _nextNextPair, _nextPoint);

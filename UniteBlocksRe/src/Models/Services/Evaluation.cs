@@ -21,9 +21,12 @@ public static class Evaluation
             foreach (var block in step.Exploded)
             {
                 var area = block.Size.GetArea();
-                score += area * area * weights.Weight;
+                score += area * area * weights.ExplodedBlockWeight;
             }
         }
+
+        score += weights.UseBombPenalty;
+
         return new ExplodeEvaluationResult(score);
     }
 

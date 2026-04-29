@@ -44,14 +44,16 @@ public partial class NPlayerScene : Node2D, IPlayerContext
         while (true)
         {
             await Board.SpawnObstacles();
-            InputSource.UpdateStrategy(Board.Model, BombGauge, Queue.Model);
-            var (parent, spawnResult) = await Spawn();
-            if (!spawnResult.Sucess)
+
+            if (!CheckCanSpawn())
             {
                 BombGauge.IsAutoCharging = false;
                 Log.Info("Game Over");
                 return;
             }
+
+            InputSource.UpdateStrategy(Board.Model, BombGauge, Queue.Model);
+            var (parent, spawnResult) = await Spawn();
             await spawnResult.Task;
 
             await OperationManager.StartRun();
@@ -67,6 +69,11 @@ public partial class NPlayerScene : Node2D, IPlayerContext
             }
             BombGauge.IsAutoCharging = true;
         }
+    }
+
+    private bool CheckCanSpawn()
+    {
+        return Board.Model.CanPlace(BoardEntity.SpawnPosition, Vector2I.One);
     }
 
     private async Task<(BlockEntity Parent, OperationResult SpawnResult)> Spawn()

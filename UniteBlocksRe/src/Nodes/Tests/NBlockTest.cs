@@ -1,7 +1,7 @@
 using Godot;
 using UniteBlocksRe.src.Logging;
-using UniteBlocksRe.src.Models.Entities;
-using UniteBlocksRe.src.Models.ValueObjects;
+using UniteBlocksRe.src.Models;
+using UniteBlocksRe.src.Models.Block;
 
 namespace UniteBlocksRe.Nodes.Tests;
 
@@ -11,7 +11,7 @@ public partial class NBlockTest : Node
 
     public override void _Ready()
     {
-        var block = new BlockEntity(BlockType.Normal, BlockColor.Red, new Vector2I(1, 1));
+        var block = BlockEntity.CreateNormal(BlockColor.Red);
         _block = NBlock.Create(block);
         AddChild(_block);
         _block.Position = new Vector2(100, 100);
@@ -32,16 +32,12 @@ public partial class NBlockTest : Node
         {
             var model = key.Keycode switch
             {
-                Key.Key1 => new BlockEntity(BlockType.Normal, BlockColor.Red, new Vector2I(1, 1)),
-                Key.Key2 => new BlockEntity(BlockType.Normal, BlockColor.Green, new Vector2I(2, 2)),
-                Key.Key3 => new BlockEntity(BlockType.Normal, BlockColor.Blue, new Vector2I(6, 3)),
-                Key.Key4 => new BlockEntity(
-                    BlockType.Normal,
-                    BlockColor.Orange,
-                    new Vector2I(2, 8)
-                ),
-                Key.A => new BlockEntity(BlockType.Bomb, BlockColor.None, Vector2I.One),
-                Key.S => new BlockEntity(BlockType.Obstacle, BlockColor.None, Vector2I.One),
+                Key.Key1 => BlockEntity.CreateNormal(BlockColor.Red, Vector2I.One),
+                Key.Key2 => BlockEntity.CreateNormal(BlockColor.Green, new Vector2I(2, 2)),
+                Key.Key3 => BlockEntity.CreateNormal(BlockColor.Blue, new Vector2I(6, 3)),
+                Key.Key4 => BlockEntity.CreateNormal(BlockColor.Orange, new Vector2I(2, 8)),
+                Key.A => BlockEntity.CreateObstacle(),
+                Key.S => BlockEntity.CreateBomb(),
                 _ => null,
             };
             if (model is not null)

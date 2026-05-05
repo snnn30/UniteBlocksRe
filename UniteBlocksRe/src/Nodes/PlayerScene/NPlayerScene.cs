@@ -1,9 +1,7 @@
-using System;
 using System.Threading.Tasks;
 using Godot;
 using UniteBlocksRe.src.Logging;
-using UniteBlocksRe.src.Models.Entities;
-using UniteBlocksRe.src.Models.ValueObjects;
+using UniteBlocksRe.src.Models;
 using UniteBlocksRe.src.Nodes.PlayerScene;
 using UniteBlocksRe.src.Nodes.PlayerScene.Operation;
 
@@ -52,21 +50,11 @@ public partial class NPlayerScene : Node2D, IPlayerContext
                 return;
             }
 
-            InputSource.UpdateStrategy(Board.Model, BombGauge, Queue.Model);
-            var (parent, spawnResult) = await Spawn();
-            await spawnResult.Task;
-
+            await OperationManager.Spawn();
             await OperationManager.StartRun();
 
             BombGauge.IsAutoCharging = false;
-            await Board.Fall();
-            await Board.Unite();
-            if (parent.Type == BlockType.Bomb)
-            {
-                await Board.Explode(parent);
-                await Board.Fall();
-                await Board.Unite();
-            }
+            await Board.ProcessChainReaction();
             BombGauge.IsAutoCharging = true;
         }
     }
@@ -74,24 +62,5 @@ public partial class NPlayerScene : Node2D, IPlayerContext
     private bool CheckCanSpawn()
     {
         return Board.Model.CanPlace(BoardEntity.SpawnPosition, Vector2I.One);
-    }
-
-    private async Task<(BlockEntity Parent, OperationResult SpawnResult)> Spawn()
-    {
-        if (BombGauge.IsBombActive)
-        {
-            BombGauge.TryUseBomb();
-            var parent = BlockEntity.Bomb;
-            var spawnResult = OperationManager.Spawn(parent);
-            return (parent, spawnResult);
-        }
-        else
-        {
-            var (pair, _) = Queue.Dequeue();
-            await Task.Delay(TimeSpan.FromSeconds(0.2f));
-            var parent = pair.Parent;
-            var spawnResult = OperationManager.Spawn(pair.Parent, pair.Child);
-            return (parent, spawnResult);
-        }
     }
 }

@@ -1,8 +1,8 @@
 using Godot;
 using UniteBlocksRe.src.Logging;
-using UniteBlocksRe.src.Models.Entities;
-using UniteBlocksRe.src.Models.ValueObjects;
-using UniteBlocksRe.src.Models.ValueObjects.BlocksOperation;
+using UniteBlocksRe.src.Models;
+using UniteBlocksRe.src.Models.Block;
+using UniteBlocksRe.src.Models.OperatingBlocks;
 
 namespace UniteBlocksRe.Nodes.Tests;
 
@@ -32,14 +32,14 @@ public partial class OperationItemTest : Node
         {
             if (key.Keycode == Key.Key1)
             {
-                var result = _item.Spawn(new BlockEntity(BlockColor.Red));
+                var result = _item.Spawn(BlockEntity.CreateNormal(BlockColor.Red));
                 Log.Info($"ブロック1つをスポーン  {(result.Sucess ? "成功" : "失敗")}");
             }
             if (key.Keycode == Key.Key2)
             {
                 var result = _item.Spawn(
-                    new BlockEntity(BlockColor.Blue),
-                    new BlockEntity(BlockColor.Green)
+                    BlockEntity.CreateNormal(BlockColor.Blue),
+                    BlockEntity.CreateNormal(BlockColor.Green)
                 );
                 Log.Info($"ブロック2つをスポーン  {(result.Sucess ? "成功" : "失敗")}");
             }

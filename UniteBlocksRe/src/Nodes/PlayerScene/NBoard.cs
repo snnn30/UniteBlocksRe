@@ -3,10 +3,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Godot;
 using UniteBlocksRe.src.Extensions;
-using UniteBlocksRe.src.Helpers;
 using UniteBlocksRe.src.Logging;
-using UniteBlocksRe.src.Models.Entities;
-using UniteBlocksRe.src.Models.Services;
+using UniteBlocksRe.src.Models;
+using UniteBlocksRe.src.Models.BoardServices;
 using UniteBlocksRe.src.Nodes.PlayerScene;
 
 namespace UniteBlocksRe.Nodes;
@@ -20,7 +19,6 @@ public partial class NBoard : Node2D
     private NObstacleCounter _playerObstacleCounter;
     private NObstacleCounter _opponentObstacleCounter;
 
-    private readonly BiMap<NBlock, Vector2I> _blockLocations = [];
     private readonly Dictionary<BlockEntity, NBlock> _blockIdentities = [];
 
     public static Vector2 GetRealPosition(Vector2I gridPos) =>
@@ -44,55 +42,23 @@ public partial class NBoard : Node2D
         spawnIcon.Position = GetRealPosition(BoardEntity.SpawnPosition);
     }
 
-    #region ブロック管理
-
-    /// <summary>
-    /// モデルからノードを作成、紐づけてボード上に登録する
-    /// すでにModel側でボード上に設置されていることが前提
-    /// </summary>
-    private NBlock RegisterBlock(
-        BlockEntity entity,
-        Vector2I gridPos,
-        Vector2? initialWorldPos = null
-    )
-    {
-        var nBlock = NBlock.Create(entity);
-        _clipMask.AddChild(nBlock);
-        nBlock.Position = initialWorldPos ?? GetRealPosition(gridPos);
-
-        _blockIdentities[entity] = nBlock;
-        _blockLocations.ForceAdd(nBlock, gridPos);
-
-        return nBlock;
-    }
-
-    /// <summary>
-    /// ボードからノードと管理情報を削除する
-    /// Model側の削除は行わない
-    /// </summary>
-    private void UnregisterBlock(BlockEntity entity)
-    {
-        if (_blockIdentities.Remove(entity, out var nBlock))
-        {
-            _blockLocations.RemoveByKey(nBlock);
-            nBlock.QueueFree();
-        }
-    }
-
-    #endregion
-
     #region 公開メソッド
 
-    public void AddAsBoardElement(Node node)
+    public void AddBlockAsChild(NBlock node)
     {
         if (node == null)
         {
             return;
         }
+
+        if (node.GetParent() is { } parentNode)
+        {
+            parentNode.RemoveChild(node);
+        }
         _clipMask.AddChild(node);
     }
 
-    public void BringToFront(Node node)
+    public void BringToFront(NBlock node)
     {
         if (node == null || node.GetParent() != _clipMask)
         {
@@ -103,101 +69,43 @@ public partial class NBoard : Node2D
 
     public async Task SetOnBoardAsync(NBlock block, Vector2I pos)
     {
-        if (!Model.TrySetBlock(pos, block.Model))
-        {
-            Log.Warn($"pos {pos} には置けない");
-            return;
-        }
-
-        if (block.GetParent() == null)
-        {
-            _clipMask.AddChild(block);
-        }
-        else if (block.GetParent() != _clipMask)
-        {
-            block.GetParent().RemoveChild(block);
-            _clipMask.AddChild(block);
-        }
+        Model.Place(pos, block.Model);
         _blockIdentities[block.Model] = block;
-        _blockLocations.Add(block, pos);
         block.Position = GetRealPosition(pos);
-
         await block.PlayPlacedAnimeAsync();
     }
 
-    public async Task Fall()
+    public async Task<ProcessResult> ProcessChainReaction()
     {
-        var result = BoardFaller.Fall(Model);
-        if (!result.HasChanged)
+        var processResult = BoardService.Process(Model);
+
+        foreach (var step in processResult.Steps)
         {
-            return;
-        }
-
-        var tween = CreateTween()
-            .SetTrans(Tween.TransitionType.Bounce)
-            .SetEase(Tween.EaseType.Out)
-            .SetParallel(true);
-
-        foreach (var step in result.Steps)
-        {
-            var nBlock = _blockIdentities[step.Block];
-            _blockLocations.ForceAdd(nBlock, step.To);
-
-            tween
-                .TweenProperty(nBlock, "position", GetRealPosition(step.To), 0.4f)
-                .From(GetRealPosition(step.From));
-        }
-
-        await tween.WaitForFinished();
-        await Task.WhenAll(
-            result.Steps.Select(s => _blockIdentities[s.Block].PlayFalledAnimeAsync())
-        );
-    }
-
-    public Task Unite()
-    {
-        var result = BoardUniter.Unite(Model);
-        List<Task> tasks = [];
-
-        foreach (var step in result.Steps)
-        {
-            foreach (var block in step.RemovedBlocks)
+            if (step is FallResult fallResult)
             {
-                UnregisterBlock(block);
+                await Fall(fallResult);
             }
-            var nBlock = RegisterBlock(step.CreatedBlock, step.Position);
-            tasks.Add(nBlock.PlayUniteAnimeAsync());
-        }
-        return Task.WhenAll(tasks);
-    }
-
-    public async Task Explode(BlockEntity bomb)
-    {
-        var result = BoardExploder.Explode(Model, bomb);
-
-        foreach (var step in result.Steps)
-        {
-            var tasks = step.Exploded.Select(b =>
+            else if (step is UniteResult uniteResult)
             {
-                var node = _blockIdentities[b];
-                BringToFront(node);
-                return node.PlayExplodeAnimeAsync();
-            });
-
-            _opponentObstacleCounter.AddCount(step);
-            await Task.WhenAll(tasks);
-            foreach (var block in step.Exploded)
+                await Unite(uniteResult);
+            }
+            else if (step is ExplodeResult explodeResult)
             {
-                UnregisterBlock(block);
+                await Explode(explodeResult);
+            }
+            else
+            {
+                Log.Error($"受け取り予定のない行動 {step}");
             }
         }
-        _opponentObstacleCounter.OnEndExplode();
+
+        return processResult;
     }
 
     public async Task SpawnObstacles()
     {
         var count = _playerObstacleCounter.ViewCount;
-        var result = BoardObstaclePlacer.Place(Model, count, 5);
+        var result = BoardService.ObstaclePlace(Model, count);
         if (!result.Placed)
         {
             return;
@@ -220,7 +128,10 @@ public partial class NBoard : Node2D
                 var offset = new Vector2(0, -(lowest + 2) * NBlock.BaseSize);
                 var startPos = targetPos + offset;
 
-                var nBlock = RegisterBlock(entity, pos, startPos);
+                var nBlock = NBlock.Create(entity);
+                AddBlockAsChild(nBlock);
+                _blockIdentities.Add(entity, nBlock);
+                nBlock.Position = startPos;
 
                 tween.TweenProperty(nBlock, "position", targetPos, 1.6f).From(startPos);
             }
@@ -229,5 +140,73 @@ public partial class NBoard : Node2D
         await tween.WaitForFinished();
     }
 
+    #endregion
+
+    #region 非公開メソッド
+    private async Task Fall(FallResult result)
+    {
+        var tween = CreateTween()
+            .SetTrans(Tween.TransitionType.Bounce)
+            .SetEase(Tween.EaseType.Out)
+            .SetParallel(true);
+
+        foreach (var step in result.Movements)
+        {
+            var node = _blockIdentities[step.Block];
+
+            tween
+                .TweenProperty(node, "position", GetRealPosition(step.To), 0.4f)
+                .From(GetRealPosition(step.From));
+        }
+
+        await tween.WaitForFinished();
+        await Task.WhenAll(
+            result.Movements.Select(s => _blockIdentities[s.Block].PlayFalledAnimeAsync())
+        );
+    }
+
+    private Task Unite(UniteResult result)
+    {
+        List<Task> tasks = [];
+
+        foreach (var step in result.Steps)
+        {
+            foreach (var block in step.RemovedBlocks)
+            {
+                var node = _blockIdentities[block];
+                _blockIdentities.Remove(block);
+                node.QueueFree();
+            }
+            var newNode = NBlock.Create(step.CreatedBlock);
+            AddBlockAsChild(newNode);
+            _blockIdentities.Add(step.CreatedBlock, newNode);
+            newNode.Position = GetRealPosition(Model.GetPositionOf(step.CreatedBlock));
+
+            tasks.Add(newNode.PlayUniteAnimeAsync());
+        }
+        return Task.WhenAll(tasks);
+    }
+
+    private async Task Explode(ExplodeResult result)
+    {
+        foreach (var step in result.Steps)
+        {
+            var tasks = step.ExplodedBlocks.Select(b =>
+            {
+                var node = _blockIdentities[b];
+                BringToFront(node);
+                return node.PlayExplodeAnimeAsync();
+            });
+
+            _opponentObstacleCounter.AddCount(step);
+            await Task.WhenAll(tasks);
+            foreach (var block in step.ExplodedBlocks)
+            {
+                _blockIdentities[block].QueueFree();
+                _blockIdentities[block] = null;
+            }
+        }
+        _opponentObstacleCounter.OnEndExplode();
+    }
     #endregion
 }

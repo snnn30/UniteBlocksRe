@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using Godot;
 using UniteBlocksRe.src.Extensions;
-using UniteBlocksRe.src.Models.Entities;
+using UniteBlocksRe.src.Models;
 
 namespace UniteBlocksRe.Nodes;
 

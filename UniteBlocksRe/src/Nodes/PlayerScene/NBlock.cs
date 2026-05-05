@@ -1,8 +1,8 @@
 using System.Threading.Tasks;
 using Godot;
 using UniteBlocksRe.src.Extensions;
-using UniteBlocksRe.src.Models.Entities;
-using UniteBlocksRe.src.Models.ValueObjects;
+using UniteBlocksRe.src.Models;
+using UniteBlocksRe.src.Models.Block;
 
 namespace UniteBlocksRe.Nodes;
 
@@ -56,6 +56,47 @@ public partial class NBlock : Node2D
         nBlock.Model = model;
         return nBlock;
     }
+
+    private void Reload()
+    {
+        if (Model == null || _visuals == null)
+        {
+            return;
+        }
+
+        LoadTex();
+        Resize();
+    }
+
+    private void LoadTex()
+    {
+        var root = "res://images/blocks";
+        var file = (Model.Type, Model.Color) switch
+        {
+            (BlockType.Bomb, _) => "BombBlock.png",
+            (BlockType.Obstacle, _) => "ObstacleBlock.png",
+            (_, BlockColor.Red) => "RedBlock.png",
+            (_, BlockColor.Green) => "GreenBlock.png",
+            (_, BlockColor.Blue) => "BlueBlock.png",
+            (_, BlockColor.Orange) => "OrangeBlock.png",
+            _ => throw new System.NotImplementedException(),
+        };
+        var fullPath = $"{root}/{file}";
+
+        _icon.Texture = ResourceLoader.Load<Texture2D>(
+            fullPath,
+            null,
+            ResourceLoader.CacheMode.Reuse
+        );
+    }
+
+    private void Resize()
+    {
+        _visuals.Size = Model.Size * BaseSize + new Vector2I(20, 20);
+        _visuals.PivotOffset = _visuals.Size / 2;
+    }
+
+    #region Animation
 
     public Task PlayFalledAnimeAsync()
     {
@@ -132,42 +173,5 @@ public partial class NBlock : Node2D
         return tween.WaitForFinished();
     }
 
-    private void Reload()
-    {
-        if (Model == null || _visuals == null)
-        {
-            return;
-        }
-
-        LoadTex();
-        Resize();
-    }
-
-    private void LoadTex()
-    {
-        var root = "res://images/blocks";
-        var file = (Model.Type, Model.Color) switch
-        {
-            (BlockType.Bomb, _) => "BombBlock.png",
-            (BlockType.Obstacle, _) => "ObstacleBlock.png",
-            (_, BlockColor.Red) => "RedBlock.png",
-            (_, BlockColor.Green) => "GreenBlock.png",
-            (_, BlockColor.Blue) => "BlueBlock.png",
-            (_, BlockColor.Orange) => "OrangeBlock.png",
-            _ => throw new System.NotImplementedException(),
-        };
-        var fullPath = $"{root}/{file}";
-
-        _icon.Texture = ResourceLoader.Load<Texture2D>(
-            fullPath,
-            null,
-            ResourceLoader.CacheMode.Reuse
-        );
-    }
-
-    private void Resize()
-    {
-        _visuals.Size = Model.Size * BaseSize + new Vector2I(20, 20);
-        _visuals.PivotOffset = _visuals.Size / 2;
-    }
+    #endregion
 }

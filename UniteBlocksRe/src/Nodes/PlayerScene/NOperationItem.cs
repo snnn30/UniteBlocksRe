@@ -4,8 +4,8 @@ using Godot;
 using UniteBlocksRe.Extensions;
 using UniteBlocksRe.src.Extensions;
 using UniteBlocksRe.src.Logging;
-using UniteBlocksRe.src.Models.Entities;
-using UniteBlocksRe.src.Models.ValueObjects.BlocksOperation;
+using UniteBlocksRe.src.Models;
+using UniteBlocksRe.src.Models.OperatingBlocks;
 using UniteBlocksRe.src.Nodes.PlayerScene.Operation;
 
 namespace UniteBlocksRe.Nodes;
@@ -17,8 +17,6 @@ public partial class NOperationItem : Node
 
     public NBlock Parent { get; private set; }
     public NBlock Child { get; private set; }
-    public Vector2I ParentPos => Model.ParentPos;
-    public Vector2I ChildPos => Model.ChildPos;
 
     #region Public Method
 
@@ -80,7 +78,7 @@ public partial class NOperationItem : Node
 
         var result = Model.TryRotate(direction);
 
-        if (result.Sucess && !result.IsShift)
+        if (result.Success && !result.IsShift)
         {
             var task = NormalRotateAnim(
                 direction,
@@ -91,7 +89,7 @@ public partial class NOperationItem : Node
             );
             return OperationResult.Succeeded(task, OperationType.Rotate);
         }
-        else if (result.Sucess && result.IsShift)
+        else if (result.Success && result.IsShift)
         {
             var task = ShiftRotateAnim(
                 direction,
@@ -220,11 +218,11 @@ public partial class NOperationItem : Node
         Model = entity;
 
         Parent = NBlock.Create(parent);
-        _board.AddAsBoardElement(Parent);
+        _board.AddBlockAsChild(Parent);
         Parent.Position = NBoard.GetRealPosition(parentPos);
 
         Child = NBlock.Create(child);
-        _board.AddAsBoardElement(Child);
+        _board.AddBlockAsChild(Child);
         Child.Position = NBoard.GetRealPosition(childPos);
 
         Parent.Outlined = true;
@@ -254,7 +252,7 @@ public partial class NOperationItem : Node
         Model = entity;
 
         Parent = NBlock.Create(parent);
-        _board.AddAsBoardElement(Parent);
+        _board.AddBlockAsChild(Parent);
         Parent.Position = NBoard.GetRealPosition(parentPos);
 
         Parent.Outlined = true;

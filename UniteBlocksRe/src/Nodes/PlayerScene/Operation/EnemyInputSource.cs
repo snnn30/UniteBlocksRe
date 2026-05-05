@@ -1,3 +1,4 @@
+/*
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,10 +7,9 @@ using System.Threading.Tasks;
 using Godot;
 using R3;
 using UniteBlocksRe.Nodes;
-using UniteBlocksRe.src.Models.Entities;
-using UniteBlocksRe.src.Models.ValueObjects;
-using UniteBlocksRe.src.Models.ValueObjects.BlocksOperation;
-using UniteBlocksRe.src.Models.ValueObjects.Simulation;
+using UniteBlocksRe.src.Models;
+using UniteBlocksRe.src.Models.Block;
+using UniteBlocksRe.src.Models.OperatingBlocks;
 
 namespace UniteBlocksRe.src.Nodes.PlayerScene.Operation;
 
@@ -245,7 +245,7 @@ public class EnemyInputSource : IOperationInputSource
         );
 
         var nextBomb = OperatingBlocksEntity.TrySpawnSingle(
-            BlockEntity.Bomb,
+            BlockEntity.CreateBomb,
             BoardEntity.SpawnPosition,
             board
         );
@@ -270,3 +270,4 @@ public class EnemyInputSource : IOperationInputSource
         }
     }
 }
+*/

@@ -4,8 +4,8 @@ using Godot;
 using R3;
 using UniteBlocksRe.src.Extensions;
 using UniteBlocksRe.src.Logging;
-using UniteBlocksRe.src.Models.Entities;
-using UniteBlocksRe.src.Models.ValueObjects.BlocksOperation;
+using UniteBlocksRe.src.Models;
+using UniteBlocksRe.src.Models.OperatingBlocks;
 using UniteBlocksRe.src.Nodes.PlayerScene;
 using UniteBlocksRe.src.Nodes.PlayerScene.Operation;
 
@@ -13,14 +13,14 @@ namespace UniteBlocksRe.Nodes;
 
 public partial class NOperationManager : Node
 {
-    private readonly Subject<OperationResult> _onOperationExecuted = new();
     public Observable<OperationResult> OnOperationExecuted => _onOperationExecuted;
-    private readonly Subject<OperatingBlocksEntity> _onSpawn = new();
     public Observable<OperatingBlocksEntity> OnSpawn => _onSpawn;
-
     public NOperationItem Item { get; private set; }
-    private NBombGauge _bombGauge;
-    private IOperationInputSource _inputSource;
+
+    private readonly Subject<OperationResult> _onOperationExecuted = new();
+    private readonly Subject<OperatingBlocksEntity> _onSpawn = new();
+
+    private IPlayerContext _context;
 
     private bool _activeInput = false;
     private bool _activeAutoDrop = false;
@@ -33,21 +33,37 @@ public partial class NOperationManager : Node
 
     private const float CheckInterval = 0.05f;
 
-    public OperationResult Spawn(BlockEntity parent, BlockEntity child = null)
+    public async Task Spawn()
     {
+        BlockEntity parent = null;
+        BlockEntity child = null;
+        if (_context.BombGauge.IsBombActive)
+        {
+            _context.BombGauge.TryUseBomb();
+            parent = BlockEntity.CreateBomb();
+        }
+        else
+        {
+            var (pair, _) = _context.Queue.Dequeue();
+            await Task.Delay(TimeSpan.FromSeconds(0.2f));
+            parent = pair.Parent;
+            child = pair.Child;
+        }
+
         var result = Item.Spawn(parent, child);
         _onOperationExecuted.OnNext(result);
         _onSpawn.OnNext(Item.Model);
-        return result;
+
+        await result.Task;
     }
 
     public async Task StartRun()
     {
         CompositeDisposable operationDisposable = [];
 
-        SubscribeDropInput(_inputSource, operationDisposable);
-        SubscribeMoveInput(_inputSource, operationDisposable);
-        SubscribeRotateInput(_inputSource, operationDisposable);
+        SubscribeDropInput(_context.InputSource, operationDisposable);
+        SubscribeMoveInput(_context.InputSource, operationDisposable);
+        SubscribeRotateInput(_context.InputSource, operationDisposable);
 
         _endOperationSignal = new TaskCompletionSource();
         _maxAltitude = BoardEntity.SpawnPosition.Y;
@@ -66,11 +82,9 @@ public partial class NOperationManager : Node
 
     public void Init(IPlayerContext context)
     {
+        _context = context;
         Item.Init(context.Board);
-        _bombGauge = context.BombGauge;
-        _inputSource = context.InputSource;
-
-        SubscribeSwitchInput(_inputSource);
+        SubscribeSwitchInput(context.InputSource);
     }
 
     public override void _Ready()
@@ -112,7 +126,7 @@ public partial class NOperationManager : Node
         source
             .SwitchBomb.Subscribe(_ =>
             {
-                _bombGauge.TrySetBombActive(!_bombGauge.IsBombActive);
+                _context.BombGauge.TrySetBombActive(!_context.BombGauge.IsBombActive);
             })
             .AddTo(this);
     }
@@ -171,9 +185,9 @@ public partial class NOperationManager : Node
                 {
                     _initialDelayTimer.ForceTimeout();
                 }
-                if (Item.ParentPos.Y > _maxAltitude) // 最低高度更新でmaxLockTimerをリセット
+                if (Item.Model.ParentPos.Y > _maxAltitude) // 最低高度更新でmaxLockTimerをリセット
                 {
-                    _maxAltitude = Item.ParentPos.Y;
+                    _maxAltitude = Item.Model.ParentPos.Y;
                     _maxLockTimer.Start();
                 }
             }
@@ -199,15 +213,13 @@ public partial class NOperationManager : Node
 
         var rotateInput = Observable
             .EveryUpdate()
-            .Select(_ =>
-                _activeInput ? source.RotateDirectionState.CurrentValue : RotateDirection.None
-            )
+            .Select(_ => _activeInput ? source.RotateDirectionState.CurrentValue : RotateInput.None)
             .DistinctUntilChanged();
 
         rotateInput
             .Select(dir =>
             {
-                if (dir == RotateDirection.None)
+                if (dir == RotateInput.None)
                 {
                     return Observable.Empty<Unit>();
                 }
@@ -230,16 +242,16 @@ public partial class NOperationManager : Node
             .Subscribe()
             .AddTo(disposables);
 
-        OperationResult ExecuteRotate(RotateDirection dir, float duration)
+        OperationResult ExecuteRotate(RotateInput dir, float duration)
         {
-            if (dir == RotateDirection.ACW)
+            if (dir == RotateInput.ACW)
             {
                 var result = Item.Rotate(RotateDirection.ACW, duration);
                 _onOperationExecuted.OnNext(result);
                 StopIdleTimer(result);
                 return result;
             }
-            else if (dir == RotateDirection.CW)
+            else if (dir == RotateInput.CW)
             {
                 var result = Item.Rotate(RotateDirection.CW, duration);
                 _onOperationExecuted.OnNext(result);
@@ -262,13 +274,13 @@ public partial class NOperationManager : Node
 
         var moveInput = Observable
             .EveryUpdate()
-            .Select(_ => _activeInput ? source.MoveDirectionState.CurrentValue : MoveDirection.None)
+            .Select(_ => _activeInput ? source.MoveDirectionState.CurrentValue : MoveInput.None)
             .DistinctUntilChanged();
 
         moveInput
             .Select(dir =>
             {
-                if (dir == MoveDirection.None)
+                if (dir == MoveInput.None)
                 {
                     return Observable.Empty<Unit>(); //通知しない
                 }
@@ -298,16 +310,16 @@ public partial class NOperationManager : Node
             .Subscribe() //実際の処理はSelectだが、Subscribeしないとそこまでの処理も一切行われない
             .AddTo(disposables);
 
-        OperationResult ExecuteMove(MoveDirection dir, float duration)
+        OperationResult ExecuteMove(MoveInput dir, float duration)
         {
-            if (dir == MoveDirection.Left)
+            if (dir == MoveInput.Left)
             {
                 var result = Item.Move(MoveDirection.Left, duration);
                 _onOperationExecuted.OnNext(result);
                 StopIdleTimer(result);
                 return result;
             }
-            else if (dir == MoveDirection.Right)
+            else if (dir == MoveInput.Right)
             {
                 var result = Item.Move(MoveDirection.Right, duration);
                 _onOperationExecuted.OnNext(result);

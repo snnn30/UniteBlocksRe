@@ -1,7 +1,7 @@
 using Godot;
 using UniteBlocksRe.src.Extensions;
-using UniteBlocksRe.src.Models.ValueObjects;
-using UniteBlocksRe.src.Models.ValueObjects.BoardOperationResults;
+using UniteBlocksRe.src.Models.Block;
+using UniteBlocksRe.src.Models.BoardServices;
 
 namespace UniteBlocksRe.Nodes;
 
@@ -31,7 +31,7 @@ public partial class NObstacleCounter : Node2D
 
     public void AddCount(ExplodeStep step)
     {
-        foreach (var block in step.Exploded)
+        foreach (var block in step.ExplodedBlocks)
         {
             if (block.Type != BlockType.Normal)
             {

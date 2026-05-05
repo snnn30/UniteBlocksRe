@@ -1,9 +1,7 @@
 using Godot;
-using UniteBlocksRe.Nodes;
-using UniteBlocksRe.src.Nodes.PlayerScene.Operation;
 
-public partial class PlayScreen : Control
-{
+public partial class PlayScreen
+    : Control { /*
     private NPlayerScene _playerScene;
     private NPlayerScene _enemyScene;
 
@@ -18,4 +16,5 @@ public partial class PlayScreen : Control
         _ = _playerScene.StartGameLoop();
         _ = _enemyScene.StartGameLoop();
     }
+    */
 }

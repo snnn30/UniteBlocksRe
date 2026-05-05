@@ -20,7 +20,6 @@
     <PackageReference Include="xunit.v3" Version="3.2.2" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ClassLibrary1\UniteBlocksRe.Domain.csproj" />
     <ProjectReference Include="..\UniteBlocksRe\UniteBlocksRe.csproj" />
   </ItemGroup>
   <ItemGroup>

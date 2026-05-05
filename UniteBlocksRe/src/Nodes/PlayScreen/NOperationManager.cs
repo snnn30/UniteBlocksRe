@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using Godot;
 using R3;
 using UniteBlocksRe.Extensions;
-using UniteBlocksRe.Logging;
 using UniteBlocksRe.Models;
 using UniteBlocksRe.Models.OperatingBlocks;
 using UniteBlocksRe.Nodes.PlayScreen.Operation;
@@ -83,7 +82,13 @@ public partial class NOperationManager : Node
     {
         _context = context;
         Item.Init(context.Board);
-        SubscribeSwitchInput(context.InputSource);
+
+        context
+            .InputSource.SwitchBomb.Subscribe(_ =>
+            {
+                _context.BombGauge.TrySetBombActive(!_context.BombGauge.IsBombActive);
+            })
+            .AddTo(this);
     }
 
     public override void _Ready()
@@ -103,10 +108,7 @@ public partial class NOperationManager : Node
         {
             _activeInput = false;
         };
-        _idleTimer.Timeout += () =>
-        {
-            EndOperation();
-        };
+        _idleTimer.Timeout += EndOperation;
         _initialDelayTimer.Timeout += () => _activeAutoDrop = true;
     }
 
@@ -118,16 +120,6 @@ public partial class NOperationManager : Node
         _idleTimer.Stop();
         _initialDelayTimer.Stop();
         _endOperationSignal.TrySetResult();
-    }
-
-    private void SubscribeSwitchInput(IOperationInputSource source)
-    {
-        source
-            .SwitchBomb.Subscribe(_ =>
-            {
-                _context.BombGauge.TrySetBombActive(!_context.BombGauge.IsBombActive);
-            })
-            .AddTo(this);
     }
 
     private void SubscribeDropInput(IOperationInputSource source, CompositeDisposable disposables)
@@ -176,18 +168,12 @@ public partial class NOperationManager : Node
         OperationResult ExecuteDrop(bool isAutoDrop, float duration)
         {
             var result = Item.Drop(duration);
-            _onOperationExecuted.OnNext(result);
-            StopIdleTimer(result); // sucessならidleタイマー止まる
+            HandleOperationResult(result);
             if (result.Sucess)
             {
                 if (!isAutoDrop) // 待機状態の時に手動落下が来たら自動落下を開始する
                 {
                     _initialDelayTimer.ForceTimeout();
-                }
-                if (Item.Model.ParentPos.Y > _maxAltitude) // 最低高度更新でmaxLockTimerをリセット
-                {
-                    _maxAltitude = Item.Model.ParentPos.Y;
-                    _maxLockTimer.Start();
                 }
             }
             else
@@ -241,27 +227,12 @@ public partial class NOperationManager : Node
             .Subscribe()
             .AddTo(disposables);
 
-        OperationResult ExecuteRotate(RotateInput dir, float duration)
+        OperationResult ExecuteRotate(RotateInput input, float duration)
         {
-            if (dir == RotateInput.ACW)
-            {
-                var result = Item.Rotate(RotateDirection.ACW, duration);
-                _onOperationExecuted.OnNext(result);
-                StopIdleTimer(result);
-                return result;
-            }
-            else if (dir == RotateInput.CW)
-            {
-                var result = Item.Rotate(RotateDirection.CW, duration);
-                _onOperationExecuted.OnNext(result);
-                StopIdleTimer(result);
-                return result;
-            }
-            else
-            {
-                Log.Error($"想定していない方向 {dir}");
-                return default;
-            }
+            var dir = input == RotateInput.ACW ? RotateDirection.ACW : RotateDirection.CW;
+            var result = Item.Rotate(dir, duration);
+            HandleOperationResult(result);
+            return result;
         }
     }
 
@@ -309,35 +280,29 @@ public partial class NOperationManager : Node
             .Subscribe() //実際の処理はSelectだが、Subscribeしないとそこまでの処理も一切行われない
             .AddTo(disposables);
 
-        OperationResult ExecuteMove(MoveInput dir, float duration)
+        OperationResult ExecuteMove(MoveInput input, float duration)
         {
-            if (dir == MoveInput.Left)
-            {
-                var result = Item.Move(MoveDirection.Left, duration);
-                _onOperationExecuted.OnNext(result);
-                StopIdleTimer(result);
-                return result;
-            }
-            else if (dir == MoveInput.Right)
-            {
-                var result = Item.Move(MoveDirection.Right, duration);
-                _onOperationExecuted.OnNext(result);
-                StopIdleTimer(result);
-                return result;
-            }
-            else
-            {
-                Log.Error($"想定していない方向 {dir}");
-                return default;
-            }
+            var dir = input == MoveInput.Left ? MoveDirection.Left : MoveDirection.Right;
+            var result = Item.Move(dir, duration);
+            HandleOperationResult(result);
+            return result;
         }
     }
 
-    private void StopIdleTimer(OperationResult result)
+    private OperationResult HandleOperationResult(OperationResult result)
     {
+        _onOperationExecuted.OnNext(result);
         if (result.Sucess)
         {
             _idleTimer.Stop();
+
+            if (Item.Model.ParentPos.Y > _maxAltitude) // 最低高度更新でmaxLockTimerをリセット
+            {
+                _maxAltitude = Item.Model.ParentPos.Y;
+                _maxLockTimer.Start();
+            }
         }
+
+        return result;
     }
 }

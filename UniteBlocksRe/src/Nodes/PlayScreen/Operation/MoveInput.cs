@@ -1,4 +1,4 @@
-namespace UniteBlocksRe.src.Nodes.PlayerScene.Operation;
+namespace UniteBlocksRe.Nodes.PlayScreen.Operation;
 
 public enum MoveInput
 {

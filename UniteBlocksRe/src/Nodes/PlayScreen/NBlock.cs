@@ -1,10 +1,10 @@
 using System.Threading.Tasks;
 using Godot;
-using UniteBlocksRe.src.Extensions;
-using UniteBlocksRe.src.Models;
-using UniteBlocksRe.src.Models.Block;
+using UniteBlocksRe.Extensions;
+using UniteBlocksRe.Models;
+using UniteBlocksRe.Models.Block;
 
-namespace UniteBlocksRe.Nodes;
+namespace UniteBlocksRe.Nodes.PlayScreen;
 
 public partial class NBlock : Node2D
 {

@@ -1,4 +1,4 @@
-namespace UniteBlocksRe.src.Models.OperatingBlocks;
+namespace UniteBlocksRe.Models.OperatingBlocks;
 
 public enum RotateDirection
 {

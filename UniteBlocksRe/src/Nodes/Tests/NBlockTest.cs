@@ -1,7 +1,8 @@
 using Godot;
-using UniteBlocksRe.src.Logging;
-using UniteBlocksRe.src.Models;
-using UniteBlocksRe.src.Models.Block;
+using UniteBlocksRe.Logging;
+using UniteBlocksRe.Models;
+using UniteBlocksRe.Models.Block;
+using UniteBlocksRe.Nodes.PlayScreen;
 
 namespace UniteBlocksRe.Nodes.Tests;
 

@@ -1,7 +1,7 @@
 using Godot;
 using UniteBlocksRe.Nodes.CommonUi;
 
-namespace UniteBlocksRe.Nodes;
+namespace UniteBlocksRe.Nodes.PlayScreen;
 
 public partial class NBombGauge : Node2D
 {

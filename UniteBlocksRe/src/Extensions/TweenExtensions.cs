@@ -2,7 +2,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Godot;
 
-namespace UniteBlocksRe.src.Extensions;
+namespace UniteBlocksRe.Extensions;
 
 public static class TweenExtensions
 {

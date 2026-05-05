@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
-using UniteBlocksRe.src.Models.Evaluation;
-using UniteBlocksRe.src.Models.OperatingBlocks;
+using UniteBlocksRe.Models.Evaluation;
+using UniteBlocksRe.Models.OperatingBlocks;
 
-namespace UniteBlocksRe.src.Models;
+namespace UniteBlocksRe.Models;
 
 public class NpcDecisionMaker
 {

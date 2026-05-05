@@ -1,6 +1,6 @@
 using System;
 
-namespace UniteBlocksRe.src.Common;
+namespace UniteBlocksRe.Common;
 
 public abstract class Entity<T> : IEquatable<Entity<T>>
     where T : Entity<T>

@@ -1,9 +1,9 @@
 using System;
 using Godot;
-using UniteBlocksRe.src.Common;
-using UniteBlocksRe.src.Models.OperatingBlocks;
+using UniteBlocksRe.Common;
+using UniteBlocksRe.Models.OperatingBlocks;
 
-namespace UniteBlocksRe.src.Models;
+namespace UniteBlocksRe.Models;
 
 public class OperatingBlocksEntity : Entity<OperatingBlocksEntity>
 {

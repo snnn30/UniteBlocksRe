@@ -1,5 +1,6 @@
 using Godot;
-using UniteBlocksRe.src.Logging;
+using UniteBlocksRe.Logging;
+using UniteBlocksRe.Nodes.PlayScreen;
 
 namespace UniteBlocksRe.Nodes.Tests;
 

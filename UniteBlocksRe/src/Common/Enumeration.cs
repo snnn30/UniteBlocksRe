@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace UniteBlocksRe.Domain.Common;
+namespace UniteBlocksRe.Common;
 
 public abstract class Enumeration<T> : IComparable
     where T : Enumeration<T>

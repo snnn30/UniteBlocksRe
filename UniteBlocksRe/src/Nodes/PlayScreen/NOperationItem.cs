@@ -2,13 +2,12 @@ using System;
 using System.Threading.Tasks;
 using Godot;
 using UniteBlocksRe.Extensions;
-using UniteBlocksRe.src.Extensions;
-using UniteBlocksRe.src.Logging;
-using UniteBlocksRe.src.Models;
-using UniteBlocksRe.src.Models.OperatingBlocks;
-using UniteBlocksRe.src.Nodes.PlayerScene.Operation;
+using UniteBlocksRe.Logging;
+using UniteBlocksRe.Models;
+using UniteBlocksRe.Models.OperatingBlocks;
+using UniteBlocksRe.Nodes.PlayScreen.Operation;
 
-namespace UniteBlocksRe.Nodes;
+namespace UniteBlocksRe.Nodes.PlayScreen;
 
 public partial class NOperationItem : Node
 {

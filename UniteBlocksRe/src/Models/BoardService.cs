@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using UniteBlocksRe.src.Models.BoardServices;
+using UniteBlocksRe.Models.BoardServices;
 
-namespace UniteBlocksRe.src.Models;
+namespace UniteBlocksRe.Models;
 
 public static class BoardService
 {

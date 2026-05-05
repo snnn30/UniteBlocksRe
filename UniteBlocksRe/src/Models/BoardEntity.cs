@@ -2,9 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Godot;
-using UniteBlocksRe.src.Common;
+using UniteBlocksRe.Common;
 
-namespace UniteBlocksRe.src.Models;
+namespace UniteBlocksRe.Models;
 
 public class BoardEntity : Entity<BoardEntity>, IEnumerable<(BlockEntity Block, Vector2I Pos)>
 {

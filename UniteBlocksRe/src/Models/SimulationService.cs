@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using Godot;
-using UniteBlocksRe.src.Models.OperatingBlocks;
+using UniteBlocksRe.Models.OperatingBlocks;
 
-namespace UniteBlocksRe.src.Models;
+namespace UniteBlocksRe.Models;
 
 public static class SimulationService
 {

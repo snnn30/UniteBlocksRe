@@ -1,6 +1,6 @@
 using Godot;
 using R3;
-using UniteBlocksRe.src.Logging;
+using UniteBlocksRe.Logging;
 
 namespace UniteBlocksRe.Nodes;
 

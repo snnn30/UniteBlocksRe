@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace UniteBlocksRe.src.Models.Evaluation.EvaluationWeights;
+namespace UniteBlocksRe.Models.Evaluation.EvaluationWeights;
 
 public sealed record DefaultEvaluationWeight : EvaluationWeight
 {

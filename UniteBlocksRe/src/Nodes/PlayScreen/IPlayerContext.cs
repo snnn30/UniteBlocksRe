@@ -1,7 +1,6 @@
-using UniteBlocksRe.Nodes;
-using UniteBlocksRe.src.Nodes.PlayerScene.Operation;
+using UniteBlocksRe.Nodes.PlayScreen.Operation;
 
-namespace UniteBlocksRe.src.Nodes.PlayerScene;
+namespace UniteBlocksRe.Nodes.PlayScreen;
 
 public interface IPlayerContext
 {

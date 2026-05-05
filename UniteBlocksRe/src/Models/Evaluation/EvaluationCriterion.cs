@@ -1,11 +1,11 @@
 using System;
 using System.Linq;
-using UniteBlocksRe.Domain.Common;
-using UniteBlocksRe.src.Extensions;
-using UniteBlocksRe.src.Models.Block;
-using UniteBlocksRe.src.Models.BoardServices;
+using UniteBlocksRe.Common;
+using UniteBlocksRe.Extensions;
+using UniteBlocksRe.Models.Block;
+using UniteBlocksRe.Models.BoardServices;
 
-namespace UniteBlocksRe.src.Models.Evaluation;
+namespace UniteBlocksRe.Models.Evaluation;
 
 public class EvaluationCriterion : Enumeration<EvaluationCriterion>
 {

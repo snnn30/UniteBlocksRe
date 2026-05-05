@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 using Godot;
 using R3;
 using UniteBlocksRe.Nodes;
-using UniteBlocksRe.src.Models;
-using UniteBlocksRe.src.Models.Block;
-using UniteBlocksRe.src.Models.OperatingBlocks;
+using UniteBlocksRe.Models;
+using UniteBlocksRe.Models.Block;
+using UniteBlocksRe.Models.OperatingBlocks;
 
-namespace UniteBlocksRe.src.Nodes.PlayerScene.Operation;
+namespace UniteBlocksRe.Nodes.PlayerScene.Operation;
 
 public class EnemyInputSource : IOperationInputSource
 {

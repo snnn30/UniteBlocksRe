@@ -1,9 +1,8 @@
 using Godot;
 using R3;
-using UniteBlocksRe.Nodes;
-using UniteBlocksRe.src.Models;
+using UniteBlocksRe.Models;
 
-namespace UniteBlocksRe.src.Nodes.PlayerScene.Operation;
+namespace UniteBlocksRe.Nodes.PlayScreen.Operation;
 
 public class PlayerInputSource : IOperationInputSource
 {

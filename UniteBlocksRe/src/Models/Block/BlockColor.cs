@@ -1,4 +1,4 @@
-namespace UniteBlocksRe.src.Models.Block;
+namespace UniteBlocksRe.Models.Block;
 
 public enum BlockColor
 {

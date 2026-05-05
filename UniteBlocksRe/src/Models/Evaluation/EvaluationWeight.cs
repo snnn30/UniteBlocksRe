@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace UniteBlocksRe.src.Models.Evaluation;
+namespace UniteBlocksRe.Models.Evaluation;
 
 public abstract record EvaluationWeight
 {

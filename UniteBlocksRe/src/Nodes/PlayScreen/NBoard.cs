@@ -2,13 +2,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Godot;
-using UniteBlocksRe.src.Extensions;
-using UniteBlocksRe.src.Logging;
-using UniteBlocksRe.src.Models;
-using UniteBlocksRe.src.Models.BoardServices;
-using UniteBlocksRe.src.Nodes.PlayerScene;
+using UniteBlocksRe.Extensions;
+using UniteBlocksRe.Logging;
+using UniteBlocksRe.Models;
+using UniteBlocksRe.Models.BoardServices;
 
-namespace UniteBlocksRe.Nodes;
+namespace UniteBlocksRe.Nodes.PlayScreen;
 
 public partial class NBoard : Node2D
 {

@@ -2,14 +2,13 @@ using System;
 using System.Threading.Tasks;
 using Godot;
 using R3;
-using UniteBlocksRe.src.Extensions;
-using UniteBlocksRe.src.Logging;
-using UniteBlocksRe.src.Models;
-using UniteBlocksRe.src.Models.OperatingBlocks;
-using UniteBlocksRe.src.Nodes.PlayerScene;
-using UniteBlocksRe.src.Nodes.PlayerScene.Operation;
+using UniteBlocksRe.Extensions;
+using UniteBlocksRe.Logging;
+using UniteBlocksRe.Models;
+using UniteBlocksRe.Models.OperatingBlocks;
+using UniteBlocksRe.Nodes.PlayScreen.Operation;
 
-namespace UniteBlocksRe.Nodes;
+namespace UniteBlocksRe.Nodes.PlayScreen;
 
 public partial class NOperationManager : Node
 {
@@ -269,7 +268,7 @@ public partial class NOperationManager : Node
     private void SubscribeMoveInput(IOperationInputSource source, CompositeDisposable disposables)
     {
         const float MoveDuration = 0.06f;
-        const float InitialDelay = 0.1f;
+        const float InitialDelay = 0.16f;
         const float RepeatDelay = 0.01f;
 
         var moveInput = Observable

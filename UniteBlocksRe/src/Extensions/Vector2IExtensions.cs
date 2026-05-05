@@ -1,6 +1,6 @@
 using Godot;
 
-namespace UniteBlocksRe.src.Extensions;
+namespace UniteBlocksRe.Extensions;
 
 public static class Vector2IExtensions
 {

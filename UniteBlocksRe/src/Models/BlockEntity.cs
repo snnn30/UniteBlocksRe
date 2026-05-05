@@ -1,8 +1,8 @@
 using Godot;
-using UniteBlocksRe.src.Common;
-using UniteBlocksRe.src.Models.Block;
+using UniteBlocksRe.Common;
+using UniteBlocksRe.Models.Block;
 
-namespace UniteBlocksRe.src.Models;
+namespace UniteBlocksRe.Models;
 
 /// <summary>
 /// ブロックを表現するエンティティ

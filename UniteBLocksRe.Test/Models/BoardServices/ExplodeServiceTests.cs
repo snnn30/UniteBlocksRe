@@ -1,8 +1,8 @@
 using Godot;
 using Shouldly;
-using UniteBlocksRe.src.Models;
-using UniteBlocksRe.src.Models.Block;
-using UniteBlocksRe.src.Models.BoardServices;
+using UniteBlocksRe.Models;
+using UniteBlocksRe.Models.Block;
+using UniteBlocksRe.Models.BoardServices;
 
 namespace UniteBlocksRe.Test.Models.BoardServices;
 

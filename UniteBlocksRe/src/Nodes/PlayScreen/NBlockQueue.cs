@@ -1,9 +1,9 @@
 using System.Threading.Tasks;
 using Godot;
-using UniteBlocksRe.src.Extensions;
-using UniteBlocksRe.src.Models;
+using UniteBlocksRe.Extensions;
+using UniteBlocksRe.Models;
 
-namespace UniteBlocksRe.Nodes;
+namespace UniteBlocksRe.Nodes.PlayScreen;
 
 public partial class NBlockQueue : Node2D
 {

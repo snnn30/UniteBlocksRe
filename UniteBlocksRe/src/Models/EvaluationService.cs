@@ -1,8 +1,8 @@
 using System;
 using System.Linq;
-using UniteBlocksRe.src.Models.Evaluation;
+using UniteBlocksRe.Models.Evaluation;
 
-namespace UniteBlocksRe.src.Models;
+namespace UniteBlocksRe.Models;
 
 public static class EvaluationService
 {

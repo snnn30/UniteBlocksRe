@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Godot;
 
-namespace UniteBlocksRe.src.Models.BoardServices;
+namespace UniteBlocksRe.Models.BoardServices;
 
 public static class ObstaclePlaceService
 {

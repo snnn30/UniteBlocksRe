@@ -1,9 +1,9 @@
 using Godot;
-using UniteBlocksRe.src.Extensions;
-using UniteBlocksRe.src.Models.Block;
-using UniteBlocksRe.src.Models.BoardServices;
+using UniteBlocksRe.Extensions;
+using UniteBlocksRe.Models.Block;
+using UniteBlocksRe.Models.BoardServices;
 
-namespace UniteBlocksRe.Nodes;
+namespace UniteBlocksRe.Nodes.PlayScreen;
 
 public partial class NObstacleCounter : Node2D
 {
@@ -21,7 +21,7 @@ public partial class NObstacleCounter : Node2D
             _label.Text = _viewCount.ToString();
         }
     }
-    private float _obstacleRate = 4.5f;
+    private readonly float _obstacleRate = 4.5f;
 
     public override void _Ready()
     {

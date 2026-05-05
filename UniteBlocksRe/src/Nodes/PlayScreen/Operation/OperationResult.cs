@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
 
-namespace UniteBlocksRe.src.Nodes.PlayerScene.Operation;
+namespace UniteBlocksRe.Nodes.PlayScreen.Operation;
 
 public record OperationResult(bool Sucess, Task Task, OperationType Type)
 {

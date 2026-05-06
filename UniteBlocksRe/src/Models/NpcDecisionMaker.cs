@@ -19,7 +19,6 @@ public class NpcDecisionMaker
     /// </summary>
     public SimulationResult GetBestDestination(OperatingBlocksEntity operating, BoardEntity board)
     {
-        // 目的地がない、あるいは状況が変わった場合のみ重い計算を行う
         var (_, destination) = EvaluationService.UpdateDestination(
             operating,
             board,

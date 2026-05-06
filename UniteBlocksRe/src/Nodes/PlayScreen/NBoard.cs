@@ -188,7 +188,6 @@ public partial class NBoard : Node2D
 
     private async Task Explode(ExplodeResult result)
     {
-        Log.Debug("Explode Anime Start");
         foreach (var step in result.Steps)
         {
             var tasks = step.ExplodedBlocks.Select(b =>

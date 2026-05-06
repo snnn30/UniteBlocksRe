@@ -1,4 +1,6 @@
+using System.Threading.Tasks;
 using Godot;
+using UniteBlocksRe.Logging;
 using UniteBlocksRe.Models;
 using UniteBlocksRe.Models.Evaluation.EvaluationWeights;
 using UniteBlocksRe.Nodes.PlayerScene.Operation;
@@ -10,7 +12,7 @@ public partial class PlayScreen : Control
     private NPlayerScene _playerScene;
     private NPlayerScene _enemyScene;
 
-    public override void _Ready()
+    public override async void _Ready()
     {
         _playerScene = GetNode<NPlayerScene>("%PlayerScene");
         _enemyScene = GetNode<NPlayerScene>("%EnemyScene");
@@ -21,7 +23,19 @@ public partial class PlayScreen : Control
             _playerScene
         );
 
-        _ = _playerScene.StartGameLoop();
-        _ = _enemyScene.StartGameLoop();
+        var playerTask = _playerScene.StartGameLoop();
+        var enemyTask = _enemyScene.StartGameLoop();
+        var finishedTask = await Task.WhenAny(playerTask, enemyTask);
+
+        GetTree().Paused = true;
+
+        if (finishedTask == playerTask)
+        {
+            Log.Info("プレイヤーの敗北...");
+        }
+        else
+        {
+            Log.Info("プレイヤーの勝利!!!");
+        }
     }
 }

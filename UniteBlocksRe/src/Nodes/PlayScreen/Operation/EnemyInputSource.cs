@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using R3;
-using UniteBlocksRe.Logging;
 using UniteBlocksRe.Models;
 using UniteBlocksRe.Models.OperatingBlocks;
 using UniteBlocksRe.Nodes.PlayScreen;
@@ -75,15 +74,6 @@ public class EnemyInputSource : IOperationInputSource
         );
 
         var steps = destination.Steps.ToList();
-
-        if (!steps.Any(s => s.Operation is StuckOperation))
-        {
-            string debugPath = string.Join(
-                ", ",
-                steps.Select(s => $"{s.Operation.GetType().Name}({s.Count})")
-            );
-            Log.Debug(debugPath);
-        }
 
         try
         {

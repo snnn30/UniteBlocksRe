@@ -44,8 +44,7 @@ public partial class NPlayerScene : Node2D, IPlayerContext
 
             if (!CheckCanSpawn())
             {
-                BombGauge.IsAutoCharging = false;
-                Log.Info("Game Over");
+                Log.Debug("GameOver");
                 return;
             }
 

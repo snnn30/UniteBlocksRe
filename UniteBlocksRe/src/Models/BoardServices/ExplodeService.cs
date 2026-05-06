@@ -41,7 +41,7 @@ public static class ExplodeService
                 foreach (var b in induced)
                 {
                     // すでに爆発済み、または次のステップに登録済みでなければ追加
-                    if (!exploded.Contains(b))
+                    if (!exploded.Contains(b) && !currentStepTargets.Contains(b))
                     {
                         nextStepTargets.Add(b);
                     }

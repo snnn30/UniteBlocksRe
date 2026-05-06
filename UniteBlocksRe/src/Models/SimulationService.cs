@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Godot;
 using UniteBlocksRe.Models.OperatingBlocks;
 
@@ -7,119 +8,139 @@ namespace UniteBlocksRe.Models;
 public static class SimulationService
 {
     /// <summary>
-    /// メソッドA: 現在の状態から到達可能な「すべての着地パターン」を列挙する
+    /// 操作フローを「横移動 -> 回転 -> 落下」に限定して、到達可能な最終地点をすべて列挙する
     /// </summary>
-    public static IReadOnlyList<SimulationResult> SimulateAll(
+    public static IReadOnlyList<SimulationResult> EnumerateAllDestinations(
         OperatingBlocksEntity initial,
         BoardEntity board
     )
     {
-        // キー: (最終ParentPos, 最終ChildPos)
-        var bestResults = new Dictionary<(Vector2I, Vector2I), SimulationResult>();
+        var destinations = new Dictionary<(Vector2I, Vector2I), SimulationResult>();
 
-        // 空中探索の訪問済み管理 (座標 + IsHalfUp)
-        // 手順を考慮しないため、同じ地点に「より低コスト」で辿り着くことだけを保証
-        var minCosts = new Dictionary<(Vector2I P, Vector2I C, bool Half), int>();
-        var pq = new PriorityQueue<OperatingBlocksEntity, int>();
-
-        var start = initial.Clone();
-        pq.Enqueue(start, 0);
-        minCosts[(start.ParentPos, start.ChildPos, start.IsHalfUp)] = 0;
-
-        while (pq.Count > 0)
+        // 横移動を全パターン試行
+        foreach (var moved in GetHorizontalPatterns(initial))
         {
-            pq.TryDequeue(out var current, out var currentCost);
-            var stateKey = (current.ParentPos, current.ChildPos, current.IsHalfUp);
-
-            if (minCosts.TryGetValue(stateKey, out var best) && currentCost > best)
+            // 移動後の各状態から、全回転パターンを試行
+            foreach (var rotated in GetRotationPatterns(moved.Entity))
             {
-                continue;
-            }
-
-            // --- 着地パターンの記録 ---
-            var landingKey = GetLandingKey(current);
-            if (!bestResults.ContainsKey(landingKey))
-            {
-                bestResults[landingKey] = Finalize(current, board);
-            }
-
-            // --- 次の操作（1ポチ分）を探索 ---
-            foreach (var next in GetPossibleNextStates(current))
-            {
-                var nextKey = (next.ParentPos, next.ChildPos, next.IsHalfUp);
-                var nextCost = currentCost + 1; // 操作回数
-
-                if (!minCosts.TryGetValue(nextKey, out var b) || nextCost < b)
+                // 回転後の各状態から、一番下まで一気に落とす
+                var finalEntity = rotated.Entity.Clone();
+                var dropCount = 0;
+                while (finalEntity.TryDrop())
                 {
-                    minCosts[nextKey] = nextCost;
-                    pq.Enqueue(next, nextCost);
+                    dropCount++;
+                }
+
+                // 最終座標をキーにする
+                var key = (finalEntity.ParentPos, finalEntity.ChildPos);
+
+                // 手順を構築 (移動 -> 回転 -> 落下)
+                var steps = new List<StepInfo>();
+                if (moved.Step != null)
+                {
+                    steps.Add(moved.Step);
+                }
+
+                if (rotated.Step != null)
+                {
+                    steps.Add(rotated.Step);
+                }
+
+                if (dropCount > 0)
+                {
+                    steps.Add(new StepInfo(new DropOperation(), dropCount));
+                }
+
+                // まだ見つかっていない場所、またはより手順の短い(Step数が少ない)ものを採用
+                if (
+                    !destinations.TryGetValue(key, out var existing)
+                    || steps.Count < existing.Steps.Count
+                )
+                {
+                    destinations[key] = CreateResult(finalEntity, board, steps);
                 }
             }
         }
 
-        return [.. bestResults.Values];
+        return destinations.Values.ToList();
     }
 
-    private static IEnumerable<OperatingBlocksEntity> GetPossibleNextStates(
-        OperatingBlocksEntity current
+    /// <summary>
+    /// 初期位置から左右に行ける全パターンを列挙（0移動含む）
+    /// </summary>
+    private static IEnumerable<(OperatingBlocksEntity Entity, StepInfo Step)> GetHorizontalPatterns(
+        OperatingBlocksEntity initial
     )
     {
-        // 左右移動
+        // 移動なし
+        yield return (initial.Clone(), null);
+
         foreach (var dir in new[] { MoveDirection.Left, MoveDirection.Right })
         {
-            var next = current.Clone();
-            while (next.TryMove(dir))
+            var current = initial.Clone();
+            var count = 0;
+            while (current.TryMove(dir))
             {
-                yield return next.Clone();
+                count++;
+                yield return (current.Clone(), new StepInfo(new MoveOperation(dir), count));
             }
         }
+    }
 
-        // 回転（1〜3回）
-        foreach (var dir in new[] { RotateDirection.CW, RotateDirection.ACW })
+    /// <summary>
+    /// 特定の座標で可能な全回転パターンを列挙
+    /// </summary>
+    private static IEnumerable<(OperatingBlocksEntity Entity, StepInfo Step)> GetRotationPatterns(
+        OperatingBlocksEntity moved
+    )
+    {
+        // 回転なし
+        yield return (moved.Clone(), null);
+
+        for (var i = 1; i <= 3; i++)
         {
-            var next = current.Clone();
-            for (var i = 0; i < 3; i++)
+            foreach (var dir in new[] { RotateDirection.CW, RotateDirection.ACW })
             {
-                if (!next.TryRotate(dir).Success)
+                var current = moved.Clone();
+                var possible = true;
+
+                for (var j = 0; j < i; j++)
                 {
-                    break;
+                    if (!current.TryRotate(dir).Success)
+                    {
+                        possible = false;
+                        break;
+                    }
                 }
 
-                yield return next.Clone();
+                if (possible)
+                {
+                    yield return (current.Clone(), new StepInfo(new RotateOperation(dir), i));
+                }
             }
         }
-
-        // 落下
-        var down = current.Clone();
-        while (down.TryDrop())
-        {
-            yield return down.Clone();
-        }
     }
 
-    private static (Vector2I P, Vector2I C) GetLandingKey(OperatingBlocksEntity state)
-    {
-        var temp = state.Clone();
-        while (temp.TryDrop()) { }
-        return (temp.ParentPos, temp.ChildPos);
-    }
-
-    private static SimulationResult Finalize(OperatingBlocksEntity state, BoardEntity board)
+    private static SimulationResult CreateResult(
+        OperatingBlocksEntity state,
+        BoardEntity board,
+        IReadOnlyList<StepInfo> steps
+    )
     {
         var simBoard = board.Clone();
-        var moving = state.Clone();
-        while (moving.TryDrop()) { } // 完全に落とし切る
-
-        simBoard.Place(moving.ParentPos, moving.Parent);
-        if (moving.Child is { } child)
+        simBoard.Place(state.ParentPos, state.Parent);
+        if (state.Child is { } child)
         {
-            simBoard.Place(moving.ChildPos, child);
+            simBoard.Place(state.ChildPos, child);
         }
 
-        // BoardService.Process で連鎖・消去をシミュレート
-        var processResult = BoardService.Process(simBoard);
-
-        return new SimulationResult(simBoard, processResult, moving.ParentPos, moving.ChildPos);
+        return new SimulationResult(
+            simBoard,
+            BoardService.Process(simBoard),
+            state.ParentPos,
+            state.ChildPos,
+            steps
+        );
     }
 }
 
@@ -127,5 +148,8 @@ public sealed record SimulationResult(
     BoardEntity Board,
     ProcessResult BoardOperations,
     Vector2I ParentDestination,
-    Vector2I ChildDestination
+    Vector2I ChildDestination,
+    IReadOnlyList<StepInfo> Steps
 );
+
+public record StepInfo(BlockOperationStep Operation, int Count);

@@ -188,6 +188,7 @@ public partial class NBoard : Node2D
 
     private async Task Explode(ExplodeResult result)
     {
+        Log.Debug("Explode Anime Start");
         foreach (var step in result.Steps)
         {
             var tasks = step.ExplodedBlocks.Select(b =>
@@ -201,11 +202,13 @@ public partial class NBoard : Node2D
             await Task.WhenAll(tasks);
             foreach (var block in step.ExplodedBlocks)
             {
-                _blockIdentities[block].QueueFree();
-                _blockIdentities[block] = null;
+                var node = _blockIdentities[block];
+                _blockIdentities.Remove(block);
+                node.QueueFree();
             }
         }
         _opponentObstacleCounter.OnEndExplode();
     }
+
     #endregion
 }

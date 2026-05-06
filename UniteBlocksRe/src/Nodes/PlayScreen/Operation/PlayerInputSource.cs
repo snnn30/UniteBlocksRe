@@ -1,6 +1,5 @@
 using Godot;
 using R3;
-using UniteBlocksRe.Models;
 
 namespace UniteBlocksRe.Nodes.PlayScreen.Operation;
 
@@ -11,10 +10,10 @@ public class PlayerInputSource : IOperationInputSource
     private readonly ReactiveProperty<bool> _isDropActive = new(false);
     private readonly Subject<Unit> _switchBomb = new();
 
-    public ReadOnlyReactiveProperty<MoveInput> MoveDirectionState => _moveDirection;
-    public ReadOnlyReactiveProperty<RotateInput> RotateDirectionState => _rotateDirection;
-    public ReadOnlyReactiveProperty<bool> IsDropActiveState => _isDropActive;
-    public Observable<Unit> SwitchBomb => _switchBomb;
+    public ReadOnlyReactiveProperty<MoveInput> MoveInputState => _moveDirection;
+    public ReadOnlyReactiveProperty<RotateInput> RotateInputState => _rotateDirection;
+    public ReadOnlyReactiveProperty<bool> DropInputState => _isDropActive;
+    public Observable<Unit> SwitchInputState => _switchBomb;
 
     private readonly CompositeDisposable _disposables = [];
 
@@ -66,6 +65,4 @@ public class PlayerInputSource : IOperationInputSource
             .Subscribe(_ => _switchBomb.OnNext(Unit.Default))
             .AddTo(_disposables);
     }
-
-    public void UpdateStrategy(BoardEntity board, NBombGauge gauge, BlockQueueEntity queue) { }
 }

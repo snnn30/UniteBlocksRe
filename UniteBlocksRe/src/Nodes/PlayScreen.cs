@@ -1,7 +1,12 @@
 using Godot;
+using UniteBlocksRe.Models;
+using UniteBlocksRe.Models.Evaluation.EvaluationWeights;
+using UniteBlocksRe.Nodes.PlayerScene.Operation;
+using UniteBlocksRe.Nodes.PlayScreen;
+using UniteBlocksRe.Nodes.PlayScreen.Operation;
 
-public partial class PlayScreen
-    : Control { /*
+public partial class PlayScreen : Control
+{
     private NPlayerScene _playerScene;
     private NPlayerScene _enemyScene;
 
@@ -11,10 +16,12 @@ public partial class PlayScreen
         _enemyScene = GetNode<NPlayerScene>("%EnemyScene");
 
         _playerScene.Init(new PlayerInputSource(), _enemyScene);
-        _enemyScene.Init(new EnemyInputSource(_enemyScene.OperationManager), _playerScene);
+        _enemyScene.Init(
+            new EnemyInputSource(_enemyScene, new NpcDecisionMaker(new DefaultEvaluationWeight())),
+            _playerScene
+        );
 
         _ = _playerScene.StartGameLoop();
         _ = _enemyScene.StartGameLoop();
     }
-    */
 }

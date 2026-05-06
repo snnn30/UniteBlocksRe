@@ -12,11 +12,9 @@ namespace UniteBlocksRe.Nodes.PlayScreen;
 public partial class NOperationManager : Node
 {
     public Observable<OperationResult> OnOperationExecuted => _onOperationExecuted;
-    public Observable<OperatingBlocksEntity> OnSpawn => _onSpawn;
     public NOperationItem Item { get; private set; }
 
     private readonly Subject<OperationResult> _onOperationExecuted = new();
-    private readonly Subject<OperatingBlocksEntity> _onSpawn = new();
 
     private IPlayerContext _context;
 
@@ -50,7 +48,6 @@ public partial class NOperationManager : Node
 
         var result = Item.Spawn(parent, child);
         _onOperationExecuted.OnNext(result);
-        _onSpawn.OnNext(Item.Model);
 
         await result.Task;
     }
@@ -84,7 +81,7 @@ public partial class NOperationManager : Node
         Item.Init(context.Board);
 
         context
-            .InputSource.SwitchBomb.Subscribe(_ =>
+            .InputSource.SwitchInputState.Subscribe(_ =>
             {
                 _context.BombGauge.TrySetBombActive(!_context.BombGauge.IsBombActive);
             })
@@ -129,7 +126,7 @@ public partial class NOperationManager : Node
 
         var dropInput = Observable
             .EveryUpdate()
-            .Select(_ => _activeInput && source.IsDropActiveState.CurrentValue)
+            .Select(_ => _activeInput && source.DropInputState.CurrentValue)
             .DistinctUntilChanged();
 
         dropInput
@@ -198,7 +195,7 @@ public partial class NOperationManager : Node
 
         var rotateInput = Observable
             .EveryUpdate()
-            .Select(_ => _activeInput ? source.RotateDirectionState.CurrentValue : RotateInput.None)
+            .Select(_ => _activeInput ? source.RotateInputState.CurrentValue : RotateInput.None)
             .DistinctUntilChanged();
 
         rotateInput
@@ -244,7 +241,7 @@ public partial class NOperationManager : Node
 
         var moveInput = Observable
             .EveryUpdate()
-            .Select(_ => _activeInput ? source.MoveDirectionState.CurrentValue : MoveInput.None)
+            .Select(_ => _activeInput ? source.MoveInputState.CurrentValue : MoveInput.None)
             .DistinctUntilChanged();
 
         moveInput

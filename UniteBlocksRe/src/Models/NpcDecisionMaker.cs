@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using System.Linq;
 using UniteBlocksRe.Models.Evaluation;
 using UniteBlocksRe.Models.OperatingBlocks;
 
@@ -9,125 +7,63 @@ public class NpcDecisionMaker
 {
     private readonly EvaluationWeight _evaluationWeight;
 
+    private SimulationResult _lastDestination;
+
     public NpcDecisionMaker(EvaluationWeight evaluationWeight)
     {
         _evaluationWeight = evaluationWeight;
     }
 
-    /// <summary>
-    /// 現在の状態から次にとるべき1操作を決定する。
+    // <summary>
+    /// 最良の目的地と、そこに至るまでの全ステップを返す
     /// </summary>
-    public BlockOperationStep GetNextStep(
-        OperatingBlocksEntity operating,
-        BoardEntity board,
-        BlockOperationStep lastStep
-    )
+    public SimulationResult GetBestDestination(OperatingBlocksEntity operating, BoardEntity board)
     {
-        // 最良の目的地を計算
+        // 目的地がない、あるいは状況が変わった場合のみ重い計算を行う
         var (_, destination) = EvaluationService.UpdateDestination(
             operating,
             board,
-            _evaluationWeight
+            _evaluationWeight,
+            _lastDestination // 前回の目的地を渡して安定性を確保
         );
-        if (destination == null)
+
+        _lastDestination = destination;
+
+        if (destination.Steps.Count == 0)
         {
-            return new StuckOperation();
+            return destination with { Steps = [new(new StuckOperation(), 0)] };
         }
 
-        // 現在地から実行可能な1回の操作をすべて列挙
-        var candidates = GetImmediateMoves(operating);
-
-        // 目的地に辿り着けるルートが残る操作だけに絞り込む
-        var validMoves = candidates.Where(c => CanReach(c.NextState, board, destination)).ToList();
-
-        // 操作不能な場合
-        if (validMoves.Count == 0)
-        {
-            return new StuckOperation();
-        }
-
-        // 前の手と同じ操作を優先する
-        return validMoves
-            .OrderByDescending(c => IsSameType(c.Step, lastStep))
-            .ThenByDescending(c => GetStepPriority(c.Step))
-            .First()
-            .Step;
+        return destination;
     }
 
-    /// <summary>
-    /// 現在の状態から一回の操作で遷移できる状態を列挙する。
-    /// </summary>
-    private static IReadOnlyList<(
-        BlockOperationStep Step,
-        OperatingBlocksEntity NextState
-    )> GetImmediateMoves(OperatingBlocksEntity current)
+    public bool ShouldUseBomb(BoardEntity board, BlockEntity parent, BlockEntity child)
     {
-        var results = new List<(BlockOperationStep, OperatingBlocksEntity)>();
-
-        // 左右移動
-        foreach (var dir in new[] { MoveDirection.Left, MoveDirection.Right })
-        {
-            var next = current.Clone();
-            if (next.TryMove(dir))
-            {
-                results.Add((new MoveOperation(dir), next));
-            }
-        }
-
-        // 回転
-        foreach (var dir in new[] { RotateDirection.CW, RotateDirection.ACW })
-        {
-            var next = current.Clone();
-            if (next.TryRotate(dir).Success)
-            {
-                results.Add((new RotateOperation(dir), next));
-            }
-        }
-
-        // 落下
-        var down = current.Clone();
-        if (down.TryDrop())
-        {
-            results.Add((new DropOperation(), down));
-        }
-
-        return results;
-    }
-
-    /// <summary>
-    /// 指定された状態から、目的地に到達できるかをシミュレーションで判定する。
-    /// </summary>
-    private static bool CanReach(
-        OperatingBlocksEntity start,
-        BoardEntity board,
-        SimulationResult target
-    )
-    {
-        var reachableLandings = SimulationService.SimulateAll(start, board);
-
-        return reachableLandings.Any(r =>
-            r.ParentDestination == target.ParentDestination
-            && r.ChildDestination == target.ChildDestination
+        var (canSpawn1, blocks) = OperatingBlocksEntity.TrySpawnDouble(parent, child, board);
+        var (canSpawn2, bomb) = OperatingBlocksEntity.TrySpawnSingle(
+            BlockEntity.CreateBomb(),
+            board
         );
-    }
 
-    private static bool IsSameType(BlockOperationStep next, BlockOperationStep last)
-    {
-        return last != null && next != null && next.GetType() == last.GetType();
-    }
-
-    /// <summary>
-    /// 挙動安定化のための操作自体の優先順位。
-    /// </summary>
-    private static int GetStepPriority(BlockOperationStep step)
-    {
-        return step switch
+        if (!canSpawn1 || !canSpawn2)
         {
-            MoveOperation => 3,
-            RotateOperation => 2,
-            DropOperation => 1,
-            _ => 0,
-        };
+            return false;
+        }
+
+        var (blockResult, _) = EvaluationService.UpdateDestination(
+            blocks,
+            board,
+            _evaluationWeight,
+            null
+        );
+        var (bombResult, _) = EvaluationService.UpdateDestination(
+            bomb,
+            board,
+            _evaluationWeight,
+            null
+        );
+
+        return bombResult.TotalScore > blockResult.TotalScore;
     }
 }
 

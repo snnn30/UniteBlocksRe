@@ -15,7 +15,7 @@ public sealed record DefaultEvaluationWeight : EvaluationWeight
         { EvaluationCriterion.ExplodeBlockBonus, 12 },
         { EvaluationCriterion.HeightPenalty, -2 },
         { EvaluationCriterion.ObstaclePenalty, -20 },
-        { EvaluationCriterion.DifferentColorAdjacentPenalty, -4 },
+        { EvaluationCriterion.DifferentColorAdjacentPenalty, -8 },
         { EvaluationCriterion.UseBombPenalty, -80 },
         { EvaluationCriterion.CantSpawnPenalty, -100000 },
     };

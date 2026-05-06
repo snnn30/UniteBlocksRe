@@ -19,10 +19,10 @@ public class OperatingBlocksEntity : Entity<OperatingBlocksEntity>
 
     public static (bool Sucess, OperatingBlocksEntity Entity) TrySpawnSingle(
         BlockEntity parent,
-        Vector2I parentPos,
         BoardEntity board
     )
     {
+        var parentPos = BoardEntity.SpawnPosition;
         var sucess = board.CanPlace(parentPos, parent);
         if (!sucess)
         {
@@ -38,11 +38,11 @@ public class OperatingBlocksEntity : Entity<OperatingBlocksEntity>
     public static (bool Sucess, OperatingBlocksEntity Entity) TrySpawnDouble(
         BlockEntity parent,
         BlockEntity child,
-        Vector2I parentPos,
-        Vector2I childPos,
         BoardEntity board
     )
     {
+        var parentPos = BoardEntity.SpawnPosition;
+        var childPos = parentPos + Vector2I.Up;
         var sucess = board.CanPlace(parentPos, parent);
         sucess &= board.CanPlace(childPos, child);
         if (!sucess)

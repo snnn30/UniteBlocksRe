@@ -4,8 +4,8 @@ namespace UniteBlocksRe.Nodes.PlayScreen.Operation;
 
 public interface IOperationInputSource
 {
-    ReadOnlyReactiveProperty<MoveInput> MoveDirectionState { get; }
-    ReadOnlyReactiveProperty<RotateInput> RotateDirectionState { get; }
-    ReadOnlyReactiveProperty<bool> IsDropActiveState { get; }
-    Observable<Unit> SwitchBomb { get; }
+    ReadOnlyReactiveProperty<MoveInput> MoveInputState { get; }
+    ReadOnlyReactiveProperty<RotateInput> RotateInputState { get; }
+    ReadOnlyReactiveProperty<bool> DropInputState { get; }
+    Observable<Unit> SwitchInputState { get; }
 }

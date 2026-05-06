@@ -199,22 +199,16 @@ public partial class NOperationItem : Node
     {
         Reset();
 
-        var parentPos = BoardEntity.SpawnPosition;
-        var childPos = parentPos + Vector2I.Up;
-
-        var (sucess, entity) = OperatingBlocksEntity.TrySpawnDouble(
-            parent,
-            child,
-            parentPos,
-            childPos,
-            _board.Model
-        );
+        var (sucess, entity) = OperatingBlocksEntity.TrySpawnDouble(parent, child, _board.Model);
 
         if (!sucess)
         {
             return OperationResult.Failed(OperationType.Spawn);
         }
         Model = entity;
+
+        var parentPos = entity.ParentPos;
+        var childPos = entity.ChildPos;
 
         Parent = NBlock.Create(parent);
         _board.AddBlockAsChild(Parent);
@@ -235,13 +229,9 @@ public partial class NOperationItem : Node
     {
         Reset();
 
-        var parentPos = BoardEntity.SpawnPosition;
+        var (sucess, entity) = OperatingBlocksEntity.TrySpawnSingle(parent, _board.Model);
 
-        var (sucess, entity) = OperatingBlocksEntity.TrySpawnSingle(
-            parent,
-            parentPos,
-            _board.Model
-        );
+        var parentPos = entity.ParentPos;
 
         if (!sucess)
         {

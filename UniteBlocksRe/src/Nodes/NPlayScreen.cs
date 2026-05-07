@@ -7,7 +7,7 @@ using UniteBlocksRe.Nodes.PlayerScene.Operation;
 using UniteBlocksRe.Nodes.PlayScreen;
 using UniteBlocksRe.Nodes.PlayScreen.Operation;
 
-public partial class PlayScreen : Control
+public partial class NPlayScreen : Control
 {
     private NPlayerScene _playerScene;
     private NPlayerScene _enemyScene;

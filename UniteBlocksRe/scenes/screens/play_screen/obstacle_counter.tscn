@@ -1,20 +1,23 @@
 [gd_scene load_steps=3 format=3 uid="uid://d1blssmj6rop2"]
 
 [ext_resource type="Texture2D" uid="uid://g0qg8rg73odp" path="res://images/blocks/ObstacleBlock.png" id="1_b8k3u"]
-[ext_resource type="Script" uid="uid://bb2erjn87ml8j" path="res://src/Nodes/PlayerScene/NObstacleCounter.cs" id="1_j3v8s"]
+[ext_resource type="Script" uid="uid://bb2erjn87ml8j" path="res://src/Nodes/PlayScreen/NObstacleCounter.cs" id="1_j3v8s"]
 
 [node name="ObstacleCounter" type="Node2D"]
 script = ExtResource("1_j3v8s")
 
-[node name="Polygon2D" type="Polygon2D" parent="."]
+[node name="Bg" type="Polygon2D" parent="."]
+unique_name_in_owner = true
+position = Vector2(-25.599998, 0)
+scale = Vector2(1.2666667, 1)
 color = Color(0.103743516, 0.10374353, 0.103743516, 0.6784314)
-polygon = PackedVector2Array(-24, -24, 96, -24, 96, 24, -24, 24, -24, 24)
+polygon = PackedVector2Array(-24, -24, 96, -24, 96, 24, -24, 24, -24, 24, -24, -0.62848663)
 
 [node name="Icon" type="Sprite2D" parent="."]
 scale = Vector2(0.72, 0.72)
 texture = ExtResource("1_b8k3u")
 
-[node name="Label" type="Label" parent="."]
+[node name="ObstacleCount" type="Label" parent="."]
 unique_name_in_owner = true
 anchors_preset = 4
 anchor_top = 0.5
@@ -28,4 +31,22 @@ pivot_offset = Vector2(63, 21)
 theme_override_font_sizes/font_size = 20
 text = "999999"
 horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="TurnCount" type="Label" parent="."]
+unique_name_in_owner = true
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -56.0
+offset_top = -24.0
+offset_right = -16.0
+offset_bottom = 24.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 32
+text = "3"
+horizontal_alignment = 1
 vertical_alignment = 1

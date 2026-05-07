@@ -15,8 +15,7 @@ public partial class NBoard : Node2D
 
     private Control _visuals;
     private Control _clipMask;
-    private NObstacleCounter _playerObstacleCounter;
-    private NObstacleCounter _opponentObstacleCounter;
+    private IPlayerContext _playerContext;
 
     private readonly Dictionary<BlockEntity, NBlock> _blockIdentities = [];
 
@@ -25,8 +24,7 @@ public partial class NBoard : Node2D
 
     public void Init(IPlayerContext context)
     {
-        _playerObstacleCounter = context.ObstacleCounter;
-        _opponentObstacleCounter = context.OpponentContext.ObstacleCounter;
+        _playerContext = context;
     }
 
     public override void _Ready()
@@ -101,16 +99,12 @@ public partial class NBoard : Node2D
         return processResult;
     }
 
-    public async Task SpawnObstacles()
+    public async Task SpawnObstacles(ObstaclePlaceResult result)
     {
-        var count = _playerObstacleCounter.ViewCount;
-        var result = BoardService.ObstaclePlace(Model, count);
         if (!result.Placed)
         {
             return;
         }
-
-        _playerObstacleCounter.SubCount(result);
 
         var tween = CreateTween()
             .SetTrans(Tween.TransitionType.Bounce)
@@ -197,7 +191,6 @@ public partial class NBoard : Node2D
                 return node.PlayExplodeAnimeAsync();
             });
 
-            _opponentObstacleCounter.AddCount(step);
             await Task.WhenAll(tasks);
             foreach (var block in step.ExplodedBlocks)
             {
@@ -206,7 +199,8 @@ public partial class NBoard : Node2D
                 node.QueueFree();
             }
         }
-        _opponentObstacleCounter.OnEndExplode();
+
+        _playerContext.ObstacleManager.OnExploded(result);
     }
 
     #endregion

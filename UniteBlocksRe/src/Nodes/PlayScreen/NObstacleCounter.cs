@@ -1,59 +1,62 @@
+using System;
 using Godot;
-using UniteBlocksRe.Extensions;
-using UniteBlocksRe.Models.Block;
-using UniteBlocksRe.Models.BoardServices;
 
 namespace UniteBlocksRe.Nodes.PlayScreen;
 
 public partial class NObstacleCounter : Node2D
 {
-    private Label _label;
+    private Label _obstacleLabel;
+    private Label _turnLabel;
+    private Polygon2D _bg;
 
-    private int _score = 0;
-    private int _count;
-    private int _viewCount;
-    public int ViewCount
+    private int _obstacleCount;
+    public int ObstacleCount
     {
-        get { return _viewCount; }
-        private set
+        get { return _obstacleCount; }
+        set
         {
-            _viewCount = value;
-            _label.Text = _viewCount.ToString();
+            _obstacleCount = Math.Max(0, value);
+            _obstacleLabel.Text = _obstacleCount.ToString();
+
+            if (_obstacleCount > 0)
+            {
+                _bg.Color = new Color(0.9f, 0.1f, 0.1f, 0.7f);
+            }
+            else
+            {
+                TurnCount = 0;
+                _bg.Color = new Color(0.1f, 0.1f, 0.1f, 0.7f);
+            }
         }
     }
-    private readonly float _obstacleRate = 4.5f;
+
+    private int _turnCount;
+    public int TurnCount
+    {
+        get { return _turnCount; }
+        set
+        {
+            _turnCount = Math.Max(0, value);
+            _turnCount = value;
+            _turnLabel.Text = _turnCount.ToString();
+
+            if (_turnCount > 0)
+            {
+                _turnLabel.Visible = true;
+            }
+            else
+            {
+                _turnLabel.Visible = false;
+            }
+        }
+    }
 
     public override void _Ready()
     {
-        _label = GetNode<Label>("%Label");
-        ViewCount = 0;
-    }
+        _bg = GetNode<Polygon2D>("%Bg");
+        _obstacleLabel = GetNode<Label>("%ObstacleCount");
+        _turnLabel = GetNode<Label>("%TurnCount");
 
-    public void AddCount(ExplodeStep step)
-    {
-        foreach (var block in step.ExplodedBlocks)
-        {
-            if (block.Type != BlockType.Normal)
-            {
-                continue;
-            }
-            var area = block.Size.GetArea();
-            _score += area * area;
-        }
-
-        ViewCount = _count + (int)(_score / _obstacleRate);
-    }
-
-    public void OnEndExplode()
-    {
-        _score = 0;
-        _count = ViewCount;
-    }
-
-    public void SubCount(ObstaclePlaceResult result)
-    {
-        var placedCount = result.PlacedCount;
-        ViewCount -= placedCount;
-        _count -= placedCount;
+        ObstacleCount = 0;
     }
 }

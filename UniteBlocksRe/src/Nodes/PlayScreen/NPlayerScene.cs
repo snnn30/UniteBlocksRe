@@ -12,7 +12,7 @@ public partial class NPlayerScene : Node2D, IPlayerContext
     public NBoard Board { get; private set; }
     public NBlockQueue Queue { get; private set; }
     public NBombGauge BombGauge { get; private set; }
-    public ObstacleManager ObstacleManager { get; private set; }
+    public NObstacleManager ObstacleManager { get; private set; }
     public NObstacleCounter ObstacleCounter { get; private set; }
     public IOperationInputSource InputSource { get; private set; }
     public IPlayerContext OpponentContext { get; private set; }
@@ -24,7 +24,7 @@ public partial class NPlayerScene : Node2D, IPlayerContext
 
         OperationManager.Init(this);
         Board.Init(this);
-        ObstacleManager = new ObstacleManager(this);
+        ObstacleManager.Init(this);
     }
 
     public override void _Ready()
@@ -34,6 +34,7 @@ public partial class NPlayerScene : Node2D, IPlayerContext
         Queue = GetNode<NBlockQueue>("%Queue");
         BombGauge = GetNode<NBombGauge>("%BombGauge");
         ObstacleCounter = GetNode<NObstacleCounter>("%ObstacleCounter");
+        ObstacleManager = GetNode<NObstacleManager>("%ObstacleManager");
     }
 
     public async Task StartGameLoop()

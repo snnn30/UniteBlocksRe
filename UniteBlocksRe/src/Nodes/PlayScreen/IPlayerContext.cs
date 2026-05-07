@@ -9,7 +9,7 @@ public interface IPlayerContext
     NBoard Board { get; }
     NBlockQueue Queue { get; }
     NBombGauge BombGauge { get; }
-    ObstacleManager ObstacleManager { get; }
+    NObstacleManager ObstacleManager { get; }
     NObstacleCounter ObstacleCounter { get; }
     IOperationInputSource InputSource { get; }
     IPlayerContext OpponentContext { get; }

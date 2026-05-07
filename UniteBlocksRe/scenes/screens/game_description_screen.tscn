@@ -1,0 +1,43 @@
+[gd_scene load_steps=3 format=3 uid="uid://uircfifgbo4n"]
+
+[ext_resource type="VideoStream" uid="uid://drr1qlijxjb0p" path="res://videos/output.ogv" id="1_vmg34"]
+[ext_resource type="Script" uid="uid://cdhaloxynq7cy" path="res://src/Nodes/GameDescriptionScreen.cs" id="1_xs6wm"]
+
+[node name="GameDescriptionScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_xs6wm")
+
+[node name="VideoStreamPlayer" type="VideoStreamPlayer" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -512.0
+offset_right = 768.0
+offset_bottom = 720.0
+grow_horizontal = 2
+scale = Vector2(0.8, 0.8)
+stream = ExtResource("1_vmg34")
+autoplay = true
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -276.0
+offset_top = -87.29999
+offset_right = 276.0
+offset_bottom = -53.299988
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_font_sizes/font_size = 32
+text = "ESC: メインメニュー　A: 前のセクション　D: 次のセクション"

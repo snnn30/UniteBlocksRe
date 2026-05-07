@@ -1,20 +1,28 @@
 using System;
 using System.Threading.Tasks;
+using Godot;
 using UniteBlocksRe.Extensions;
 using UniteBlocksRe.Models.BoardServices;
 using UniteBlocksRe.Nodes.PlayScreen;
 
 namespace UniteBlocksRe.src.Nodes.PlayScreen;
 
-public class ObstacleManager
+public partial class NObstacleManager : Node
 {
-    private readonly IPlayerContext _playerContext;
+    private IPlayerContext _playerContext;
 
-    private readonly float _obstacleRate = 4.5f;
+    private float _obstacleRate = 4.5f;
+    private const float RateSubSpeed = 0.018f;
 
-    public ObstacleManager(IPlayerContext context)
+    public void Init(IPlayerContext context)
     {
         _playerContext = context;
+    }
+
+    public override void _Process(double delta)
+    {
+        _obstacleRate -= RateSubSpeed * (float)delta;
+        _obstacleRate = Math.Max(0.1f, _obstacleRate);
     }
 
     public void OnExploded(ExplodeResult result)
@@ -42,7 +50,7 @@ public class ObstacleManager
         if (currentCount > 0) // 相手に追加
         {
             _playerContext.OpponentContext.ObstacleCounter.ObstacleCount += currentCount;
-            _playerContext.OpponentContext.ObstacleCounter.TurnCount = 3;
+            _playerContext.OpponentContext.ObstacleCounter.TurnCount = 4;
         }
     }
 
@@ -53,8 +61,12 @@ public class ObstacleManager
         {
             return;
         }
-
         var obstacleCount = _playerContext.ObstacleCounter.ObstacleCount;
+        if (obstacleCount == 0)
+        {
+            return;
+        }
+
         var result = ObstaclePlaceService.Execute(_playerContext.Board.Model, obstacleCount);
         _playerContext.ObstacleCounter.ObstacleCount -= result.PlacedCount;
         await _playerContext.Board.SpawnObstacles(result);

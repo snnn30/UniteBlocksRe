@@ -37,7 +37,6 @@ public partial class NObstacleCounter : Node2D
         set
         {
             _turnCount = Math.Max(0, value);
-            _turnCount = value;
             _turnLabel.Text = _turnCount.ToString();
 
             if (_turnCount > 0)

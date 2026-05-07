@@ -1,6 +1,5 @@
 using System.Threading.Tasks;
 using Godot;
-using UniteBlocksRe.Logging;
 using UniteBlocksRe.Models;
 using UniteBlocksRe.Models.Evaluation.EvaluationWeights;
 using UniteBlocksRe.Nodes.PlayerScene.Operation;
@@ -37,6 +36,12 @@ public partial class NPlayScreen : Control
         _gameOverMessage.Visible = false;
 
         _playerScene.Init(new PlayerInputSource(), _enemyScene);
+        /*
+        _playerScene.Init(
+            new EnemyInputSource(_playerScene, new NpcDecisionMaker(new DefaultEvaluationWeight())),
+            _enemyScene
+        );
+        */
         _enemyScene.Init(
             new EnemyInputSource(_enemyScene, new NpcDecisionMaker(new DefaultEvaluationWeight())),
             _playerScene
@@ -49,12 +54,10 @@ public partial class NPlayScreen : Control
         if (playerWin)
         {
             _gameOverMessage.SetWinMessege();
-            Log.Info("プレイヤーの勝利!!!");
         }
         else
         {
             _gameOverMessage.SetLoseMessage();
-            Log.Info("プレイヤーの敗北...");
         }
         _gameOverMessage.Visible = true;
         _gameOver = true;

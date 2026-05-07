@@ -1,0 +1,83 @@
+[gd_scene load_steps=3 format=3 uid="uid://4yn0jqhv5dgw"]
+
+[ext_resource type="Script" uid="uid://cr2chrxioqluv" path="res://src/Nodes/NMainMenuScreen.cs" id="1_dauu4"]
+[ext_resource type="Texture2D" uid="uid://cee3ehgfs0hmp" path="res://images/operation_instructions/操作説明キーボード.png" id="1_rs0ey"]
+
+[node name="MainMenuScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_dauu4")
+
+[node name="Title" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -230.5
+offset_top = -279.63
+offset_right = 230.5
+offset_bottom = -191.62973
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 64
+text = "UniteBlocks Re"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Message" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -229.0
+offset_top = -87.0
+offset_right = 232.0
+offset_bottom = 1.0001221
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 32
+text = "Press Any Key to Start"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 0.41700003
+anchor_right = 0.5
+anchor_bottom = 0.41700003
+offset_left = -150.0
+offset_top = -0.24002075
+offset_right = 150.0
+offset_bottom = 121.76004
+grow_horizontal = 2
+theme_override_constants/separation = 16
+
+[node name="Button" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "ゲーム開始"
+
+[node name="OperationInstructions" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "操作説明"
+
+[node name="OperationInstruction" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 294.0
+offset_top = 289.0
+offset_right = 1417.0
+offset_bottom = 1083.0
+scale = Vector2(0.645, 0.645)
+texture = ExtResource("1_rs0ey")

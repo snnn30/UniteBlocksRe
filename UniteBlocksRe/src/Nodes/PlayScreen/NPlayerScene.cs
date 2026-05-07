@@ -1,6 +1,5 @@
 using System.Threading.Tasks;
 using Godot;
-using UniteBlocksRe.Logging;
 using UniteBlocksRe.Models;
 using UniteBlocksRe.Nodes.PlayScreen.Operation;
 using UniteBlocksRe.src.Nodes.PlayScreen;
@@ -47,7 +46,6 @@ public partial class NPlayerScene : Node2D, IPlayerContext
 
             if (!CheckCanSpawn())
             {
-                Log.Debug("GameOver");
                 return;
             }
 

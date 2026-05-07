@@ -1,0 +1,32 @@
+[gd_scene load_steps=3 format=3 uid="uid://sy4frg6j3fmn"]
+
+[ext_resource type="Texture2D" uid="uid://cee3ehgfs0hmp" path="res://images/operation_instructions/操作説明キーボード.png" id="1_kcvg3"]
+[ext_resource type="Texture2D" uid="uid://k2ie7yxil5o7" path="res://images/operation_instructions/操作説明ゲームパッド.png" id="2_eutks"]
+
+[node name="OperationInstructionScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TextureRect" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 117.0
+offset_top = 1.0
+offset_right = 1240.0
+offset_bottom = 795.0
+texture = ExtResource("1_kcvg3")
+expand_mode = 1
+
+[node name="TextureRect2" type="TextureRect" parent="."]
+visible = false
+layout_mode = 0
+offset_left = 553.99994
+offset_top = 75.0
+offset_right = 1677.0
+offset_bottom = 869.0
+scale = Vector2(0.7, 0.7)
+texture = ExtResource("2_eutks")
+expand_mode = 1

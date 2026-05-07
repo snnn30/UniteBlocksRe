@@ -1,0 +1,33 @@
+using Godot;
+using UniteBlocksRe.Logging;
+
+public partial class NGame : Control
+{
+    private PackedScene _mainMenuScreen = GD.Load<PackedScene>(
+        "res://scenes/screens/main_menu_screen.tscn"
+    );
+
+    private Node _currentScreen;
+
+    public static NGame Instance { get; private set; }
+
+    public override void _EnterTree()
+    {
+        if (Instance != null)
+        {
+            Log.Warn("NBeatManagerインスタンスが複数ある");
+            QueueFree();
+            return;
+        }
+        Instance = this;
+
+        LoadScreen(_mainMenuScreen);
+    }
+
+    public void LoadScreen(PackedScene screenPath)
+    {
+        _currentScreen?.QueueFree();
+        _currentScreen = screenPath.Instantiate(PackedScene.GenEditState.Disabled);
+        AddChild(_currentScreen, forceReadableName: false, InternalMode.Disabled);
+    }
+}

@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://bwb1m24upet0p"]
+[gd_scene load_steps=3 format=3 uid="uid://bwb1m24upet0p"]
 
 [ext_resource type="Script" uid="uid://bw573s05ctjgd" path="res://src/Nodes/NBeatManager.cs" id="1_uwrxv"]
+[ext_resource type="Script" uid="uid://pwfbt0u8uyi8" path="res://src/Nodes/NGame.cs" id="1_yqjtg"]
 
 [node name="Game" type="Control"]
 layout_mode = 3
@@ -9,6 +10,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_yqjtg")
 
 [node name="BeatManager" type="Node" parent="."]
 script = ExtResource("1_uwrxv")

@@ -55,6 +55,7 @@ public partial class NOperationManager : Node
     public async Task StartRun()
     {
         CompositeDisposable operationDisposable = [];
+        operationDisposable.AddTo(this);
 
         SubscribeDropInput(_context.InputSource, operationDisposable);
         SubscribeMoveInput(_context.InputSource, operationDisposable);

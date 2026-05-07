@@ -1,9 +1,10 @@
-[gd_scene load_steps=5 format=3 uid="uid://bth6xgu4sbuao"]
+[gd_scene load_steps=6 format=3 uid="uid://bth6xgu4sbuao"]
 
 [ext_resource type="Script" uid="uid://ck3534pbvlw6f" path="res://src/Nodes/NPlayScreen.cs" id="1_15gne"]
 [ext_resource type="PackedScene" uid="uid://c101pr35mnthh" path="res://scenes/screens/play_screen/play_bg.tscn" id="1_thvdw"]
 [ext_resource type="PackedScene" uid="uid://b2pbjmw8bpy40" path="res://scenes/screens/play_screen/player/player_scene.tscn" id="2_8cj2q"]
 [ext_resource type="PackedScene" uid="uid://qvvx1lcdi81m" path="res://scenes/screens/play_screen/enemy/player_scene.tscn" id="3_thvdw"]
+[ext_resource type="PackedScene" uid="uid://d0pydgdaggv82" path="res://scenes/screens/play_screen/game_over_message.tscn" id="5_xhil7"]
 
 [node name="PlayScreen" type="Control"]
 layout_mode = 3
@@ -20,8 +21,14 @@ layout_mode = 1
 
 [node name="PlayerScene" parent="." instance=ExtResource("2_8cj2q")]
 unique_name_in_owner = true
+process_mode = 1
 position = Vector2(290, 380)
 
 [node name="EnemyScene" parent="." instance=ExtResource("3_thvdw")]
 unique_name_in_owner = true
+process_mode = 1
 position = Vector2(990, 380)
+
+[node name="GameOverMessage" parent="." instance=ExtResource("5_xhil7")]
+unique_name_in_owner = true
+layout_mode = 1

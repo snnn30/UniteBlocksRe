@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=3 uid="uid://mvu67ni3qh6c"]
+
+[ext_resource type="Script" uid="uid://bfh3t1fo1npne" path="res://src/Nodes/PlayScreen/PlayerScene/NOperationManager.cs" id="1_elucd"]
+[ext_resource type="PackedScene" uid="uid://brw2pexc1gwrw" path="res://scenes/screens/play_screen/player_scene/operation_item.tscn" id="2_46vqx"]
+
+[node name="OperationManager" type="Node"]
+script = ExtResource("1_elucd")
+
+[node name="OperationItem" parent="." instance=ExtResource("2_46vqx")]
+unique_name_in_owner = true

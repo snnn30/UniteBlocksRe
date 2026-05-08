@@ -8,6 +8,7 @@
 [ext_resource type="Script" uid="uid://cfp61phdg8f3t" path="res://src/Nodes/PlayScreen/NObstacleManager.cs" id="6_v4h3r"]
 
 [node name="PlayScreen" type="Control"]
+process_mode = 3
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -30,12 +31,9 @@ unique_name_in_owner = true
 process_mode = 1
 position = Vector2(990, 380)
 
-[node name="GameOverMessage" parent="." instance=ExtResource("5_xhil7")]
+[node name="ObstacleManager" type="Control" parent="."]
 unique_name_in_owner = true
-visible = false
-layout_mode = 1
-
-[node name="Control" type="Control" parent="."]
+process_mode = 1
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
@@ -44,8 +42,9 @@ offset_left = -20.0
 offset_right = 20.0
 offset_bottom = 40.0
 grow_horizontal = 2
+script = ExtResource("6_v4h3r")
 
-[node name="Label" type="Label" parent="Control"]
+[node name="Label" type="Label" parent="ObstacleManager"]
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
@@ -59,7 +58,7 @@ theme_override_font_sizes/font_size = 32
 text = "DamageRate"
 horizontal_alignment = 1
 
-[node name="Label2" type="Label" parent="Control"]
+[node name="Counter" type="Label" parent="ObstacleManager"]
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
@@ -74,6 +73,7 @@ text = "12"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="ObstacleManager" type="Node" parent="."]
+[node name="GameOverMessage" parent="." instance=ExtResource("5_xhil7")]
 unique_name_in_owner = true
-script = ExtResource("6_v4h3r")
+visible = false
+layout_mode = 1

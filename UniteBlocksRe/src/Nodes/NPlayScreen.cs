@@ -50,7 +50,6 @@ public partial class NPlayScreen : Control, IPlayScreen
 
     public override async void _Ready()
     {
-        ProcessMode = ProcessModeEnum.Always;
         Initialize();
         var playerTask = _playerScene.StartGameLoop();
         var enemyTask = _enemyScene.StartGameLoop();

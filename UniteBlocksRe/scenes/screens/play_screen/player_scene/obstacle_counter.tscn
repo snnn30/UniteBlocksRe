@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://d1blssmj6rop2"]
 
 [ext_resource type="Texture2D" uid="uid://g0qg8rg73odp" path="res://images/blocks/ObstacleBlock.png" id="1_b8k3u"]
-[ext_resource type="Script" uid="uid://bb2erjn87ml8j" path="res://src/Nodes/PlayScreen/NObstacleCounter.cs" id="1_j3v8s"]
+[ext_resource type="Script" uid="uid://bb2erjn87ml8j" path="res://src/Nodes/PlayScreen/PlayerScene/NObstacleCounter.cs" id="1_j3v8s"]
 
 [node name="ObstacleCounter" type="Node2D"]
 script = ExtResource("1_j3v8s")

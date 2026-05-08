@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://bse5vr6vscgqi"]
 
-[ext_resource type="Script" uid="uid://p3xljtpa8tlh" path="res://src/Nodes/PlayerScene/NBoard.cs" id="1_bw3vb"]
+[ext_resource type="Script" uid="uid://p3xljtpa8tlh" path="res://src/Nodes/PlayScreen/PlayerScene/NBoard.cs" id="1_bw3vb"]
 [ext_resource type="Texture2D" uid="uid://dhq4gs2x5ye4o" path="res://images/board/SpawnIcon.png" id="2_tx6nw"]
 
 [node name="Board" type="Node2D"]

@@ -9,9 +9,13 @@ namespace UniteBlocksRe.src.Nodes.PlayScreen;
 
 public partial class NObstacleManager : Node
 {
+    private const float InitialObstacleRate = 4.5f;
+
+    private Label _label;
+
     private IPlayScreen _screen;
 
-    private float _obstacleRate = 4.5f;
+    private float _obstacleRate = InitialObstacleRate;
     private const float RateSubSpeed = 0.018f;
 
     public void Init(IPlayScreen screen)
@@ -19,10 +23,17 @@ public partial class NObstacleManager : Node
         _screen = screen;
     }
 
+    public override void _Ready()
+    {
+        _label = GetNode<Label>("Counter");
+    }
+
     public override void _Process(double delta)
     {
         _obstacleRate -= RateSubSpeed * (float)delta;
         _obstacleRate = Math.Max(0.1f, _obstacleRate);
+
+        _label.Text = (InitialObstacleRate / _obstacleRate).ToString("F2");
     }
 
     public void OnExploded(ExplodeResult result, PlayerSide side)

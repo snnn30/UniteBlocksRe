@@ -2,29 +2,40 @@ using System.Threading.Tasks;
 using Godot;
 using UniteBlocksRe.Models;
 using UniteBlocksRe.Nodes.PlayScreen.Operation;
-using UniteBlocksRe.src.Nodes.PlayScreen;
 
 namespace UniteBlocksRe.Nodes.PlayScreen;
 
+public interface IPlayerContext
+{
+    PlayerSide PlayerSide { get; }
+    NOperationManager OperationManager { get; }
+    NBoard Board { get; }
+    NBlockQueue Queue { get; }
+    NBombGauge BombGauge { get; }
+    NObstacleCounter ObstacleCounter { get; }
+    IOperationInputSource InputSource { get; }
+}
+
 public partial class NPlayerScene : Node2D, IPlayerContext
 {
+    public PlayerSide PlayerSide { get; private set; }
     public NOperationManager OperationManager { get; private set; }
     public NBoard Board { get; private set; }
     public NBlockQueue Queue { get; private set; }
     public NBombGauge BombGauge { get; private set; }
-    public NObstacleManager ObstacleManager { get; private set; }
     public NObstacleCounter ObstacleCounter { get; private set; }
     public IOperationInputSource InputSource { get; private set; }
-    public IPlayerContext OpponentContext { get; private set; }
 
-    public void Init(IOperationInputSource inputSource, IPlayerContext opponentContext)
+    private IPlayScreen _playScreen;
+
+    public void Init(IOperationInputSource inputSource, PlayerSide side, IPlayScreen playScreen)
     {
+        PlayerSide = side;
         InputSource = inputSource;
-        OpponentContext = opponentContext;
+        _playScreen = playScreen;
 
-        OperationManager.Init(this);
-        Board.Init(this);
-        ObstacleManager.Init(this);
+        Board.Init(playScreen, side);
+        OperationManager.Init(playScreen, side);
     }
 
     public override void _Ready()
@@ -34,7 +45,6 @@ public partial class NPlayerScene : Node2D, IPlayerContext
         Queue = GetNode<NBlockQueue>("%Queue");
         BombGauge = GetNode<NBombGauge>("%BombGauge");
         ObstacleCounter = GetNode<NObstacleCounter>("%ObstacleCounter");
-        ObstacleManager = GetNode<NObstacleManager>("%ObstacleManager");
     }
 
     public async Task StartGameLoop()
@@ -43,7 +53,7 @@ public partial class NPlayerScene : Node2D, IPlayerContext
 
         while (true)
         {
-            await ObstacleManager.OnTurnStart();
+            await _playScreen.ObstacleManager.OnTurnStart(PlayerSide);
 
             if (!CheckCanSpawn())
             {
@@ -52,7 +62,6 @@ public partial class NPlayerScene : Node2D, IPlayerContext
 
             await OperationManager.Spawn();
             await OperationManager.StartRun();
-
             BombGauge.IsAutoCharging = false;
             await Board.ProcessChainReaction();
             BombGauge.IsAutoCharging = true;

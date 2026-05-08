@@ -16,7 +16,8 @@ public partial class NOperationManager : Node
 
     private readonly Subject<OperationResult> _onOperationExecuted = new();
 
-    private IPlayerContext _context;
+    private IPlayScreen _screen;
+    private PlayerSide _playerSide;
 
     private bool _activeInput = false;
     private bool _activeAutoDrop = false;
@@ -31,22 +32,25 @@ public partial class NOperationManager : Node
 
     public async Task Spawn()
     {
+        var context = _screen.GetContext(_playerSide);
+
         BlockEntity parent = null;
         BlockEntity child = null;
-        if (_context.BombGauge.IsBombActive)
+        if (context.BombGauge.IsBombActive)
         {
-            _context.BombGauge.TryUseBomb();
+            context.BombGauge.TryUseBomb();
             parent = BlockEntity.CreateBomb();
         }
         else
         {
-            var (pair, _) = _context.Queue.Dequeue();
+            var (pair, _) = context.Queue.Dequeue();
             await Task.Delay(TimeSpan.FromSeconds(0.2f));
             parent = pair.Parent;
             child = pair.Child;
         }
 
         var result = Item.Spawn(parent, child);
+
         _onOperationExecuted.OnNext(result);
 
         await result.Task;
@@ -54,12 +58,14 @@ public partial class NOperationManager : Node
 
     public async Task StartRun()
     {
+        var context = _screen.GetContext(_playerSide);
+
         CompositeDisposable operationDisposable = [];
         operationDisposable.AddTo(this);
 
-        SubscribeDropInput(_context.InputSource, operationDisposable);
-        SubscribeMoveInput(_context.InputSource, operationDisposable);
-        SubscribeRotateInput(_context.InputSource, operationDisposable);
+        SubscribeDropInput(context.InputSource, operationDisposable);
+        SubscribeMoveInput(context.InputSource, operationDisposable);
+        SubscribeRotateInput(context.InputSource, operationDisposable);
 
         _endOperationSignal = new TaskCompletionSource();
         _maxAltitude = BoardEntity.SpawnPosition.Y;
@@ -76,15 +82,18 @@ public partial class NOperationManager : Node
         await result.Task;
     }
 
-    public void Init(IPlayerContext context)
+    public void Init(IPlayScreen screen, PlayerSide side)
     {
-        _context = context;
-        Item.Init(context.Board);
+        _screen = screen;
+        _playerSide = side;
 
+        var context = _screen.GetContext(side);
+
+        Item.Init(context.Board);
         context
             .InputSource.SwitchInputState.Subscribe(_ =>
             {
-                _context.BombGauge.TrySetBombActive(!_context.BombGauge.IsBombActive);
+                context.BombGauge.TrySetBombActive(!context.BombGauge.IsBombActive);
             })
             .AddTo(this);
     }

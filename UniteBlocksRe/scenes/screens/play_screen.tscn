@@ -1,10 +1,11 @@
-[gd_scene load_steps=6 format=3 uid="uid://bth6xgu4sbuao"]
+[gd_scene load_steps=7 format=3 uid="uid://bth6xgu4sbuao"]
 
 [ext_resource type="Script" uid="uid://ck3534pbvlw6f" path="res://src/Nodes/NPlayScreen.cs" id="1_15gne"]
 [ext_resource type="PackedScene" uid="uid://c101pr35mnthh" path="res://scenes/screens/play_screen/play_bg.tscn" id="1_thvdw"]
 [ext_resource type="PackedScene" uid="uid://b2pbjmw8bpy40" path="res://scenes/screens/play_screen/player/player_scene.tscn" id="2_8cj2q"]
 [ext_resource type="PackedScene" uid="uid://qvvx1lcdi81m" path="res://scenes/screens/play_screen/enemy/player_scene.tscn" id="3_thvdw"]
 [ext_resource type="PackedScene" uid="uid://d0pydgdaggv82" path="res://scenes/screens/play_screen/game_over_message.tscn" id="5_xhil7"]
+[ext_resource type="Script" uid="uid://cfp61phdg8f3t" path="res://src/Nodes/PlayScreen/NObstacleManager.cs" id="6_v4h3r"]
 
 [node name="PlayScreen" type="Control"]
 layout_mode = 3
@@ -31,4 +32,48 @@ position = Vector2(990, 380)
 
 [node name="GameOverMessage" parent="." instance=ExtResource("5_xhil7")]
 unique_name_in_owner = true
+visible = false
 layout_mode = 1
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -20.0
+offset_right = 20.0
+offset_bottom = 40.0
+grow_horizontal = 2
+
+[node name="Label" type="Label" parent="Control"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -98.5
+offset_top = 21.25
+offset_right = 98.5
+offset_bottom = 66.250015
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 32
+text = "DamageRate"
+horizontal_alignment = 1
+
+[node name="Label2" type="Label" parent="Control"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -98.5
+offset_top = 62.08
+offset_right = 98.5
+offset_bottom = 107.080025
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 32
+text = "12"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ObstacleManager" type="Node" parent="."]
+unique_name_in_owner = true
+script = ExtResource("6_v4h3r")

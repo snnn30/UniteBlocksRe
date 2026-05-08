@@ -1,9 +1,11 @@
 using Godot;
 using UniteBlocksRe.Logging;
 
+namespace UniteBlocksRe.Nodes;
+
 public partial class NGame : Control
 {
-    private PackedScene _mainMenuScreen = GD.Load<PackedScene>(
+    private readonly PackedScene _mainMenuScreen = GD.Load<PackedScene>(
         "res://scenes/screens/main_menu_screen.tscn"
     );
 

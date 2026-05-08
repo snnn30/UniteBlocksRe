@@ -15,16 +15,18 @@ public partial class NBoard : Node2D
 
     private Control _visuals;
     private Control _clipMask;
-    private IPlayerContext _playerContext;
+    private IPlayScreen _screen;
+    private PlayerSide _playerSide;
 
     private readonly Dictionary<BlockEntity, NBlock> _blockIdentities = [];
 
     public static Vector2 GetRealPosition(Vector2I gridPos) =>
         new Vector2(gridPos.X + 0.5f, gridPos.Y + 0.5f) * NBlock.BaseSize;
 
-    public void Init(IPlayerContext context)
+    public void Init(IPlayScreen screen, PlayerSide side)
     {
-        _playerContext = context;
+        _screen = screen;
+        _playerSide = side;
     }
 
     public override void _Ready()
@@ -200,7 +202,7 @@ public partial class NBoard : Node2D
             }
         }
 
-        _playerContext.ObstacleManager.OnExploded(result);
+        _screen.ObstacleManager.OnExploded(result, _playerSide);
     }
 
     #endregion

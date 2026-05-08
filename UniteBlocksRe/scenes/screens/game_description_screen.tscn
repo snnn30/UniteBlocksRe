@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://uircfifgbo4n"]
 
 [ext_resource type="VideoStream" uid="uid://drr1qlijxjb0p" path="res://videos/output.ogv" id="1_vmg34"]
-[ext_resource type="Script" uid="uid://cdhaloxynq7cy" path="res://src/Nodes/GameDescriptionScreen.cs" id="1_xs6wm"]
+[ext_resource type="Script" uid="uid://cdhaloxynq7cy" path="res://src/Nodes/NGameDescriptionScreen.cs" id="1_xs6wm"]
 
 [node name="GameDescriptionScreen" type="Control"]
 layout_mode = 3

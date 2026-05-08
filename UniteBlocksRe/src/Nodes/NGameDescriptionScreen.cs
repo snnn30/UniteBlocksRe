@@ -1,7 +1,7 @@
 using Godot;
 using UniteBlocksRe.Nodes;
 
-public partial class GameDescriptionScreen : Control
+public partial class NGameDescriptionScreen : Control
 {
     private readonly (string Name, float Time)[] _sections =
     [
@@ -21,6 +21,7 @@ public partial class GameDescriptionScreen : Control
         _currentSectionIndex = Mathf.Clamp(_currentSectionIndex, 0, _sections.Length - 1);
         var section = _sections[_currentSectionIndex];
         _videoPlayer.StreamPosition = section.Time;
+        _videoPlayer.Play();
     }
 
     private void PreviousSection()
@@ -29,6 +30,7 @@ public partial class GameDescriptionScreen : Control
         _currentSectionIndex = Mathf.Clamp(_currentSectionIndex, 0, _sections.Length - 1);
         var section = _sections[_currentSectionIndex];
         _videoPlayer.StreamPosition = section.Time;
+        _videoPlayer.Play();
     }
 
     public override void _Ready()
@@ -38,6 +40,11 @@ public partial class GameDescriptionScreen : Control
 
     public override void _Process(double delta)
     {
+        if (!_videoPlayer.IsPlaying())
+        {
+            return;
+        }
+
         var time = _videoPlayer.StreamPosition;
         for (var i = _sections.Length - 1; i >= 0; i--)
         {

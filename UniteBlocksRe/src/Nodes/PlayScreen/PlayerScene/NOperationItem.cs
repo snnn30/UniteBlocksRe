@@ -5,9 +5,9 @@ using UniteBlocksRe.Extensions;
 using UniteBlocksRe.Logging;
 using UniteBlocksRe.Models;
 using UniteBlocksRe.Models.OperatingBlocks;
-using UniteBlocksRe.Nodes.PlayScreen.Operation;
+using UniteBlocksRe.Nodes.PlayScreen.PlayerScene.Operation;
 
-namespace UniteBlocksRe.Nodes.PlayScreen;
+namespace UniteBlocksRe.Nodes.PlayScreen.PlayerScene;
 
 public partial class NOperationItem : Node
 {

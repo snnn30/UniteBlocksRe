@@ -3,7 +3,7 @@ using Godot;
 using UniteBlocksRe.Extensions;
 using UniteBlocksRe.Models;
 
-namespace UniteBlocksRe.Nodes.PlayScreen;
+namespace UniteBlocksRe.Nodes.PlayScreen.PlayerScene;
 
 public partial class NBlockQueue : Node2D
 {

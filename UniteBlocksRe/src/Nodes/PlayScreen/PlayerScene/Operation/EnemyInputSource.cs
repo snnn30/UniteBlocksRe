@@ -5,10 +5,8 @@ using System.Threading.Tasks;
 using R3;
 using UniteBlocksRe.Models;
 using UniteBlocksRe.Models.OperatingBlocks;
-using UniteBlocksRe.Nodes.PlayScreen;
-using UniteBlocksRe.Nodes.PlayScreen.Operation;
 
-namespace UniteBlocksRe.Nodes.PlayerScene.Operation;
+namespace UniteBlocksRe.Nodes.PlayScreen.PlayerScene.Operation;
 
 public class EnemyInputSource : IOperationInputSource
 {
@@ -43,7 +41,7 @@ public class EnemyInputSource : IOperationInputSource
             }
             else if (result.Type == OperationType.Spawn || !result.Sucess)
             {
-                _ = Play();
+                _ = ThinkInput();
             }
         });
 
@@ -63,7 +61,7 @@ public class EnemyInputSource : IOperationInputSource
             });
     }
 
-    private async Task Play()
+    private async Task ThinkInput()
     {
         _planCts?.Cancel();
         _planCts = new CancellationTokenSource();
@@ -73,66 +71,78 @@ public class EnemyInputSource : IOperationInputSource
             _context.Board.Model
         );
 
-        var steps = destination.Steps.ToList();
-
         try
         {
-            foreach (var step in steps)
+            foreach (var step in destination.Steps)
             {
-                if (step.Operation is StuckOperation stuck)
-                {
-                    _dropInput.Value = true;
-                }
-                else if (step.Operation is MoveOperation move)
-                {
-                    ResetInputState();
-                    await Task.Delay(TimeSpan.FromSeconds(BaseThinkTime), _planCts.Token);
-                    _moveInput.Value =
-                        move.Direction == MoveDirection.Left ? MoveInput.Left : MoveInput.Right;
-                    await _context
-                        .OperationManager.OnOperationExecuted.Where(result =>
-                            result.Type == OperationType.Move
-                        )
-                        .Take(step.Count)
-                        .LastAsync();
-                }
-                else if (step.Operation is RotateOperation rotate)
-                {
-                    for (var i = 0; i < step.Count; i++)
-                    {
-                        ResetInputState();
-                        await Task.Delay(TimeSpan.FromSeconds(BaseThinkTime), _planCts.Token);
-                        _rotateInput.Value =
-                            rotate.Direction == RotateDirection.ACW
-                                ? RotateInput.ACW
-                                : RotateInput.CW;
-                        await _context
-                            .OperationManager.OnOperationExecuted.Where(result =>
-                                result.Type == OperationType.Rotate
-                            )
-                            .Take(1)
-                            .LastAsync();
-                    }
-                }
-                else if (step.Operation is DropOperation drop)
-                {
-                    ResetInputState();
-                    await Task.Delay(TimeSpan.FromSeconds(BaseThinkTime), _planCts.Token);
-                    _dropInput.Value = true;
-                    await _context
-                        .OperationManager.OnOperationExecuted.Where(result =>
-                            result.Type == OperationType.Drop
-                        )
-                        .Take(step.Count)
-                        .LastAsync();
-                }
-                else
-                {
-                    throw new NotImplementedException();
-                }
+                await ExecuteStepAsync(step, _planCts.Token);
             }
         }
         catch (OperationCanceledException) { }
+    }
+
+    private async Task ExecuteStepAsync(StepInfo step, CancellationToken ct)
+    {
+        if (step.Operation is not StuckOperation)
+        {
+            ResetInputState();
+            await Task.Delay(TimeSpan.FromSeconds(BaseThinkTime), ct);
+        }
+
+        switch (step.Operation)
+        {
+            case MoveOperation move:
+                await ExecuteMove(move, step.Count, ct);
+                break;
+            case RotateOperation rotate:
+                await ExecuteRotate(rotate, step.Count, ct);
+                break;
+            case DropOperation drop:
+                await ExecuteDrop(step.Count, ct);
+                break;
+            case StuckOperation:
+                _dropInput.Value = true;
+                break;
+            default:
+                throw new NotImplementedException();
+        }
+    }
+
+    private async Task ExecuteMove(MoveOperation move, int count, CancellationToken ct)
+    {
+        _moveInput.Value = move.Direction == MoveDirection.Left ? MoveInput.Left : MoveInput.Right;
+        await WaitForOperation(OperationType.Move, count, ct);
+    }
+
+    private async Task ExecuteRotate(RotateOperation rotate, int count, CancellationToken ct)
+    {
+        var direction = rotate.Direction == RotateDirection.ACW ? RotateInput.ACW : RotateInput.CW;
+
+        // 回転は1回ずつ入力をリセットして送る必要があるためループ
+        for (var i = 0; i < count; i++)
+        {
+            if (i > 0)
+            {
+                ResetInputState();
+                await Task.Delay(TimeSpan.FromSeconds(BaseThinkTime), ct);
+            }
+            _rotateInput.Value = direction;
+            await WaitForOperation(OperationType.Rotate, 1, ct);
+        }
+    }
+
+    private async Task ExecuteDrop(int count, CancellationToken ct)
+    {
+        _dropInput.Value = true;
+        await WaitForOperation(OperationType.Drop, count, ct);
+    }
+
+    private Task WaitForOperation(OperationType type, int count, CancellationToken ct)
+    {
+        return _context
+            .OperationManager.OnOperationExecuted.Where(result => result.Type == type)
+            .Take(count)
+            .LastAsync(ct);
     }
 
     private void ResetInputState()

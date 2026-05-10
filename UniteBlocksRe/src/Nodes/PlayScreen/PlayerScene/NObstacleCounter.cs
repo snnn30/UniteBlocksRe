@@ -1,7 +1,7 @@
 using System;
 using Godot;
 
-namespace UniteBlocksRe.Nodes.PlayScreen;
+namespace UniteBlocksRe.Nodes.PlayScreen.PlayerScene;
 
 public partial class NObstacleCounter : Node2D
 {

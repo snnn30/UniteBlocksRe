@@ -1,6 +1,6 @@
 using R3;
 
-namespace UniteBlocksRe.Nodes.PlayScreen.Operation;
+namespace UniteBlocksRe.Nodes.PlayScreen.PlayerScene.Operation;
 
 public interface IOperationInputSource
 {

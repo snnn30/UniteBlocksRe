@@ -1,5 +1,7 @@
 using Godot;
 
+namespace UniteBlocksRe.Nodes.PlayScreen;
+
 public partial class NGameOverMessage : Control
 {
     private Label _label;

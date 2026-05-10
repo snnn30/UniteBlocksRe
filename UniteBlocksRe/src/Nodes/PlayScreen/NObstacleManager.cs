@@ -3,9 +3,8 @@ using System.Threading.Tasks;
 using Godot;
 using UniteBlocksRe.Extensions;
 using UniteBlocksRe.Models.BoardServices;
-using UniteBlocksRe.Nodes;
 
-namespace UniteBlocksRe.src.Nodes.PlayScreen;
+namespace UniteBlocksRe.Nodes.PlayScreen;
 
 public partial class NObstacleManager : Node
 {

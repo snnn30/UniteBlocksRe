@@ -1,4 +1,4 @@
-namespace UniteBlocksRe.Nodes.PlayScreen.Operation;
+namespace UniteBlocksRe.Nodes.PlayScreen.PlayerScene.Operation;
 
 public enum RotateInput
 {

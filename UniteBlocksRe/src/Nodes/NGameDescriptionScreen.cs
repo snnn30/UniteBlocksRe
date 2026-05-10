@@ -1,5 +1,6 @@
 using Godot;
-using UniteBlocksRe.Nodes;
+
+namespace UniteBlocksRe.Nodes;
 
 public partial class NGameDescriptionScreen : Control
 {
@@ -14,24 +15,6 @@ public partial class NGameDescriptionScreen : Control
     private VideoStreamPlayer _videoPlayer;
 
     private int _currentSectionIndex;
-
-    private void NextSection()
-    {
-        _currentSectionIndex++;
-        _currentSectionIndex = Mathf.Clamp(_currentSectionIndex, 0, _sections.Length - 1);
-        var section = _sections[_currentSectionIndex];
-        _videoPlayer.StreamPosition = section.Time;
-        _videoPlayer.Play();
-    }
-
-    private void PreviousSection()
-    {
-        _currentSectionIndex--;
-        _currentSectionIndex = Mathf.Clamp(_currentSectionIndex, 0, _sections.Length - 1);
-        var section = _sections[_currentSectionIndex];
-        _videoPlayer.StreamPosition = section.Time;
-        _videoPlayer.Play();
-    }
 
     public override void _Ready()
     {
@@ -61,16 +44,24 @@ public partial class NGameDescriptionScreen : Control
     {
         if (@event.IsActionPressed("left"))
         {
-            PreviousSection();
+            MoveSection(_currentSectionIndex - 1);
         }
         if (@event.IsActionPressed("right"))
         {
-            NextSection();
+            MoveSection(_currentSectionIndex + 1);
         }
         if (@event is InputEventKey keyEvent && keyEvent.Pressed && keyEvent.Keycode == Key.Escape)
         {
             var mainMenuScreen = GD.Load<PackedScene>("res://scenes/screens/main_menu_screen.tscn");
             NGame.Instance.LoadScreen(mainMenuScreen);
         }
+    }
+
+    private void MoveSection(int index)
+    {
+        _currentSectionIndex = Mathf.Clamp(index, 0, _sections.Length - 1);
+        var section = _sections[_currentSectionIndex];
+        _videoPlayer.StreamPosition = section.Time;
+        _videoPlayer.Play();
     }
 }

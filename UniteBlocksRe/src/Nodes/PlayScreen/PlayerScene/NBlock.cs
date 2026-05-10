@@ -4,7 +4,7 @@ using UniteBlocksRe.Extensions;
 using UniteBlocksRe.Models;
 using UniteBlocksRe.Models.Block;
 
-namespace UniteBlocksRe.Nodes.PlayScreen;
+namespace UniteBlocksRe.Nodes.PlayScreen.PlayerScene;
 
 public partial class NBlock : Node2D
 {

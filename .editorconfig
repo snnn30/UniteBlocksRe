@@ -172,6 +172,9 @@ dotnet_diagnostic.xUnit2029.severity = none
 
 # CSharp code style settings:
 [*.cs]
+# 名前空間定義を必須に
+dotnet_diagnostic.CA1050.severity = error
+
 # フォルダ構造と名前空間を一致させない
 dotnet_style_namespace_match_folder = false:warning
 

@@ -1,7 +1,8 @@
 using System.Threading.Tasks;
 using Godot;
 using UniteBlocksRe.Models;
-using UniteBlocksRe.Nodes.PlayScreen.Operation;
+using UniteBlocksRe.Nodes.PlayScreen.PlayerScene;
+using UniteBlocksRe.Nodes.PlayScreen.PlayerScene.Operation;
 
 namespace UniteBlocksRe.Nodes.PlayScreen;
 

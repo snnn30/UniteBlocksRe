@@ -29,7 +29,7 @@ public partial class NGame : Control
     public void LoadScreen(PackedScene screenPath)
     {
         _currentScreen?.QueueFree();
-        _currentScreen = screenPath.Instantiate(PackedScene.GenEditState.Disabled);
-        AddChild(_currentScreen, forceReadableName: false, InternalMode.Disabled);
+        _currentScreen = screenPath.Instantiate();
+        AddChild(_currentScreen);
     }
 }

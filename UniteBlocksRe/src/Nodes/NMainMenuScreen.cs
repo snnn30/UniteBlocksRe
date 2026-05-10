@@ -1,10 +1,9 @@
 using Godot;
-using UniteBlocksRe.Nodes;
+
+namespace UniteBlocksRe.Nodes;
 
 public partial class NMainMenuScreen : Control
 {
-    private void StartGame() { }
-
     public override void _Input(InputEvent @event)
     {
         if (@event.IsActionPressed("rotate_left"))

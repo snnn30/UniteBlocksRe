@@ -2,10 +2,10 @@ using System;
 using System.Threading.Tasks;
 using Godot;
 using R3;
-using UniteBlocksRe.Extensions;
 using UniteBlocksRe.Models;
 using UniteBlocksRe.Models.OperatingBlocks;
 using UniteBlocksRe.Nodes.PlayScreen.PlayerScene.Operation;
+using UniteBlocksRe.src.Nodes.NodeExtensions;
 
 namespace UniteBlocksRe.Nodes.PlayScreen.PlayerScene;
 

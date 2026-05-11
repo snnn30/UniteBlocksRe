@@ -1,33 +1,41 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Godot;
 
-namespace UniteBlocksRe.Extensions;
+namespace UniteBlocksRe.src.Nodes.NodeExtensions;
 
-public static class TweenExtensions
+public static class TimerExtensions
 {
-    public static void FastForwardToCompletion(this Tween t)
+    public static void ForceTimeout(this Godot.Timer timer)
     {
-        t.CustomStep(999.0);
+        timer.Stop();
+        timer.EmitSignal(Godot.Timer.SignalName.Timeout);
     }
 
-    public static Task WaitForFinished(this Tween tween, CancellationToken ct = default)
+    public static Task Delay(
+        TimeSpan time,
+        bool processAlways = false,
+        CancellationToken ct = default
+    )
     {
+        var tree = (SceneTree)Engine.GetMainLoop();
+        var timer = tree.CreateTimer(time.TotalSeconds, processAlways);
+        ct.ThrowIfCancellationRequested();
+
         var tcs = new TaskCompletionSource();
         CancellationTokenRegistration ctr = default;
         var unsubscribed = 0; // 0は購読中、1は購読解除済み
 
-        tween.Finished += OnFinished;
+        timer.Timeout += OnFinished;
 
         if (ct.CanBeCanceled)
         {
             ctr = ct.Register(() =>
             {
-                // Interlocked.Exchangeは、unsubscribedを1に設定し、元の値を返す。
-                // これにより、複数回の呼び出しで二重実行されないようにする。
                 if (Interlocked.Exchange(ref unsubscribed, 1) == 0)
                 {
-                    tween.Finished -= OnFinished;
+                    timer.Timeout -= OnFinished;
                 }
                 tcs.TrySetCanceled(ct);
             });
@@ -39,7 +47,7 @@ public static class TweenExtensions
         {
             if (Interlocked.Exchange(ref unsubscribed, 1) == 0)
             {
-                tween.Finished -= OnFinished;
+                timer.Timeout -= OnFinished;
             }
             ctr.Dispose();
             tcs.TrySetResult();

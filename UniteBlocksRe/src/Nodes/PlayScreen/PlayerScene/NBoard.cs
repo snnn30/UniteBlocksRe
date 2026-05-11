@@ -2,10 +2,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Godot;
-using UniteBlocksRe.Extensions;
 using UniteBlocksRe.Logging;
 using UniteBlocksRe.Models;
 using UniteBlocksRe.Models.BoardServices;
+using UniteBlocksRe.src.Nodes.NodeExtensions;
 
 namespace UniteBlocksRe.Nodes.PlayScreen.PlayerScene;
 

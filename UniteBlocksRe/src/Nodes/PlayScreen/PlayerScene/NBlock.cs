@@ -47,7 +47,7 @@ public partial class NBlock : Node2D
     {
         var nBlock = ResourceLoader
             .Load<PackedScene>(
-                "res://scenes/blocks/block.tscn",
+                "res://scenes/screens/play_screen/player_scene/block.tscn",
                 null,
                 ResourceLoader.CacheMode.Reuse
             )

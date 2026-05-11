@@ -27,4 +27,4 @@ scale = Vector2(0.605, 0.605)
 
 [node name="ObstacleCounter" parent="." instance=ExtResource("6_brxka")]
 unique_name_in_owner = true
-position = Vector2(-129, -316)
+position = Vector2(-100, -316)

@@ -27,6 +27,6 @@ position = Vector2(-254.27, -179)
 
 [node name="ObstacleCounter" parent="." instance=ExtResource("6_f5nrd")]
 unique_name_in_owner = true
-position = Vector2(-129, -316)
+position = Vector2(-100, -316)
 
 [editable path="BombGauge"]

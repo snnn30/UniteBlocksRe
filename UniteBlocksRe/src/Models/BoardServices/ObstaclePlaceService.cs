@@ -11,21 +11,26 @@ public static class ObstaclePlaceService
 
     public static ObstaclePlaceResult Execute(BoardEntity board, int count)
     {
-        var currentBoard = board;
+        var (capacities, minAltitudes) = CalculateColumnCapacities(board);
+        var distribution = DistributeObstacles(count, capacities);
+        var resultDict = ApplyPlacement(board, distribution, minAltitudes);
+        return new ObstaclePlaceResult(resultDict);
+    }
 
-        var colCapacities = new int[BoardEntity.Size.X];
-        var currentCounts = new int[BoardEntity.Size.X];
-        var minAltitude = new int[BoardEntity.Size.X];
-        var remaining = count;
-
-        // 各列の空き容量を確認
+    // 各列の空きをチェック
+    private static (int[] capacities, int[] minAltitudes) CalculateColumnCapacities(
+        BoardEntity board
+    )
+    {
+        var capacities = new int[BoardEntity.Size.X];
+        var minAltitudes = new int[BoardEntity.Size.X];
         for (var x = 0; x < BoardEntity.Size.X; x++)
         {
             var space = 0;
 
             for (var y = 0; y < BoardEntity.Size.Y; y++)
             {
-                if (currentBoard.CanPlace(new(x, y), Vector2I.One))
+                if (board.CanPlace(new(x, y), Vector2I.One))
                 {
                     space++;
                 }
@@ -34,31 +39,27 @@ public static class ObstaclePlaceService
                     break;
                 }
             }
-            colCapacities[x] = Math.Min(space, MaxPerColumn);
-            currentCounts[x] = 0;
-            minAltitude[x] = space - 1;
+            capacities[x] = Math.Min(space, MaxPerColumn);
+            minAltitudes[x] = space - 1;
         }
+        return (capacities, minAltitudes);
+    }
 
-        // １段ずつ埋める　端数が出るまでやる
-        var noPlace = false;
+    // 個数をどう配分するか
+    private static int[] DistributeObstacles(int count, int[] capacities)
+    {
+        var currentCounts = new int[BoardEntity.Size.X];
+        var remaining = count;
+
+        // 均等分配
         while (true)
         {
-            List<int> canPlaceCol = [];
-            for (var x = 0; x < BoardEntity.Size.X; x++)
-            {
-                if (currentCounts[x] < colCapacities[x])
-                {
-                    canPlaceCol.Add(x);
-                }
-            }
+            var canPlaceCol = Enumerable
+                .Range(0, BoardEntity.Size.X)
+                .Where(x => currentCounts[x] < capacities[x])
+                .ToList();
 
-            if (canPlaceCol.Count == 0)
-            {
-                noPlace = true;
-                break;
-            }
-
-            if (remaining < canPlaceCol.Count)
+            if (canPlaceCol.Count == 0 || remaining < canPlaceCol.Count)
             {
                 break;
             }
@@ -70,52 +71,53 @@ public static class ObstaclePlaceService
             }
         }
 
-        // 端数をランダム分配
-        if (remaining > 0 && !noPlace)
+        // ランダム分配
+        if (remaining > 0)
         {
-            List<int> canPlaceCol = [];
-            for (var x = 0; x < BoardEntity.Size.X; x++)
-            {
-                if (currentCounts[x] < colCapacities[x])
-                {
-                    canPlaceCol.Add(x);
-                }
-            }
-
             var rand = new Random();
+            var canPlaceCol = Enumerable
+                .Range(0, BoardEntity.Size.X)
+                .Where(x => currentCounts[x] < capacities[x])
+                .ToList();
+
             while (remaining > 0 && canPlaceCol.Count > 0)
             {
                 var col = canPlaceCol[rand.Next(canPlaceCol.Count)];
-
                 currentCounts[col]++;
                 remaining--;
-
                 canPlaceCol.Remove(col);
             }
         }
+        return currentCounts;
+    }
 
-        // 座標の算出、実際に配置
-        Dictionary<int, ColumnResult> result = [];
-
+    // 最終的な配置処理
+    private static Dictionary<int, ColumnResult> ApplyPlacement(
+        BoardEntity board,
+        int[] distribution,
+        int[] minAltitudes
+    )
+    {
+        var result = new Dictionary<int, ColumnResult>();
         for (var x = 0; x < BoardEntity.Size.X; x++)
         {
-            List<(BlockEntity block, Vector2I position)> blocks = [];
-            for (var i = 0; i < currentCounts[x]; i++)
+            if (distribution[x] <= 0)
             {
-                var y = minAltitude[x] - i;
+                continue;
+            }
+
+            List<(BlockEntity block, Vector2I position)> blocks = [];
+            for (var i = 0; i < distribution[x]; i++)
+            {
+                var y = minAltitudes[x] - i;
                 var block = BlockEntity.CreateObstacle();
                 var pos = new Vector2I(x, y);
                 board.Place(pos, block);
                 blocks.Add((block, pos));
             }
-
-            if (blocks.Count > 0)
-            {
-                result.Add(x, new(blocks));
-            }
+            result.Add(x, new ColumnResult(blocks));
         }
-
-        return new ObstaclePlaceResult(result);
+        return result;
     }
 }
 

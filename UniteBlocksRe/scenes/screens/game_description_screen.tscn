@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://uircfifgbo4n"]
 
-[ext_resource type="VideoStream" uid="uid://drr1qlijxjb0p" path="res://videos/output.ogv" id="1_vmg34"]
 [ext_resource type="Script" uid="uid://cdhaloxynq7cy" path="res://src/Nodes/NGameDescriptionScreen.cs" id="1_xs6wm"]
+[ext_resource type="VideoStream" uid="uid://cnnujlwed36x7" path="res://videos/GameDescriptionVideo.ogv" id="2_xs6wm"]
 
 [node name="GameDescriptionScreen" type="Control"]
 layout_mode = 3
@@ -23,7 +23,7 @@ offset_right = 768.0
 offset_bottom = 720.0
 grow_horizontal = 2
 scale = Vector2(0.8, 0.8)
-stream = ExtResource("1_vmg34")
+stream = ExtResource("2_xs6wm")
 autoplay = true
 
 [node name="Label" type="Label" parent="."]

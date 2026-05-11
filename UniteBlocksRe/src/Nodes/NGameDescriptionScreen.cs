@@ -7,9 +7,9 @@ public partial class NGameDescriptionScreen : Control
     private readonly (string Name, float Time)[] _sections =
     [
         ("基本操作", 0f),
-        ("合体", 23f),
-        ("ボム", 35f),
-        ("防御", 68f),
+        ("合体", 35f),
+        ("ボム", 47f),
+        ("防御", 83f),
     ];
 
     private VideoStreamPlayer _videoPlayer;

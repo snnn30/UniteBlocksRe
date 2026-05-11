@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using R3;
 using UniteBlocksRe.Models;
 using UniteBlocksRe.Models.OperatingBlocks;
+using UniteBlocksRe.src.Nodes.NodeExtensions;
 
 namespace UniteBlocksRe.Nodes.PlayScreen.PlayerScene.Operation;
 
@@ -86,7 +87,7 @@ public class EnemyInputSource : IOperationInputSource
         if (step.Operation is not StuckOperation)
         {
             ResetInputState();
-            await Task.Delay(TimeSpan.FromSeconds(BaseThinkTime), ct);
+            await TimerExtensions.Delay(TimeSpan.FromSeconds(BaseThinkTime), cancellationToken: ct);
         }
 
         switch (step.Operation)
@@ -124,7 +125,10 @@ public class EnemyInputSource : IOperationInputSource
             if (i > 0)
             {
                 ResetInputState();
-                await Task.Delay(TimeSpan.FromSeconds(BaseThinkTime), ct);
+                await TimerExtensions.Delay(
+                    TimeSpan.FromSeconds(BaseThinkTime),
+                    cancellationToken: ct
+                );
             }
             _rotateInput.Value = direction;
             await WaitForOperation(OperationType.Rotate, 1, ct);

@@ -5,6 +5,7 @@ using UniteBlocksRe.Models;
 using UniteBlocksRe.Models.Evaluation.EvaluationWeights;
 using UniteBlocksRe.Nodes.PlayScreen;
 using UniteBlocksRe.Nodes.PlayScreen.PlayerScene.Operation;
+using UniteBlocksRe.src.Nodes.NodeExtensions;
 
 namespace UniteBlocksRe.Nodes;
 
@@ -83,7 +84,7 @@ public partial class NPlayScreen : Control, IPlayScreen
             _gameOverMessage.SetLoseMessage();
         }
         _gameOverMessage.Visible = true;
-        await Task.Delay(TimeSpan.FromSeconds(1f));
+        await TimerExtensions.Delay(TimeSpan.FromSeconds(1f), true);
         SetProcessInput(true);
     }
 

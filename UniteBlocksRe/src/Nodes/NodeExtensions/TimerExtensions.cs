@@ -16,12 +16,12 @@ public static class TimerExtensions
     public static Task Delay(
         TimeSpan time,
         bool processAlways = false,
-        CancellationToken ct = default
+        CancellationToken cancellationToken = default
     )
     {
         var tree = (SceneTree)Engine.GetMainLoop();
         var timer = tree.CreateTimer(time.TotalSeconds, processAlways);
-        ct.ThrowIfCancellationRequested();
+        cancellationToken.ThrowIfCancellationRequested();
 
         var tcs = new TaskCompletionSource();
         CancellationTokenRegistration ctr = default;
@@ -29,15 +29,15 @@ public static class TimerExtensions
 
         timer.Timeout += OnFinished;
 
-        if (ct.CanBeCanceled)
+        if (cancellationToken.CanBeCanceled)
         {
-            ctr = ct.Register(() =>
+            ctr = cancellationToken.Register(() =>
             {
                 if (Interlocked.Exchange(ref unsubscribed, 1) == 0)
                 {
                     timer.Timeout -= OnFinished;
                 }
-                tcs.TrySetCanceled(ct);
+                tcs.TrySetCanceled(cancellationToken);
             });
         }
 

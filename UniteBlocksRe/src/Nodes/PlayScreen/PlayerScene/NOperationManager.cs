@@ -44,7 +44,7 @@ public partial class NOperationManager : Node
         else
         {
             var (pair, _) = context.Queue.Dequeue();
-            await Task.Delay(TimeSpan.FromSeconds(0.2f));
+            await TimerExtensions.Delay(TimeSpan.FromSeconds(0.2f));
             parent = pair.Parent;
             child = pair.Child;
         }
@@ -149,10 +149,16 @@ public partial class NOperationManager : Node
                         while (!ct.IsCancellationRequested)
                         {
                             var result = ExecuteDrop(false, ManualDropDuration + 0.01f); // 滑らかな演出のため演出に少し時間をかける
-                            await Task.Delay(TimeSpan.FromSeconds(ManualDropDuration), ct);
+                            await TimerExtensions.Delay(
+                                TimeSpan.FromSeconds(ManualDropDuration),
+                                cancellationToken: ct
+                            );
                             if (!result.Sucess)
                             {
-                                await Task.Delay(TimeSpan.FromSeconds(CheckInterval), ct);
+                                await TimerExtensions.Delay(
+                                    TimeSpan.FromSeconds(CheckInterval),
+                                    cancellationToken: ct
+                                );
                             }
                         }
                     });
@@ -226,7 +232,10 @@ public partial class NOperationManager : Node
                             await task;
                             return;
                         }
-                        await Task.Delay(TimeSpan.FromSeconds(CheckInterval), ct);
+                        await TimerExtensions.Delay(
+                            TimeSpan.FromSeconds(CheckInterval),
+                            cancellationToken: ct
+                        );
                     }
                 });
             })
@@ -272,12 +281,18 @@ public partial class NOperationManager : Node
                         {
                             var delayTime = wasLastMoveSucess ? RepeatDelay : InitialDelay;
                             await task;
-                            await Task.Delay(TimeSpan.FromSeconds(delayTime), ct);
+                            await TimerExtensions.Delay(
+                                TimeSpan.FromSeconds(delayTime),
+                                cancellationToken: ct
+                            );
                             wasLastMoveSucess = true;
                         }
                         else
                         {
-                            await Task.Delay(TimeSpan.FromSeconds(CheckInterval), ct);
+                            await TimerExtensions.Delay(
+                                TimeSpan.FromSeconds(CheckInterval),
+                                cancellationToken: ct
+                            );
                             wasLastMoveSucess = false;
                         }
                     }

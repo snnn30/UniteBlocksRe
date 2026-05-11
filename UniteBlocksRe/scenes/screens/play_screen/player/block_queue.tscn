@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://bkrjkiqwy4ve"]
 
-[ext_resource type="PackedScene" uid="uid://bepogq5wvg41" path="res://scenes/blocks/block.tscn" id="1_hawg5"]
+[ext_resource type="PackedScene" uid="uid://bepogq5wvg41" path="res://scenes/screens/play_screen/player_scene/block.tscn" id="1_hawg5"]
 [ext_resource type="Script" uid="uid://cmp2v3fmku3m1" path="res://src/Nodes/PlayScreen/PlayerScene/NBlockQueue.cs" id="1_q0oou"]
 
 [node name="BlockQueue" type="Node2D"]

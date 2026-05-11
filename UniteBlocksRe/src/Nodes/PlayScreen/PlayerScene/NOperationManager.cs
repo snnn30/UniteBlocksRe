@@ -298,7 +298,7 @@ public partial class NOperationManager : Node
                     }
                 });
             })
-            .Switch() //新しいストリームが届くと古いものを破棄する
+            .Switch() // Observable<Observable>に対して使用可能 購読を次々乗り換える
             .Subscribe() //実際の処理はSelectだが、Subscribeしないとそこまでの処理も一切行われない
             .AddTo(disposables);
 

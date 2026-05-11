@@ -21,9 +21,7 @@ public static class FallService
         return new FallResult(movements);
     }
 
-    /// <summary>
-    /// 指定されたブロックを限界まで落下させる
-    /// </summary>
+    // 指定されたブロックを限界まで落下させる
     private static void ProcessSingleBlockFall(
         BoardEntity board,
         BlockEntity block,
@@ -31,26 +29,18 @@ public static class FallService
     )
     {
         var startPos = board.GetPositionOf(block);
+        var currentPos = startPos;
         board.Remove(block);
-        var fallCount = 0;
-        while (true)
+
+        while (board.CanPlace(currentPos + Vector2I.Down, block))
         {
-            if (board.CanPlace(startPos + Vector2I.Down * (fallCount + 1), block))
-            {
-                fallCount++;
-            }
-            else
-            {
-                break;
-            }
+            currentPos += Vector2I.Down;
         }
+        board.Place(currentPos, block);
 
-        var targetPos = startPos + Vector2I.Down * fallCount;
-        board.Place(targetPos, block);
-
-        if (fallCount > 0)
+        if (startPos != currentPos)
         {
-            movements.Add(new Movement(block, startPos, targetPos));
+            movements.Add(new Movement(block, startPos, currentPos));
         }
     }
 }

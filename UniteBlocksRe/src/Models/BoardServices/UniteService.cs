@@ -13,8 +13,9 @@ public static class UniteService
     public static UniteResult Execute(BoardEntity board)
     {
         var steps = new List<UniteStep>();
+        var visited = new HashSet<BlockEntity>();
 
-        // 盤面を左上から順にスキャン
+        // 盤面を左上から順に走査
         for (var y = 0; y < BoardEntity.Size.Y; y++)
         {
             for (var x = 0; x < BoardEntity.Size.X; x++)
@@ -22,7 +23,10 @@ public static class UniteService
                 var currentPos = new Vector2I(x, y);
 
                 // ブロックが存在しない、またはノーマル以外ならスキップ
-                if (board[currentPos] is not { } startBlock || startBlock.Type != BlockType.Normal)
+                if (
+                    board[currentPos] is not { Type: BlockType.Normal } startBlock
+                    || visited.Contains(startBlock)
+                )
                 {
                     continue;
                 }
@@ -46,16 +50,15 @@ public static class UniteService
                 var newBlock = BlockEntity.CreateNormal(startBlock.Color, rect.Size);
                 board.Place(rect.Origin, newBlock);
                 steps.Add(new UniteStep(targetBlocks, newBlock));
+                visited.Add(newBlock);
             }
         }
 
         return new UniteResult(steps);
     }
 
-    /// <summary>
-    /// 指定されたブロックを起点に、同色が連続している最大の長方形の範囲を計算する
-    /// 最小サイズを考慮する
-    /// </summary>
+    // 指定されたブロックを起点に、同色が連続している最大の長方形の範囲を計算する
+    // 最小サイズを考慮する
     private static (Vector2I Origin, Vector2I Size) FindPerfectRectangle(
         BoardEntity board,
         BlockEntity startBlock
@@ -97,10 +100,8 @@ public static class UniteService
         return (origin, largestSize);
     }
 
-    /// <summary>
-    /// 指定範囲内に含まれるブロックを収集する。
-    /// 隙間がある、あるいははみ出しているブロックが存在する場合はnullを返す
-    /// </summary>
+    // 指定範囲内に含まれるブロックを収集する。
+    // 隙間がある、あるいははみ出しているブロックが存在する場合はnullを返す
     private static HashSet<BlockEntity> GetBlocksExclusivelyInArea(
         BoardEntity board,
         (Vector2I Origin, Vector2I Size) rect
@@ -131,9 +132,7 @@ public static class UniteService
         return found;
     }
 
-    /// <summary>
-    /// rectの中に対象のブロックが収まっているか検証する
-    /// </summary>
+    // rectの中に対象のブロックが収まっているか検証する
     private static bool IsWithin(
         Vector2I origin,
         BlockEntity b,

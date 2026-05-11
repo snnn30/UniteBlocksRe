@@ -10,38 +10,31 @@ public static class ExplodeService
     public static ExplodeResult Execute(BoardEntity board)
     {
         var steps = new List<ExplodeStep>();
+        var exploded = new HashSet<BlockEntity>();
 
-        // 最初の爆発起点（ボム）を探す
-        var initialTargets = board
+        var currentStepTargets = board
+            .Where(bp => bp.Block.Type == BlockType.Bomb)
             .Select(bp => bp.Block)
-            .Where(b => b.Type == BlockType.Bomb)
             .ToHashSet();
 
-        if (initialTargets.Count == 0)
+        if (currentStepTargets.Count == 0)
         {
             return new ExplodeResult(steps);
         }
 
-        var currentStepTargets = initialTargets; // 現在のステップで爆発する対象
-        var exploded = new HashSet<BlockEntity>(); // すでに爆発した（判定済みの）ブロックの座標
-
-        while (currentStepTargets.Count != 0)
+        while (currentStepTargets.Count > 0)
         {
-            // このステップで爆発するブロックを記録
             steps.Add(new ExplodeStep(currentStepTargets));
+            exploded.UnionWith(currentStepTargets);
 
             var nextStepTargets = new HashSet<BlockEntity>();
 
+            // 次に誘発されるブロックを探す
             foreach (var target in currentStepTargets)
             {
-                exploded.Add(target);
-
-                // 次のステップで誘発されるブロックを探す
-                var induced = FindInducedBlocks(board, target);
-                foreach (var b in induced)
+                foreach (var b in FindInducedBlocks(board, target))
                 {
-                    // すでに爆発済み、または次のステップに登録済みでなければ追加
-                    if (!exploded.Contains(b) && !currentStepTargets.Contains(b))
+                    if (!exploded.Contains(b))
                     {
                         nextStepTargets.Add(b);
                     }
@@ -60,9 +53,7 @@ public static class ExplodeService
         return new ExplodeResult(steps);
     }
 
-    /// <summary>
-    /// 特定のブロックが爆発した際に、次のステップで誘発されるブロックを特定する
-    /// </summary>
+    // 次のステップで誘発されるブロックを探す
     private static BlockEntity[] FindInducedBlocks(BoardEntity board, BlockEntity exploded)
     {
         if (exploded.Type == BlockType.Bomb)

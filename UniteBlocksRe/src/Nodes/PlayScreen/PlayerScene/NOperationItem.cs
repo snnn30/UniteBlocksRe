@@ -1,7 +1,6 @@
 using System;
 using System.Threading.Tasks;
 using Godot;
-using UniteBlocksRe.Extensions;
 using UniteBlocksRe.Logging;
 using UniteBlocksRe.Models;
 using UniteBlocksRe.Models.OperatingBlocks;
@@ -124,17 +123,20 @@ public partial class NOperationItem : Node
             var tween = CreateTween()
                 .SetTrans(Tween.TransitionType.Sine)
                 .SetEase(Tween.EaseType.InOut);
-            var parentHandler = Parent.AddOffset();
-            var childHandler = Child?.AddOffset();
 
+            var currentParent = Parent;
+            var currentChild = Child;
+            var preVec = Vector2.Zero;
             tween.TweenMethod(
                 Callable.From<Vector2>(v =>
                 {
-                    parentHandler.Val = v;
-                    if (Child != null)
+                    var diff = v - preVec;
+                    currentParent.Position += diff;
+                    if (currentChild != null)
                     {
-                        childHandler.Val = v;
+                        currentChild.Position += diff;
                     }
+                    preVec = v;
                 }),
                 Vector2.Zero,
                 (Vector2)direction.ToVector2I() * NBlock.BaseSize,
@@ -142,8 +144,6 @@ public partial class NOperationItem : Node
             );
 
             await tween.WaitForFinished();
-            parentHandler.Apply();
-            childHandler?.Apply();
         })();
 
         return OperationResult.Succeeded(task, OperationType.Move);
@@ -168,16 +168,19 @@ public partial class NOperationItem : Node
                 .SetTrans(Tween.TransitionType.Linear)
                 .SetEase(Tween.EaseType.In);
 
-            var parentHandler = Parent.AddOffset();
-            var childHandler = Child?.AddOffset();
+            var currentParent = Parent;
+            var currentChild = Child;
+            var preVec = Vector2.Zero;
             tween.TweenMethod(
                 Callable.From<Vector2>(v =>
                 {
-                    parentHandler.Val = v;
-                    if (childHandler != null)
+                    var diff = v - preVec;
+                    currentParent.Position += diff;
+                    if (currentChild != null)
                     {
-                        childHandler.Val = v;
+                        currentChild.Position += diff;
                     }
+                    preVec = v;
                 }),
                 Vector2.Zero,
                 Vector2.Down * NBlock.BaseSize * 0.5f,
@@ -185,8 +188,6 @@ public partial class NOperationItem : Node
             );
 
             await tween.WaitForFinished();
-            parentHandler.Apply();
-            childHandler?.Apply();
         })();
 
         return OperationResult.Succeeded(task, OperationType.Drop);
@@ -267,14 +268,17 @@ public partial class NOperationItem : Node
         var relativePos = (Vector2)(moverPos - pivotPos) * NBlock.BaseSize;
 
         var tween = CreateTween().SetTrans(Tween.TransitionType.Quart).SetEase(Tween.EaseType.Out);
-        var pivotHandler = pivotIsChild ? Child.AddOffset() : Parent.AddOffset();
-        var moverHandler = pivotIsChild ? Parent.AddOffset() : Child.AddOffset();
 
+        var currentParent = Parent;
+        var currentChild = Child;
+        var preVec = Vector2.Zero;
         tween.TweenMethod(
             Callable.From<Vector2>(v =>
             {
-                pivotHandler.Val = v;
-                moverHandler.Val = v;
+                var diff = v - preVec;
+                currentParent.Position += diff;
+                currentChild.Position += diff;
+                preVec = v;
             }),
             Vector2.Zero,
             relativePos,
@@ -283,8 +287,6 @@ public partial class NOperationItem : Node
 
         var task2 = tween.WaitForFinished();
         await Task.WhenAll(task1, task2);
-        pivotHandler.Apply();
-        moverHandler.Apply();
     }
 
     private async Task NormalRotateAnim(
@@ -301,7 +303,7 @@ public partial class NOperationItem : Node
         var moverPos = pivotIsChild ? preParentPos : preChildPos;
 
         var relativePos = (Vector2)(moverPos - pivotPos) * NBlock.BaseSize;
-        var moverHandler = pivotIsChild ? Parent.AddOffset() : Child.AddOffset();
+        var mover = pivotIsChild ? Parent : Child;
 
         var targetDeg = direction switch
         {
@@ -310,14 +312,16 @@ public partial class NOperationItem : Node
             _ => throw new ArgumentException("無効な回転方向", nameof(direction)),
         };
 
+        var preVec = Vector2.Zero;
         tween.TweenMethod(
             Callable.From<float>(deg =>
             {
                 var rad = Mathf.DegToRad(deg);
                 var rotatedOffset = relativePos.Rotated(rad);
                 var targetOffset = rotatedOffset - relativePos;
-
-                moverHandler.Val = targetOffset;
+                var diff = targetOffset - preVec;
+                mover.Position += diff;
+                preVec = targetOffset;
             }),
             0f,
             targetDeg,
@@ -325,7 +329,6 @@ public partial class NOperationItem : Node
         );
 
         await tween.WaitForFinished();
-        moverHandler.Apply();
     }
 
     private void Reset()

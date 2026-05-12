@@ -70,7 +70,6 @@ public partial class NBoard : Node2D
     {
         Model.Place(pos, block.Model);
         _blockIdentities[block.Model] = block;
-        block.Position = GetRealPosition(pos);
         await block.PlayPlacedAnimeAsync();
     }
 

@@ -1,11 +1,10 @@
 using System;
-using UniteBlocksRe.Common;
 using UniteBlocksRe.Models.Block;
 using BlockPair = (UniteBlocksRe.Models.BlockEntity Parent, UniteBlocksRe.Models.BlockEntity Child);
 
 namespace UniteBlocksRe.Models;
 
-public class BlockQueueEntity : Entity<BlockQueueEntity>
+public sealed class BlockQueueEntity
 {
     public BlockPair Next { get; private set; }
     public BlockPair NextNext { get; private set; }

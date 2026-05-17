@@ -1,11 +1,10 @@
 using System;
 using Godot;
-using UniteBlocksRe.Common;
 using UniteBlocksRe.Models.OperatingBlocks;
 
 namespace UniteBlocksRe.Models;
 
-public class OperatingBlocksEntity : Entity<OperatingBlocksEntity>
+public sealed class OperatingBlocksEntity
 {
     public BlockEntity Parent { get; }
     public BlockEntity Child { get; }

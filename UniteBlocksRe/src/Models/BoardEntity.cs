@@ -2,11 +2,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Godot;
-using UniteBlocksRe.Common;
 
 namespace UniteBlocksRe.Models;
 
-public class BoardEntity : Entity<BoardEntity>, IEnumerable<(BlockEntity Block, Vector2I Pos)>
+public sealed class BoardEntity : IEnumerable<(BlockEntity Block, Vector2I Pos)>
 {
     // 左上を原点とする座標系で、右方向がX軸、下方向がY軸
     public static readonly Vector2I Size = new(8, 14);

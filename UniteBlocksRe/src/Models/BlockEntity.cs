@@ -1,16 +1,9 @@
 using Godot;
-using UniteBlocksRe.Common;
 using UniteBlocksRe.Models.Block;
 
 namespace UniteBlocksRe.Models;
 
-/// <summary>
-/// ブロックを表現するエンティティ
-/// </summary>
-/// <remarks>
-/// このクラスは不変(Immutable)です。
-/// </remarks>
-public class BlockEntity : Entity<BlockEntity>
+public sealed class BlockEntity
 {
     public BlockType Type { get; }
     public BlockColor Color { get; }
@@ -36,6 +29,6 @@ public class BlockEntity : Entity<BlockEntity>
 
     public override string ToString()
     {
-        return $"BlockEntity(ID:{Id} Type:{Type}, Color:{Color}, Size:{Size.X}x{Size.Y})";
+        return $"BlockEntity(Type:{Type}, Color:{Color}, Size:{Size.X}x{Size.Y})";
     }
 }

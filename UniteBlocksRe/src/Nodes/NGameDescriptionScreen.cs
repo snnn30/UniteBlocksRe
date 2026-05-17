@@ -12,7 +12,7 @@ public partial class NGameDescriptionScreen : Control
         ("防御", 83f),
     ];
 
-    private VideoStreamPlayer _videoPlayer;
+    private VideoStreamPlayer _videoPlayer = null!;
 
     private int _currentSectionIndex;
 

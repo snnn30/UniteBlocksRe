@@ -24,7 +24,7 @@ public class EnemyInputSource : IOperationInputSource
     private readonly IPlayerContext _context;
     private readonly NpcDecisionMaker _decisionMaker;
 
-    private CancellationTokenSource _planCts;
+    private CancellationTokenSource? _planCts;
 
     private const float BaseThinkTime = 0.4f;
 
@@ -66,6 +66,11 @@ public class EnemyInputSource : IOperationInputSource
     {
         _planCts?.Cancel();
         _planCts = new CancellationTokenSource();
+
+        if (_context.OperationManager.Item.Model == null)
+        {
+            throw new InvalidOperationException("_context.OperationManager.Item.Modelがnull");
+        }
 
         var destination = _decisionMaker.GetBestDestination(
             _context.OperationManager.Item.Model,

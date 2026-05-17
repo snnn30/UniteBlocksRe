@@ -9,9 +9,9 @@ public partial class NGame : Control
         "res://scenes/screens/main_menu_screen.tscn"
     );
 
-    private Node _currentScreen;
+    private Node _currentScreen = null!;
 
-    public static NGame Instance { get; private set; }
+    public static NGame Instance { get; private set; } = null!;
 
     public override void _EnterTree()
     {

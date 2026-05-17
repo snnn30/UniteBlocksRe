@@ -35,8 +35,8 @@ public partial class NBombGauge : Node2D
         }
     }
 
-    private NDividedCircularGauge _gauge;
-    private Sprite2D _icon;
+    private NDividedCircularGauge _gauge = null!;
+    private Sprite2D _icon = null!;
     private Vector2 _defaultIconScale;
 
     public override void _Ready()

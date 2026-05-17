@@ -10,11 +10,11 @@ public partial class NBlock : Node2D
 {
     public const int BaseSize = 40;
 
-    private Control _visuals;
-    private ColorRect _outline;
-    private NinePatchRect _icon;
+    private Control _visuals = null!;
+    private ColorRect _outline = null!;
+    private NinePatchRect _icon = null!;
 
-    private BlockEntity _model;
+    private BlockEntity _model = null!;
     public BlockEntity Model
     {
         get => _model;

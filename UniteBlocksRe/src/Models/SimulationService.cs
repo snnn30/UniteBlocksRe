@@ -68,9 +68,10 @@ public static class SimulationService
     /// <summary>
     /// 初期位置から左右に行ける全パターンを列挙（0移動含む）
     /// </summary>
-    private static IEnumerable<(OperatingBlocksEntity Entity, StepInfo Step)> GetHorizontalPatterns(
-        OperatingBlocksEntity initial
-    )
+    private static IEnumerable<(
+        OperatingBlocksEntity Entity,
+        StepInfo? Step
+    )> GetHorizontalPatterns(OperatingBlocksEntity initial)
     {
         // 移動なし
         yield return (initial.Clone(), null);
@@ -90,7 +91,7 @@ public static class SimulationService
     /// <summary>
     /// 特定の座標で可能な全回転パターンを列挙
     /// </summary>
-    private static IEnumerable<(OperatingBlocksEntity Entity, StepInfo Step)> GetRotationPatterns(
+    private static IEnumerable<(OperatingBlocksEntity Entity, StepInfo? Step)> GetRotationPatterns(
         OperatingBlocksEntity moved
     )
     {

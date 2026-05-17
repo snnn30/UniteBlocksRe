@@ -11,17 +11,17 @@ public partial class NBlockQueue : Node2D
 
     private record NBlockPair(Node2D Root, NBlock Parent, NBlock Child);
 
-    private TargetTransform _spawnPoint;
-    private TargetTransform _nextnextPoint;
-    private TargetTransform _nextPoint;
-    private TargetTransform _exitPoint;
+    private TargetTransform _spawnPoint = null!;
+    private TargetTransform _nextnextPoint = null!;
+    private TargetTransform _nextPoint = null!;
+    private TargetTransform _exitPoint = null!;
 
-    private NBlockPair _nextPair;
-    private NBlockPair _nextNextPair;
-    private NBlockPair _spawnPair;
+    private NBlockPair _nextPair = null!;
+    private NBlockPair _nextNextPair = null!;
+    private NBlockPair _spawnPair = null!;
     public BlockQueueEntity Model { get; } = new();
 
-    private Tween _activeTween;
+    private Tween? _activeTween;
 
     public override void _Ready()
     {

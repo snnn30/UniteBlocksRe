@@ -27,10 +27,10 @@ public partial class NPlayScreen : Control, IPlayScreen
         };
     }
 
-    private NPlayerScene _playerScene;
-    private NPlayerScene _enemyScene;
-    private NGameOverMessage _gameOverMessage;
-    public NObstacleManager ObstacleManager { get; private set; }
+    private NPlayerScene _playerScene = null!;
+    private NPlayerScene _enemyScene = null!;
+    private NGameOverMessage _gameOverMessage = null!;
+    public NObstacleManager ObstacleManager { get; private set; } = null!;
 
     public override async void _Ready()
     {

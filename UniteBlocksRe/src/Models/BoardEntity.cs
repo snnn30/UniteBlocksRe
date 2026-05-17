@@ -11,16 +11,16 @@ public sealed class BoardEntity : IEnumerable<(BlockEntity Block, Vector2I Pos)>
     public static readonly Vector2I Size = new(8, 14);
     public static readonly Vector2I SpawnPosition = new(3, 1);
 
-    private readonly BlockEntity[,] _grid = new BlockEntity[Size.X, Size.Y];
+    private readonly BlockEntity?[,] _grid = new BlockEntity?[Size.X, Size.Y];
     private readonly Dictionary<BlockEntity, Vector2I> _blockToPos = [];
 
-    public BlockEntity this[int x, int y]
+    public BlockEntity? this[int x, int y]
     {
         get => _grid[x, y];
         private set => _grid[x, y] = value;
     }
 
-    public BlockEntity this[Vector2I v]
+    public BlockEntity? this[Vector2I v]
     {
         get => _grid[v.X, v.Y];
         private set => _grid[v.X, v.Y] = value;

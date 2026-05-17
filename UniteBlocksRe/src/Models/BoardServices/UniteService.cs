@@ -10,6 +10,8 @@ public static class UniteService
 {
     public static Vector2I MinUniteSize { get; } = new Vector2I(2, 2);
 
+    private readonly record struct Rect(Vector2I Origin, Vector2I Size);
+
     public static UniteResult Execute(BoardEntity board)
     {
         var steps = new List<UniteStep>();
@@ -32,7 +34,7 @@ public static class UniteService
                 }
 
                 // このブロックを起点（左上）として、同じ色が形成する「最大かつ完璧な長方形」の範囲を特定
-                var rect = FindPerfectRectangle(board, startBlock);
+                var (rect, contains) = FindPerfectRectangle(board, startBlock);
 
                 // 現在のサイズから変化しない場合はスキップ
                 if (rect.Size == startBlock.Size)
@@ -40,7 +42,7 @@ public static class UniteService
                     continue;
                 }
 
-                var targetBlocks = GetBlocksExclusivelyInArea(board, rect).ToList();
+                var targetBlocks = contains.ToList();
                 // 範囲内のブロックを削除
                 foreach (var b in targetBlocks)
                 {
@@ -59,16 +61,17 @@ public static class UniteService
 
     // 指定されたブロックを起点に、同色が連続している最大の長方形の範囲を計算する
     // 最小サイズを考慮する
-    private static (Vector2I Origin, Vector2I Size) FindPerfectRectangle(
+    private static (Rect rect, HashSet<BlockEntity> contains) FindPerfectRectangle(
         BoardEntity board,
         BlockEntity startBlock
     )
     {
+        HashSet<BlockEntity> containBlocks = [];
         var largestSize = startBlock.Size;
         var origin = board.GetPositionOf(startBlock);
         if (startBlock.Type != BlockType.Normal)
         {
-            return (origin, startBlock.Size);
+            return (new(origin, startBlock.Size), containBlocks);
         }
         var color = startBlock.Color;
 
@@ -83,7 +86,7 @@ public static class UniteService
                 }
 
                 // 範囲内が隙間なくはみ出しなく埋まっている事を確認
-                var blocks = GetBlocksExclusivelyInArea(board, (origin, new Vector2I(x, y)));
+                var blocks = GetBlocksExclusivelyInArea(board, new(origin, new Vector2I(x, y)));
                 if (blocks == null)
                 {
                     continue;
@@ -93,19 +96,17 @@ public static class UniteService
                 if (blocks.All(b => b.Type == BlockType.Normal && b.Color == color))
                 {
                     largestSize = new Vector2I(x, y);
+                    containBlocks = blocks;
                 }
             }
         }
 
-        return (origin, largestSize);
+        return (new(origin, largestSize), containBlocks);
     }
 
     // 指定範囲内に含まれるブロックを収集する。
     // 隙間がある、あるいははみ出しているブロックが存在する場合はnullを返す
-    private static HashSet<BlockEntity> GetBlocksExclusivelyInArea(
-        BoardEntity board,
-        (Vector2I Origin, Vector2I Size) rect
-    )
+    private static HashSet<BlockEntity>? GetBlocksExclusivelyInArea(BoardEntity board, Rect rect)
     {
         var found = new HashSet<BlockEntity>();
         for (var y = 0; y < rect.Size.Y; y++)
@@ -133,11 +134,7 @@ public static class UniteService
     }
 
     // rectの中に対象のブロックが収まっているか検証する
-    private static bool IsWithin(
-        Vector2I origin,
-        BlockEntity b,
-        (Vector2I Origin, Vector2I Size) rect
-    ) =>
+    private static bool IsWithin(Vector2I origin, BlockEntity b, Rect rect) =>
         origin.X >= rect.Origin.X
         && origin.Y >= rect.Origin.Y
         && origin.X + b.Size.X <= rect.Origin.X + rect.Size.X

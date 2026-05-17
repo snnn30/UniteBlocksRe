@@ -5,9 +5,9 @@ namespace UniteBlocksRe.Nodes.PlayScreen.PlayerScene;
 
 public partial class NObstacleCounter : Node2D
 {
-    private Label _obstacleLabel;
-    private Label _turnLabel;
-    private Polygon2D _bg;
+    private Label _obstacleLabel = null!;
+    private Label _turnLabel = null!;
+    private Polygon2D _bg = null!;
 
     private int _obstacleCount;
     public int ObstacleCount

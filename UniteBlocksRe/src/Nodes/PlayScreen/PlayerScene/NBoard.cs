@@ -13,9 +13,9 @@ public partial class NBoard : Node2D
 {
     public BoardEntity Model { get; private set; } = new BoardEntity();
 
-    private Control _visuals;
-    private Control _clipMask;
-    private IPlayScreen _screen;
+    private Control _visuals = null!;
+    private Control _clipMask = null!;
+    private IPlayScreen _screen = null!;
     private PlayerSide _playerSide;
 
     private readonly Dictionary<BlockEntity, NBlock> _blockIdentities = [];

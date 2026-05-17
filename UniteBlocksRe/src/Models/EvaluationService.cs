@@ -10,7 +10,7 @@ public static class EvaluationService
         OperatingBlocksEntity operating,
         BoardEntity board,
         EvaluationWeight weight,
-        SimulationResult lastDestination
+        SimulationResult? lastDestination
     )
     {
         var destinations = SimulationService.EnumerateAllDestinations(operating, board);
@@ -32,7 +32,7 @@ public static class EvaluationService
         return new EvaluationResult(scores);
     }
 
-    private static bool IsSameDestination(SimulationResult current, SimulationResult last)
+    private static bool IsSameDestination(SimulationResult current, SimulationResult? last)
     {
         if (last == null)
         {

@@ -10,9 +10,9 @@ public partial class NObstacleManager : Node
 {
     private const float InitialObstacleRate = 4.5f;
 
-    private Label _label;
+    private Label _label = null!;
 
-    private IPlayScreen _screen;
+    private IPlayScreen _screen = null!;
 
     private float _obstacleRate = InitialObstacleRate;
     private const float RateSubSpeed = 0.018f;

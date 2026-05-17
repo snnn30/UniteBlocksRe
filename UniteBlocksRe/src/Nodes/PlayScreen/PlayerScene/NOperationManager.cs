@@ -12,21 +12,21 @@ namespace UniteBlocksRe.Nodes.PlayScreen.PlayerScene;
 public partial class NOperationManager : Node
 {
     public Observable<OperationResult> OnOperationExecuted => _onOperationExecuted;
-    public NOperationItem Item { get; private set; }
+    public NOperationItem Item { get; private set; } = null!;
 
     private readonly Subject<OperationResult> _onOperationExecuted = new();
 
-    private IPlayScreen _screen;
+    private IPlayScreen _screen = null!;
     private PlayerSide _playerSide;
 
     private bool _activeInput = false;
     private bool _activeAutoDrop = false;
 
-    private Timer _maxLockTimer; // 無限上昇を防ぐためのタイマー 最低高度に達するたびにリセット
-    private Timer _idleTimer; // 一定時間動かない時に自動で設置するためのタイマー
-    private Timer _initialDelayTimer;
+    private Timer _maxLockTimer = null!; // 無限上昇を防ぐためのタイマー 最低高度に達するたびにリセット
+    private Timer _idleTimer = null!; // 一定時間動かない時に自動で設置するためのタイマー
+    private Timer _initialDelayTimer = null!;
     private int _maxAltitude;
-    private TaskCompletionSource _endOperationSignal;
+    private TaskCompletionSource? _endOperationSignal;
 
     private const float CheckInterval = 0.05f;
 
@@ -34,8 +34,8 @@ public partial class NOperationManager : Node
     {
         var context = _screen.GetContext(_playerSide);
 
-        BlockEntity parent = null;
-        BlockEntity child = null;
+        BlockEntity parent;
+        BlockEntity? child = null;
         if (context.BombGauge.IsBombActive)
         {
             context.BombGauge.TryUseBomb();
@@ -126,7 +126,7 @@ public partial class NOperationManager : Node
         _maxLockTimer.Stop();
         _idleTimer.Stop();
         _initialDelayTimer.Stop();
-        _endOperationSignal.TrySetResult();
+        _endOperationSignal?.TrySetResult();
     }
 
     private void SubscribeDropInput(IOperationInputSource source, CompositeDisposable disposables)
@@ -317,6 +317,11 @@ public partial class NOperationManager : Node
         if (result.Sucess)
         {
             _idleTimer.Stop();
+
+            if (Item.Model == null)
+            {
+                throw new InvalidOperationException("Item.Modelがnull");
+            }
 
             if (Item.Model.ParentPos.Y > _maxAltitude) // 最低高度更新でmaxLockTimerをリセット
             {

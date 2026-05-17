@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using Godot;
 using UniteBlocksRe.Models.OperatingBlocks;
 
@@ -7,7 +8,7 @@ namespace UniteBlocksRe.Models;
 public sealed class OperatingBlocksEntity
 {
     public BlockEntity Parent { get; }
-    public BlockEntity Child { get; }
+    public BlockEntity? Child { get; }
     public Vector2I ParentPos { get; private set; }
     public Vector2I ChildPos { get; private set; }
     public bool IsHalfUp { get; private set; } = false;
@@ -16,43 +17,45 @@ public sealed class OperatingBlocksEntity
 
     #region Spawn
 
-    public static (bool Sucess, OperatingBlocksEntity Entity) TrySpawnSingle(
+    public static bool TrySpawnSingle(
         BlockEntity parent,
-        BoardEntity board
+        BoardEntity board,
+        [NotNullWhen(true)] out OperatingBlocksEntity? entity
     )
     {
         var parentPos = BoardEntity.SpawnPosition;
         var sucess = board.CanPlace(parentPos, parent);
-        if (!sucess)
+        if (sucess)
         {
-            return (false, null);
+            entity = new OperatingBlocksEntity(parent, parentPos, board);
         }
         else
         {
-            var entity = new OperatingBlocksEntity(parent, parentPos, board);
-            return (true, entity);
+            entity = null;
         }
+        return sucess;
     }
 
-    public static (bool Sucess, OperatingBlocksEntity Entity) TrySpawnDouble(
+    public static bool TrySpawnDouble(
         BlockEntity parent,
         BlockEntity child,
-        BoardEntity board
+        BoardEntity board,
+        [NotNullWhen(true)] out OperatingBlocksEntity? entity
     )
     {
         var parentPos = BoardEntity.SpawnPosition;
         var childPos = parentPos + Vector2I.Up;
         var sucess = board.CanPlace(parentPos, parent);
         sucess &= board.CanPlace(childPos, child);
-        if (!sucess)
+        if (sucess)
         {
-            return (false, null);
+            entity = new OperatingBlocksEntity(parent, child, parentPos, childPos, board);
         }
         else
         {
-            var entity = new OperatingBlocksEntity(parent, child, parentPos, childPos, board);
-            return (true, entity);
+            entity = null;
         }
+        return sucess;
     }
 
     #endregion

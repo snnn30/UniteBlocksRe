@@ -6,7 +6,7 @@ namespace UniteBlocksRe.Nodes;
 
 public partial class NBeatManager : Node
 {
-    public static NBeatManager Instance { get; private set; }
+    public static NBeatManager Instance { get; private set; } = null!;
     public int BPM { get; set; } = 180;
 
     // 4拍で刻むと仮定して、0, 1, 2, 3の順でビートカウントを通知する

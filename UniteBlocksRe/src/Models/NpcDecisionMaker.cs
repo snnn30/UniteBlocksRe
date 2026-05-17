@@ -7,7 +7,7 @@ public class NpcDecisionMaker
 {
     private readonly EvaluationWeight _evaluationWeight;
 
-    private SimulationResult _lastDestination;
+    private SimulationResult? _lastDestination;
 
     public NpcDecisionMaker(EvaluationWeight evaluationWeight)
     {
@@ -38,13 +38,10 @@ public class NpcDecisionMaker
 
     public bool ShouldUseBomb(BoardEntity board, BlockEntity parent, BlockEntity child)
     {
-        var (canSpawn1, blocks) = OperatingBlocksEntity.TrySpawnDouble(parent, child, board);
-        var (canSpawn2, bomb) = OperatingBlocksEntity.TrySpawnSingle(
-            BlockEntity.CreateBomb(),
-            board
-        );
-
-        if (!canSpawn1 || !canSpawn2)
+        if (
+            !OperatingBlocksEntity.TrySpawnDouble(parent, child, board, out var blocks)
+            || !OperatingBlocksEntity.TrySpawnSingle(BlockEntity.CreateBomb(), board, out var bomb)
+        )
         {
             return false;
         }
@@ -55,6 +52,7 @@ public class NpcDecisionMaker
             _evaluationWeight,
             null
         );
+
         var (bombResult, _) = EvaluationService.UpdateDestination(
             bomb,
             board,

@@ -15,21 +15,19 @@ public class EvaluationServiceTests
     private OperatingBlocksEntity SpawnRedPair(BoardEntity board)
     {
         // デフォルト位置でのスポーン
-        var (success, entity) = OperatingBlocksEntity.TrySpawnDouble(
+        OperatingBlocksEntity.TrySpawnDouble(
             BlockEntity.CreateNormal(BlockColor.Red),
             BlockEntity.CreateNormal(BlockColor.Red),
-            board
+            board,
+            out var entity
         );
-        return entity;
+        return entity!;
     }
 
     private OperatingBlocksEntity SpawnBomb(BoardEntity board)
     {
-        var (success, entity) = OperatingBlocksEntity.TrySpawnSingle(
-            BlockEntity.CreateBomb(),
-            board
-        );
-        return entity;
+        OperatingBlocksEntity.TrySpawnSingle(BlockEntity.CreateBomb(), board, out var entity);
+        return entity!;
     }
 
     // Evaluateメソッドをテストするために最小限のSimulationResultを生成する

@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using Godot;
 using UniteBlocksRe.Logging;
@@ -11,11 +12,11 @@ namespace UniteBlocksRe.Nodes.PlayScreen.PlayerScene;
 
 public partial class NOperationItem : Node
 {
-    public OperatingBlocksEntity Model { get; private set; }
-    private NBoard _board;
+    public OperatingBlocksEntity? Model { get; private set; }
+    private NBoard _board = null!;
 
-    public NBlock Parent { get; private set; }
-    public NBlock Child { get; private set; }
+    public NBlock? Parent { get; private set; }
+    public NBlock? Child { get; private set; }
 
     #region Public Method
 
@@ -36,7 +37,7 @@ public partial class NOperationItem : Node
             return OperationResult.Failed(OperationType.Settle);
         }
 
-        var task = new Func<NBlock, NBlock, Task>(
+        var task = new Func<NBlock, NBlock?, Task>(
             async (parent, child) =>
             {
                 var parentAnim = _board.SetOnBoardAsync(parent, Model.ParentPos);
@@ -53,7 +54,7 @@ public partial class NOperationItem : Node
         return OperationResult.Succeeded(task, OperationType.Settle);
     }
 
-    public OperationResult Spawn(BlockEntity parent, BlockEntity child = null)
+    public OperationResult Spawn(BlockEntity parent, BlockEntity? child = null)
     {
         if (child == null)
         {
@@ -201,9 +202,7 @@ public partial class NOperationItem : Node
     {
         Reset();
 
-        var (sucess, entity) = OperatingBlocksEntity.TrySpawnDouble(parent, child, _board.Model);
-
-        if (!sucess)
+        if (!OperatingBlocksEntity.TrySpawnDouble(parent, child, _board.Model, out var entity))
         {
             return OperationResult.Failed(OperationType.Spawn);
         }
@@ -231,16 +230,13 @@ public partial class NOperationItem : Node
     {
         Reset();
 
-        var (sucess, entity) = OperatingBlocksEntity.TrySpawnSingle(parent, _board.Model);
-
-        var parentPos = entity.ParentPos;
-
-        if (!sucess)
+        if (!OperatingBlocksEntity.TrySpawnSingle(parent, _board.Model, out var entity))
         {
             return OperationResult.Failed(OperationType.Spawn);
         }
-
         Model = entity;
+
+        var parentPos = entity.ParentPos;
 
         Parent = NBlock.Create(parent);
         _board.AddBlockAsChild(Parent);
@@ -269,8 +265,8 @@ public partial class NOperationItem : Node
 
         var tween = CreateTween().SetTrans(Tween.TransitionType.Quart).SetEase(Tween.EaseType.Out);
 
-        var currentParent = Parent;
-        var currentChild = Child;
+        var currentParent = Parent!;
+        var currentChild = Child!;
         var preVec = Vector2.Zero;
         tween.TweenMethod(
             Callable.From<Vector2>(v =>
@@ -303,7 +299,7 @@ public partial class NOperationItem : Node
         var moverPos = pivotIsChild ? preParentPos : preChildPos;
 
         var relativePos = (Vector2)(moverPos - pivotPos) * NBlock.BaseSize;
-        var mover = pivotIsChild ? Parent : Child;
+        var mover = pivotIsChild ? Parent! : Child!;
 
         var targetDeg = direction switch
         {
@@ -338,6 +334,8 @@ public partial class NOperationItem : Node
         Child = null;
     }
 
+    [MemberNotNullWhen(true, nameof(Model))]
+    [MemberNotNullWhen(true, nameof(Parent))]
     private bool CheckExistBlocks()
     {
         var exist = Model != null;

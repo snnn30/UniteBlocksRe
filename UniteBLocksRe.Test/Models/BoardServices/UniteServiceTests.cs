@@ -12,7 +12,6 @@ public class UniteServiceTests
     public void BasicUnite_TwoRectanglesIntoSquare()
     {
         var board = new BoardEntity();
-        // 2x1 が2つ縦に並んで 2x2 になる
         var redUpper = BlockEntity.CreateNormal(BlockColor.Red, new Vector2I(2, 1));
         var redLower = BlockEntity.CreateNormal(BlockColor.Red, new Vector2I(2, 1));
 
@@ -28,7 +27,6 @@ public class UniteServiceTests
         created.Size.ShouldBe(new Vector2I(2, 2));
         board.GetPositionOf(created).ShouldBe(new Vector2I(0, 0));
 
-        // 元のブロックが消えていること
         board.Count().ShouldBe(1);
     }
 
@@ -53,7 +51,7 @@ public class UniteServiceTests
     public void DifferentColors_ShouldNotUnite()
     {
         var board = new BoardEntity();
-        // 2x1 の赤と緑
+
         board.Place(new(0, 0), BlockEntity.CreateNormal(BlockColor.Red, new Vector2I(2, 1)));
         board.Place(new(0, 1), BlockEntity.CreateNormal(BlockColor.Green, new Vector2I(2, 1)));
 
@@ -67,7 +65,7 @@ public class UniteServiceTests
     public void BlockProtrudingFromRect_ShouldNotUnite()
     {
         var board = new BoardEntity();
-        // 1x2 と 1x3 を並べても、綺麗な長方形(2x2や2x3)にならないため合体しない
+
         board.Place(new(0, 0), BlockEntity.CreateNormal(BlockColor.Red, new Vector2I(1, 2)));
         board.Place(new(1, 0), BlockEntity.CreateNormal(BlockColor.Red, new Vector2I(1, 3)));
 
@@ -82,8 +80,6 @@ public class UniteServiceTests
         var board = new BoardEntity();
         var color = BlockColor.Red;
 
-        // 3x2 の範囲を埋めるように配置
-        // (0,0)から2x1, (2,0)から1x2, (0,1)から2x1
         board.Place(new(0, 0), BlockEntity.CreateNormal(color, new Vector2I(2, 1)));
         board.Place(new(2, 0), BlockEntity.CreateNormal(color, new Vector2I(1, 2)));
         board.Place(new(0, 1), BlockEntity.CreateNormal(color, new Vector2I(2, 1)));
@@ -99,49 +95,42 @@ public class UniteServiceTests
     {
         var board = new BoardEntity();
 
-        // 左上：赤の合体 (2x2)
         board.Place(new(0, 0), BlockEntity.CreateNormal(BlockColor.Red, new Vector2I(2, 1)));
         board.Place(new(0, 1), BlockEntity.CreateNormal(BlockColor.Red, new Vector2I(2, 1)));
 
-        // 右下：青の合体 (2x3)
         board.Place(new(5, 5), BlockEntity.CreateNormal(BlockColor.Blue, new Vector2I(2, 2)));
         board.Place(new(5, 7), BlockEntity.CreateNormal(BlockColor.Blue, new Vector2I(2, 1)));
 
         var result = UniteService.Execute(board);
 
         result.Steps.Count.ShouldBe(2);
-        // 赤の合体確認
         result.Steps.ShouldContain(s => s.CreatedBlock.Size == new Vector2I(2, 2));
-        // 青の合体確認
         result.Steps.ShouldContain(s => s.CreatedBlock.Size == new Vector2I(2, 3));
     }
 
     [Fact(DisplayName = "凸型の配置で、有効な長方形が抽出され合体するテスト")]
     public void IrregularShape_ShouldFindValidRectangle()
     {
-        /* 配置イメージ (R=Red):
-           RRRR (4x1)
-           RR   (2x1)
+        /* 配置イメージ
+           RRRR
+           RR
         */
         var board = new BoardEntity();
         var red = BlockColor.Red;
 
-        // 1段目 (4つ)
         board.Place(new(0, 0), BlockEntity.CreateNormal(red));
         board.Place(new(1, 0), BlockEntity.CreateNormal(red));
         board.Place(new(2, 0), BlockEntity.CreateNormal(red));
         board.Place(new(3, 0), BlockEntity.CreateNormal(red));
-        // 2段目 (2つ)
+
         board.Place(new(0, 1), BlockEntity.CreateNormal(red));
         board.Place(new(1, 1), BlockEntity.CreateNormal(red));
 
         var result = UniteService.Execute(board);
 
-        // (0,0)地点から 2x2 の合体が発生することを確認
         result.HasUnited.ShouldBeTrue();
         result.Steps.Any(s => s.CreatedBlock.Size == new Vector2I(2, 2)).ShouldBeTrue();
 
-        // 2x2合体後、右側に余った2つの1x1が残っているはず
-        board.Count().ShouldBe(3); // (2x2) + (1x1) + (1x1)
+        board.Count().ShouldBe(3);
     }
 }

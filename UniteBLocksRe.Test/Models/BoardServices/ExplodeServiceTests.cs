@@ -11,7 +11,6 @@ public class ExplodeServiceTests
     [Fact(DisplayName = "ボムが爆発し、その下のブロックが連鎖するテスト")]
     public void BombExplosion_ShouldTrigger_BlockBelow()
     {
-        // BoardEntityは固定サイズ(8x14)
         var board = new BoardEntity();
         var bomb = BlockEntity.CreateBomb();
         var block = BlockEntity.CreateNormal(BlockColor.Red);
@@ -21,7 +20,6 @@ public class ExplodeServiceTests
 
         var result = ExplodeService.Execute(board);
 
-        // ステップ数の検証（ボム -> 下のブロック）
         result.Steps.Count.ShouldBe(2);
         result.Steps[0].ExplodedBlocks.ShouldContain(bomb);
         result.Steps[1].ExplodedBlocks.ShouldContain(block);
@@ -43,7 +41,6 @@ public class ExplodeServiceTests
 
         var result = ExplodeService.Execute(board);
 
-        // 順次爆発：Bomb(0,0) -> Red(0,1) -> Red(1,1) -> Red(1,2)
         result.Steps.Count.ShouldBe(4);
         result.Steps[1].ExplodedBlocks.ShouldContain(red1);
         result.Steps[2].ExplodedBlocks.ShouldContain(red2);
@@ -67,11 +64,9 @@ public class ExplodeServiceTests
 
         var result = ExplodeService.Execute(board);
 
-        // ボム -> red1 で連鎖が止まるはず
         result.Steps.Count.ShouldBe(2);
         result.Steps[1].ExplodedBlocks.ShouldContain(red1);
 
-        // red2 は盤面に残っていることを検証 (board[x, y] でアクセス)
         board[red2Pos.X, red2Pos.Y].ShouldBe(red2);
     }
 
@@ -92,11 +87,9 @@ public class ExplodeServiceTests
 
         var result = ExplodeService.Execute(board);
 
-        // ボム -> red で止まる
         result.Steps.Count.ShouldBe(2);
         result.Steps[1].ExplodedBlocks.ShouldContain(redBlock);
 
-        // blue は爆発せず残っている
         board[bluePos.X, bluePos.Y].ShouldBe(blueBlock);
     }
 
@@ -121,12 +114,8 @@ public class ExplodeServiceTests
 
         var result = ExplodeService.Execute(board);
 
-        // Step 0: Bomb
-        // Step 1: Center Red
-        // Step 2: Left & Right Reds (同時に誘発)
         result.Steps.Count.ShouldBe(3);
         result.Steps[2].ExplodedBlocks.Count.ShouldBe(2);
-
         result.Steps[2].ExplodedBlocks.ShouldContain(leftRed);
         result.Steps[2].ExplodedBlocks.ShouldContain(rightRed);
     }
@@ -147,10 +136,8 @@ public class ExplodeServiceTests
 
         var result = ExplodeService.Execute(board);
 
-        // Step 0 で両方のボムが同時に爆発
         result.Steps[0].ExplodedBlocks.Count.ShouldBe(2);
 
-        // Step 1 でそれぞれのボムの下にあるブロックが同時に誘発
         result.Steps[1].ExplodedBlocks.Count.ShouldBe(2);
         result.Steps[1].ExplodedBlocks.ShouldContain(red1);
         result.Steps[1].ExplodedBlocks.ShouldContain(blue1);
@@ -166,13 +153,10 @@ public class ExplodeServiceTests
         board.Place(new(1, 0), BlockEntity.CreateBomb());
         board.Place(new(1, 1), red1);
         board.Place(new(2, 1), red2);
-        // red2の横にred1を置くような形（隣接関係のループ）
 
         var result = ExplodeService.Execute(board);
 
-        // 盤面が空になっていること
         board.Count().ShouldBe(0);
-        // 合計爆発数が 3 (Bomb + Red1 + Red2) であること
         result.Steps.SelectMany(s => s.ExplodedBlocks).Count().ShouldBe(3);
     }
 
@@ -180,12 +164,10 @@ public class ExplodeServiceTests
     public void BombAtBoardEdge_ShouldHandle_OutOfBoundsInductionGracefully()
     {
         var board = new BoardEntity();
-        // 最下段に配置
         var bottomPos = new Vector2I(1, BoardEntity.Size.Y - 1);
 
         board.Place(bottomPos, BlockEntity.CreateBomb());
 
-        // 実行して例外が出ないこと
         var result = ExplodeService.Execute(board);
 
         result.Steps.Count.ShouldBe(1);
@@ -213,7 +195,6 @@ public class ExplodeServiceTests
         result.Steps[1].ExplodedBlocks.ShouldContain(redBlock);
         result.Steps[2].ExplodedBlocks.ShouldContain(obstacle);
 
-        // 盤面からお邪魔ブロックが消えていること
         board.Count().ShouldBe(0);
     }
 }

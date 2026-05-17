@@ -9,14 +9,7 @@ namespace UniteBlocksRe.Test.Models;
 
 public class EvaluationServiceTests
 {
-    private readonly ITestOutputHelper _output;
-    private readonly EvaluationWeight _weights;
-
-    public EvaluationServiceTests(ITestOutputHelper output)
-    {
-        _output = output;
-        _weights = new DefaultEvaluationWeight();
-    }
+    private readonly EvaluationWeight _weights = new DefaultEvaluationWeight();
 
     #region Helpers
     private OperatingBlocksEntity SpawnRedPair(BoardEntity board)
@@ -50,11 +43,11 @@ public class EvaluationServiceTests
         );
     #endregion
 
-    [Fact(DisplayName = "Test1: 低く積むことを優先するべき")]
-    public void Test1_PrioritizeLowerHeight()
+    [Fact(DisplayName = "低く積める場合は低い位置への配置を優先するテスト")]
+    public void LowerPlacement_ShouldBePreferred()
     {
         var board = new BoardEntity();
-        // 中央に障害物を置いて高くする
+
         board.Place(new(3, BoardEntity.Size.Y - 1), BlockEntity.CreateObstacle());
         board.Place(new(3, BoardEntity.Size.Y - 2), BlockEntity.CreateObstacle());
 
@@ -65,13 +58,12 @@ public class EvaluationServiceTests
             null
         );
 
-        // 一番下に配置されているか
         sim.ParentDestination.Y.ShouldBe(BoardEntity.Size.Y - 1);
         sim.ChildDestination.Y.ShouldBe(BoardEntity.Size.Y - 1);
     }
 
-    [Fact(DisplayName = "Test2: すでに同色のブロックがあるとき、隣接を狙うべき")]
-    public void Test2_PrioritizeSameColorAdjacency()
+    [Fact(DisplayName = "同色ブロックが存在する場合は隣接配置を優先するテスト")]
+    public void SameColorAdjacency_ShouldBePreferred()
     {
         var board = new BoardEntity();
         var targetPos = new Vector2I(BoardEntity.Size.X - 1, BoardEntity.Size.Y - 1);
@@ -90,10 +82,11 @@ public class EvaluationServiceTests
         sim.Board.GetAdjacentBlocks(block).Count().ShouldBeGreaterThan(0);
     }
 
-    [Fact(DisplayName = "Test3: ゲームオーバーを確実に回避するべき")]
-    public void Test3_AvoidGameOver()
+    [Fact(DisplayName = "ゲームオーバー可能な配置を回避するテスト")]
+    public void GameOverPlacement_ShouldBeAvoided()
     {
         var board = new BoardEntity();
+
         // スポーン地点の直下以外をすべて埋める
         for (var x = 0; x < BoardEntity.Size.X; x++)
         {
@@ -115,12 +108,11 @@ public class EvaluationServiceTests
             null
         );
 
-        // 置ける場所があるなら回避されているはず
         eval.Scores[EvaluationCriterion.CantSpawnPenalty].ShouldBe(0);
     }
 
-    [Fact(DisplayName = "Test4: 複数の塊が存在する時、より面積が大きくなる合体を優先するべき")]
-    public void Test4_PreferLargerMerge()
+    [Fact(DisplayName = "より大きな合体を作れる配置を優先するテスト")]
+    public void LargerMerge_ShouldBePreferred()
     {
         var board = new BoardEntity();
         board.Place(
@@ -144,11 +136,11 @@ public class EvaluationServiceTests
         maxArea.ShouldBe(8);
     }
 
-    [Fact(DisplayName = "Test5: 他色の小さいブロックが複数隣接している時はブロック操作を選ぶべき")]
-    public void Test5_PreferNormalBlockOverInefficientBomb()
+    [Fact(DisplayName = "爆発効率が低い場合はボムより通常ブロックを優先するテスト")]
+    public void InefficientBomb_ShouldNotBePreferred()
     {
         var board = new BoardEntity();
-        // 青の小さなブロック（1x1）をバラバラに置く
+
         board.Place(new(0, BoardEntity.Size.Y - 1), BlockEntity.CreateNormal(BlockColor.Blue));
         board.Place(new(5, BoardEntity.Size.Y - 1), BlockEntity.CreateNormal(BlockColor.Blue));
 
@@ -165,15 +157,14 @@ public class EvaluationServiceTests
             null
         );
 
-        // ボムの消去範囲に乏しい場合、UseBombPenalty によりブロック操作のスコアが上回るはず
         blockEval.TotalScore.ShouldBeGreaterThan(bombEval.TotalScore);
     }
 
-    [Fact(DisplayName = "Test6: 他色の大きな塊があるときブロックよりボムを選ぶべき")]
-    public void Test6_PreferBombAgainstLargeEnemyBlocks()
+    [Fact(DisplayName = "巨大な敵ブロックが存在する場合は通常ブロックよりボムを優先するテスト")]
+    public void Bomb_ShouldBePreferredAgainstLargeEnemyBlocks()
     {
         var board = new BoardEntity();
-        // 中央に青の巨大な塊 (2x5 = 10マス) を配置
+
         board.Place(
             new(3, BoardEntity.Size.Y - 6),
             BlockEntity.CreateNormal(BlockColor.Blue, new(2, 5))
@@ -192,15 +183,14 @@ public class EvaluationServiceTests
             null
         );
 
-        // 巨大ブロック消去の加点 > ボム使用ペナルティ となり、ボムが選ばれるべき
         bombEval.TotalScore.ShouldBeGreaterThan(blockEval.TotalScore);
     }
 
-    [Fact(DisplayName = "Test7: 同色の大きな塊がある時ボムより大きなブロック生成を優先するべき")]
-    public void Test7_PreferGrowthOverDestructionForSameColor()
+    [Fact(DisplayName = "同色の巨大ブロックが存在する場合はボムより合体を優先するテスト")]
+    public void SameColorGrowth_ShouldBePreferredOverBomb()
     {
         var board = new BoardEntity();
-        // 赤の巨大な塊
+
         board.Place(
             new(3, BoardEntity.Size.Y - 6),
             BlockEntity.CreateNormal(BlockColor.Red, new(2, 5))
@@ -219,20 +209,17 @@ public class EvaluationServiceTests
             null
         );
 
-        // 同色ならボムより合体の方が BlockSize 的に有利
         blockEval.TotalScore.ShouldBeGreaterThan(bombEval.TotalScore);
     }
 
-    [Fact(
-        DisplayName = "Test8: 小さなブロックのまとまりより大きなブロック1つの方がスコアが高いべき"
-    )]
-    public void Test8_LargeBlockShouldScoreHigherThanMultipleSmallBlocks()
+    [Fact(DisplayName = "小ブロック群より巨大ブロック単体の方が高スコアになるテスト")]
+    public void LargeBlock_ShouldScoreHigherThanMultipleSmallBlocks()
     {
         // 小さなブロック 1x1 が 4個隣接
         var board1 = new BoardEntity();
-        for (int x = 0; x < 2; x++)
+        for (var x = 0; x < 2; x++)
         {
-            for (int y = 0; y < 2; y++)
+            for (var y = 0; y < 2; y++)
             {
                 board1.Place(new(x, y), BlockEntity.CreateNormal(BlockColor.Red));
             }
@@ -245,7 +232,6 @@ public class EvaluationServiceTests
         var res1 = EvaluationService.Evaluate(CreateSimResult(board1), _weights);
         var res2 = EvaluationService.Evaluate(CreateSimResult(board2), _weights);
 
-        // 単純な隣接よりも合体後のブロックの方が評価が高いことを確認
         res2.TotalScore.ShouldBeGreaterThan(res1.TotalScore);
     }
 }

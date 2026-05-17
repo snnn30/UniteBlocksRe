@@ -13,8 +13,6 @@ public static class EvaluationService
         SimulationResult lastDestination
     )
     {
-        ValidateWeights(weight);
-
         var destinations = SimulationService.EnumerateAllDestinations(operating, board);
 
         var best = destinations
@@ -29,27 +27,9 @@ public static class EvaluationService
         EvaluationWeight weight
     )
     {
-        var scores = EvaluationCriterion
-            .GetAll()
-            .ToDictionary(c => c, c => c.CalculateScore(weight.Weights[c], simulationResult));
-
+        var scores = Enum.GetValues<EvaluationCriterion>()
+            .ToDictionary(c => c, c => c.CalculateScore(weight.GetWeight(c), simulationResult));
         return new EvaluationResult(scores);
-    }
-
-    private static void ValidateWeights(EvaluationWeight weight)
-    {
-        var allCriteria = EvaluationCriterion.GetAll();
-        var missing = allCriteria
-            .Where(c => !weight.Weights.ContainsKey(c))
-            .Select(c => c.Name)
-            .ToArray();
-
-        if (missing.Length != 0)
-        {
-            throw new InvalidOperationException(
-                $"評価の重みが不足している　追加が必要な項目: {string.Join(", ", missing)}"
-            );
-        }
     }
 
     private static bool IsSameDestination(SimulationResult current, SimulationResult last)

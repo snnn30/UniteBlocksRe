@@ -18,12 +18,64 @@ public partial class NOperationItem : Node
     public NBlock? Parent { get; private set; }
     public NBlock? Child { get; private set; }
 
-    #region Public Method
-
     public void Init(NBoard board)
     {
         _board = board;
     }
+
+    #region Spawn
+    public OperationResult Spawn(BlockEntity parent, BlockEntity? child = null)
+    {
+        Reset();
+
+        if (!TrySpawnEntity(parent, child, out var entity))
+        {
+            return OperationResult.Failed(OperationType.Spawn);
+        }
+
+        Model = entity;
+        Parent = CreateBlock(parent, entity.ParentPos);
+
+        if (child != null)
+        {
+            Child = CreateBlock(child, entity.ChildPos);
+        }
+
+        Parent.Outlined = true;
+        _board.BringToFront(Parent);
+
+        var anim =
+            Child != null
+                ? Task.WhenAll(Parent.PlaySpawnAnimeAsync(), Child.PlaySpawnAnimeAsync())
+                : Parent.PlaySpawnAnimeAsync();
+
+        return OperationResult.Succeeded(anim, OperationType.Spawn);
+    }
+
+    private bool TrySpawnEntity(
+        BlockEntity parent,
+        BlockEntity? child,
+        [NotNullWhen(true)] out OperatingBlocksEntity? entity
+    )
+    {
+        if (child == null)
+        {
+            return OperatingBlocksEntity.TrySpawnSingle(parent, _board.Model, out entity);
+        }
+
+        return OperatingBlocksEntity.TrySpawnDouble(parent, child, _board.Model, out entity);
+    }
+
+    private NBlock CreateBlock(BlockEntity entity, Vector2I pos)
+    {
+        var block = NBlock.Create(entity);
+
+        _board.AddBlockAsChild(block);
+        block.Position = NBoard.GetRealPosition(pos);
+
+        return block;
+    }
+    #endregion
 
     public OperationResult Settle()
     {
@@ -52,58 +104,6 @@ public partial class NOperationItem : Node
 
         Reset();
         return OperationResult.Succeeded(task, OperationType.Settle);
-    }
-
-    public OperationResult Spawn(BlockEntity parent, BlockEntity? child = null)
-    {
-        if (child == null)
-        {
-            return SpawnSingle(parent);
-        }
-        else
-        {
-            return SpawnDouble(parent, child);
-        }
-    }
-
-    public OperationResult Rotate(RotateDirection direction, float duration)
-    {
-        if (!CheckExistBlocks())
-        {
-            return OperationResult.Failed(OperationType.Rotate);
-        }
-
-        var preParentPos = Model.ParentPos;
-        var preChildPos = Model.ChildPos;
-
-        var result = Model.TryRotate(direction);
-
-        if (result.Success && !result.IsShift)
-        {
-            var task = NormalRotateAnim(
-                direction,
-                duration,
-                preParentPos,
-                preChildPos,
-                result.PivotIsChild
-            );
-            return OperationResult.Succeeded(task, OperationType.Rotate);
-        }
-        else if (result.Success && result.IsShift)
-        {
-            var task = ShiftRotateAnim(
-                direction,
-                duration,
-                preParentPos,
-                preChildPos,
-                result.PivotIsChild
-            );
-            return OperationResult.Succeeded(task, OperationType.Rotate);
-        }
-        else
-        {
-            return OperationResult.Failed(OperationType.Rotate);
-        }
     }
 
     public OperationResult Move(MoveDirection direction, float duration)
@@ -194,59 +194,45 @@ public partial class NOperationItem : Node
         return OperationResult.Succeeded(task, OperationType.Drop);
     }
 
-    #endregion
-
-    #region Private Method
-
-    private OperationResult SpawnDouble(BlockEntity parent, BlockEntity child)
+    #region Rotate
+    public OperationResult Rotate(RotateDirection direction, float duration)
     {
-        Reset();
-
-        if (!OperatingBlocksEntity.TrySpawnDouble(parent, child, _board.Model, out var entity))
+        if (!CheckExistBlocks())
         {
-            return OperationResult.Failed(OperationType.Spawn);
+            return OperationResult.Failed(OperationType.Rotate);
         }
-        Model = entity;
 
-        var parentPos = entity.ParentPos;
-        var childPos = entity.ChildPos;
+        var preParentPos = Model.ParentPos;
+        var preChildPos = Model.ChildPos;
 
-        Parent = NBlock.Create(parent);
-        _board.AddBlockAsChild(Parent);
-        Parent.Position = NBoard.GetRealPosition(parentPos);
+        var result = Model.TryRotate(direction);
 
-        Child = NBlock.Create(child);
-        _board.AddBlockAsChild(Child);
-        Child.Position = NBoard.GetRealPosition(childPos);
-
-        Parent.Outlined = true;
-        _board.BringToFront(Parent);
-
-        var anim = Task.WhenAll(Parent.PlaySpawnAnimeAsync(), Child.PlaySpawnAnimeAsync());
-        return OperationResult.Succeeded(anim, OperationType.Spawn);
-    }
-
-    private OperationResult SpawnSingle(BlockEntity parent)
-    {
-        Reset();
-
-        if (!OperatingBlocksEntity.TrySpawnSingle(parent, _board.Model, out var entity))
+        if (result.Success && !result.IsShift)
         {
-            return OperationResult.Failed(OperationType.Spawn);
+            var task = NormalRotateAnim(
+                direction,
+                duration,
+                preParentPos,
+                preChildPos,
+                result.PivotIsChild
+            );
+            return OperationResult.Succeeded(task, OperationType.Rotate);
         }
-        Model = entity;
-
-        var parentPos = entity.ParentPos;
-
-        Parent = NBlock.Create(parent);
-        _board.AddBlockAsChild(Parent);
-        Parent.Position = NBoard.GetRealPosition(parentPos);
-
-        Parent.Outlined = true;
-        _board.BringToFront(Parent);
-
-        var anim = Parent.PlaySpawnAnimeAsync();
-        return OperationResult.Succeeded(anim, OperationType.Spawn);
+        else if (result.Success && result.IsShift)
+        {
+            var task = ShiftRotateAnim(
+                direction,
+                duration,
+                preParentPos,
+                preChildPos,
+                result.PivotIsChild
+            );
+            return OperationResult.Succeeded(task, OperationType.Rotate);
+        }
+        else
+        {
+            return OperationResult.Failed(OperationType.Rotate);
+        }
     }
 
     private async Task ShiftRotateAnim(
@@ -326,6 +312,7 @@ public partial class NOperationItem : Node
 
         await tween.WaitForFinished();
     }
+    #endregion
 
     private void Reset()
     {
@@ -345,5 +332,4 @@ public partial class NOperationItem : Node
         }
         return exist;
     }
-    #endregion
 }
